@@ -28,6 +28,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 /**
  * Fetch and cache labor actions
+ * @returns {Promise<boolean>} Success status
  */
 async function refreshLaborActions() {
   try {
@@ -36,8 +37,11 @@ async function refreshLaborActions() {
     
     // Store in local storage for quick access
     await chrome.storage.local.set({ labor_actions: actions });
+    
+    return actions.length > 0 || true; // Return true even if empty (successful fetch)
   } catch (error) {
     console.error('Failed to refresh labor actions:', error);
+    return false;
   }
 }
 
@@ -121,7 +125,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Return true to indicate async response
     return true;
   } else if (request.action === 'refreshActions') {
-    refreshLaborActions().then(() => {
+    refreshLaborActions().then((success) => {
+      if (success) {
+        sendResponse({ success: true });
+      } else {
+        sendResponse({ success: false, error: 'Failed to fetch labor actions. Check API configuration.' });
+      }
+    });
+    return true;
+  } else if (request.action === 'clearCache') {
+    apiService.clearCache().then(() => {
       sendResponse({ success: true });
     });
     return true;

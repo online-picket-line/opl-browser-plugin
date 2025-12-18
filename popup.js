@@ -2,22 +2,80 @@
 document.addEventListener('DOMContentLoaded', () => {
   const modeBannerRadio = document.getElementById('mode-banner');
   const modeBlockRadio = document.getElementById('mode-block');
+  const apiUrlInput = document.getElementById('api-url');
+  const apiKeyInput = document.getElementById('api-key');
+  const saveConfigBtn = document.getElementById('save-config-btn');
   const refreshBtn = document.getElementById('refresh-btn');
+  const testConfigBtn = document.getElementById('test-config-btn');
   const statusDiv = document.getElementById('status');
   const statsContent = document.getElementById('stats-content');
+  const toggleConfig = document.getElementById('toggle-config');
+  const configHelp = document.getElementById('config-help');
 
   // Load current settings
-  chrome.storage.sync.get(['blockMode'], (result) => {
+  chrome.storage.sync.get(['blockMode', 'apiUrl', 'apiKey'], (result) => {
     const blockMode = result.blockMode || false;
     if (blockMode) {
       modeBlockRadio.checked = true;
     } else {
       modeBannerRadio.checked = true;
     }
+    
+    apiUrlInput.value = result.apiUrl || '';
+    apiKeyInput.value = result.apiKey || '';
+    
+    // Show warning if API not configured
+    if (!result.apiUrl || !result.apiKey) {
+      showStatus('Please configure your API settings', 'warning');
+    }
   });
 
   // Load stats
   loadStats();
+
+  // Toggle config help
+  toggleConfig.addEventListener('click', () => {
+    if (configHelp.classList.contains('expanded')) {
+      configHelp.classList.remove('expanded');
+      toggleConfig.textContent = 'Show API setup guide';
+    } else {
+      configHelp.classList.add('expanded');
+      toggleConfig.textContent = 'Hide API setup guide';
+    }
+  });
+
+  // Save API configuration
+  saveConfigBtn.addEventListener('click', () => {
+    const apiUrl = apiUrlInput.value.trim();
+    const apiKey = apiKeyInput.value.trim();
+    
+    if (!apiUrl || !apiKey) {
+      showStatus('Please enter both API URL and API Key', 'error');
+      return;
+    }
+    
+    // Validate API key format
+    if (!apiKey.startsWith('opk_')) {
+      showStatus('API key should start with "opk_"', 'error');
+      return;
+    }
+    
+    // Validate URL format
+    try {
+      new URL(apiUrl);
+    } catch (e) {
+      showStatus('Invalid API URL format', 'error');
+      return;
+    }
+    
+    chrome.storage.sync.set({ apiUrl, apiKey }, () => {
+      showStatus('API configuration saved successfully', 'success');
+      // Clear cache to force refresh with new config
+      chrome.runtime.sendMessage({ action: 'clearCache' }, () => {
+        loadStats();
+      });
+    });
+  });
 
   // Save settings when radio buttons change
   modeBannerRadio.addEventListener('change', () => {
@@ -34,6 +92,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Test API connection
+  testConfigBtn.addEventListener('click', () => {
+    const apiUrl = apiUrlInput.value.trim();
+    const apiKey = apiKeyInput.value.trim();
+    
+    if (!apiUrl || !apiKey) {
+      showStatus('Please enter API URL and Key first', 'error');
+      return;
+    }
+    
+    testConfigBtn.disabled = true;
+    testConfigBtn.textContent = 'Testing...';
+    statusDiv.className = 'status';
+    
+    // Test the API connection
+    fetch(`${apiUrl}/api/blocklist?format=json`, {
+      headers: {
+        'X-API-Key': apiKey
+      }
+    })
+    .then(response => {
+      if (response.status === 401) {
+        throw new Error('Invalid API key');
+      }
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      showStatus(`✓ Connected! Found ${data.totalUrls || 0} URLs from ${data.employers?.length || 0} employers`, 'success');
+    })
+    .catch(error => {
+      showStatus(`✗ Connection failed: ${error.message}`, 'error');
+    })
+    .finally(() => {
+      testConfigBtn.disabled = false;
+      testConfigBtn.textContent = 'Test API Connection';
+    });
+  });
+
   // Refresh labor actions
   refreshBtn.addEventListener('click', () => {
     refreshBtn.disabled = true;
@@ -44,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showStatus('Labor actions refreshed successfully', 'success');
         loadStats();
       } else {
-        showStatus('Failed to refresh labor actions', 'error');
+        showStatus(response?.error || 'Failed to refresh labor actions', 'error');
       }
       
       refreshBtn.disabled = false;
@@ -55,15 +154,17 @@ document.addEventListener('DOMContentLoaded', () => {
   /**
    * Show status message
    * @param {string} message - Status message
-   * @param {string} type - Status type (success, error)
+   * @param {string} type - Status type (success, error, warning)
    */
   function showStatus(message, type) {
     statusDiv.textContent = message;
     statusDiv.className = `status ${type}`;
     
-    setTimeout(() => {
-      statusDiv.className = 'status';
-    }, 3000);
+    if (type !== 'warning') {
+      setTimeout(() => {
+        statusDiv.className = 'status';
+      }, 5000);
+    }
   }
 
   /**
@@ -75,8 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const timestamp = result.cache_timestamp;
       
       const activeActions = actions.filter(a => !a.status || a.status === 'active').length;
+      const totalUrls = actions.reduce((sum, a) => sum + (a.target_urls?.length || 0), 0);
       
       let statsHtml = `<strong>${activeActions}</strong> active labor action${activeActions !== 1 ? 's' : ''}`;
+      if (totalUrls > 0) {
+        statsHtml += `<br><strong>${totalUrls}</strong> URL${totalUrls !== 1 ? 's' : ''} monitored`;
+      }
       
       if (timestamp) {
         const age = Date.now() - timestamp;
@@ -93,6 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         statsHtml += `<br>Last updated ${timeStr}`;
+      } else if (activeActions === 0) {
+        statsHtml = 'No data loaded yet<br>Configure API and refresh';
       }
       
       statsContent.innerHTML = statsHtml;
