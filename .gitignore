@@ -28,8 +28,5 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Build scripts (keep the output, not the scripts)
-generate-icons.js
-
 # Backup files
 *-backup.json

@@ -109,13 +109,35 @@
     checkCurrentPage();
   }
 
-  // Listen for navigation changes (for SPAs)
+  // Listen for URL changes in SPAs using a more efficient approach
+  // Only monitor for history state changes rather than all DOM mutations
   let lastUrl = window.location.href;
-  new MutationObserver(() => {
-    const currentUrl = window.location.href;
-    if (currentUrl !== lastUrl) {
-      lastUrl = currentUrl;
+  
+  // Modern approach: use popstate for history changes
+  window.addEventListener('popstate', () => {
+    if (window.location.href !== lastUrl) {
+      lastUrl = window.location.href;
       checkCurrentPage();
     }
-  }).observe(document, { subtree: true, childList: true });
+  });
+  
+  // Also monitor pushState and replaceState for SPAs
+  const originalPushState = history.pushState;
+  const originalReplaceState = history.replaceState;
+  
+  history.pushState = function() {
+    originalPushState.apply(this, arguments);
+    if (window.location.href !== lastUrl) {
+      lastUrl = window.location.href;
+      checkCurrentPage();
+    }
+  };
+  
+  history.replaceState = function() {
+    originalReplaceState.apply(this, arguments);
+    if (window.location.href !== lastUrl) {
+      lastUrl = window.location.href;
+      checkCurrentPage();
+    }
+  };
 })();

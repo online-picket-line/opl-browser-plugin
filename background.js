@@ -16,8 +16,8 @@ chrome.runtime.onInstalled.addListener(async () => {
   });
 });
 
-// Refresh labor actions periodically (every hour)
-chrome.alarms.create('refreshLaborActions', { periodInMinutes: 60 });
+// Refresh labor actions periodically (every 15 minutes as recommended by API)
+chrome.alarms.create('refreshLaborActions', { periodInMinutes: 15 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'refreshLaborActions') {
@@ -47,9 +47,16 @@ async function refreshLaborActions() {
 
 /**
  * Check if a URL matches any labor actions
+ * 
+ * Matching algorithm:
+ * 1. Extracts hostname from URL
+ * 2. Checks each active labor action's target URLs
+ * 3. Matches exact domain or subdomains (e.g., sub.example.com matches example.com)
+ * 4. Falls back to company name matching in hostname
+ * 
  * @param {string} url - URL to check
- * @param {Array} actions - List of labor actions
- * @returns {Object|null} Matching action or null
+ * @param {Array} actions - List of labor actions with target_urls arrays
+ * @returns {Object|null} Matching action object or null if no match found
  */
 function matchUrlToAction(url, actions) {
   if (!url || !actions || actions.length === 0) {

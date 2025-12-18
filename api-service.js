@@ -1,6 +1,7 @@
 // API service to fetch labor actions from Online Picketline API
-// Default API base URL - can be configured via settings
-const DEFAULT_API_BASE_URL = 'https://your-instance.com';
+// Default API base URL - must be configured by user
+const DEFAULT_API_BASE_URL = '';
+const API_KEY_PREFIX = 'opk_';
 const CACHE_KEY = 'labor_actions_cache';
 const CACHE_DURATION = 900000; // 15 minutes in milliseconds (as recommended by API docs)
 
@@ -40,7 +41,19 @@ class ApiService {
 
   /**
    * Fetch labor actions from the Online Picketline API with caching
-   * @returns {Promise<Array>} List of blocklist entries
+   * @returns {Promise<Array>} List of transformed labor action objects with structure:
+   *   {
+   *     id: string,
+   *     title: string,
+   *     description: string,
+   *     company: string,
+   *     type: string,
+   *     status: string,
+   *     target_urls: string[],
+   *     locations: string[],
+   *     divisions: string[]
+   *   }
+   * @throws {Error} If API request fails or API key is invalid
    */
   async getLaborActions() {
     try {
@@ -103,8 +116,10 @@ class ApiService {
 
   /**
    * Transform API response to internal format
-   * @param {Object} apiData - Raw API response
-   * @returns {Array} Transformed data
+   * @param {Object} apiData - Raw API response from Online Picketline
+   * @param {Array} apiData.blocklist - Array of blocklist entries
+   * @param {Array} apiData.employers - Array of employer metadata
+   * @returns {Array} Transformed data grouped by employer
    */
   transformApiResponse(apiData) {
     if (!apiData || !apiData.blocklist) {

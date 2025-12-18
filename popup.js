@@ -1,4 +1,8 @@
 // Popup script
+
+// Constants
+const API_KEY_PREFIX = 'opk_';
+
 document.addEventListener('DOMContentLoaded', () => {
   const modeBannerRadio = document.getElementById('mode-banner');
   const modeBlockRadio = document.getElementById('mode-block');
@@ -55,8 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Validate API key format
-    if (!apiKey.startsWith('opk_')) {
-      showStatus('API key should start with "opk_"', 'error');
+    if (!apiKey.startsWith(API_KEY_PREFIX)) {
+      showStatus(`API key should start with "${API_KEY_PREFIX}"`, 'error');
       return;
     }
     
