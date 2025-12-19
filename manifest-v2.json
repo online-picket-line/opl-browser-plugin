@@ -7,15 +7,16 @@
     "storage",
     "tabs",
     "webRequest",
+    "alarms",
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["api-service.js", "background.js"]
+    "scripts": ["browser-polyfill.js", "api-service.js", "background.js"]
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["browser-polyfill.js", "content.js"],
       "css": ["content.css"],
       "run_at": "document_end"
     }

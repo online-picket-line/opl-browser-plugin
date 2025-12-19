@@ -1,4 +1,5 @@
 // Background service worker
+importScripts('browser-polyfill.js');
 importScripts('api-service.js');
 
 const apiService = new ApiService();
