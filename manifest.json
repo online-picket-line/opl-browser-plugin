@@ -6,18 +6,20 @@
   "permissions": [
     "storage",
     "tabs",
-    "webRequest"
+    "webRequest",
+    "alarms"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["browser-polyfill.js", "content.js"],
       "css": ["content.css"],
       "run_at": "document_end"
     }

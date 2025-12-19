@@ -16,6 +16,12 @@
 3. Click "Load Temporary Add-on"
 4. Select any file in this directory
 
+**Safari:**
+1. Open Terminal and navigate to this directory
+2. Run: `xcrun safari-web-extension-converter . --app-name "Online Picket Line"`
+3. Open the generated Xcode project and run (⌘R)
+4. In Safari: Preferences → Extensions → Enable "Online Picket Line"
+
 ### Step 2: Configure API Access
 
 1. Click the extension icon in your browser toolbar

@@ -54,10 +54,50 @@ Before using this extension, you need:
 
 ### Safari
 
-Safari requires additional steps for extension packaging:
+Safari 14+ supports web extensions using the same WebExtensions API as Chrome and Firefox. The extension is fully compatible with Safari's Manifest V3 implementation.
 
-1. Use Xcode's `xcrun safari-web-extension-converter` tool to convert the extension
-2. Follow Apple's official guide for [Converting a Web Extension for Safari](https://developer.apple.com/documentation/safariservices/safari_web_extensions/converting_a_web_extension_for_safari)
+#### Installation Methods
+
+**Method 1: For Development/Testing (Recommended for trying the extension)**
+
+1. Download or clone this repository
+2. Open Terminal and navigate to the extension directory
+3. Convert the extension to Safari App Extension format:
+   ```bash
+   xcrun safari-web-extension-converter . --app-name "Online Picket Line"
+   ```
+4. Open the generated Xcode project
+5. Build and run the project (⌘R)
+6. Safari will launch automatically with the extension enabled
+7. In Safari, go to Preferences → Extensions and enable "Online Picket Line"
+
+**Method 2: Manual Loading (Quick Testing)**
+
+1. Download or clone this repository
+2. Open Safari and go to Safari → Preferences → Advanced
+3. Check "Show Develop menu in menu bar"
+4. Go to Develop → Allow Unsigned Extensions
+5. Go to Safari → Preferences → Extensions
+6. Click the "+" button and select the extension directory
+
+**Method 3: Distribution via Mac App Store**
+
+For distributing to end users, the extension must be:
+1. Converted using `xcrun safari-web-extension-converter`
+2. Signed with an Apple Developer account
+3. Submitted to the Mac App Store as part of a Mac app
+
+For detailed instructions, see Apple's [Converting a Web Extension for Safari](https://developer.apple.com/documentation/safariservices/safari_web_extensions/converting_a_web_extension_for_safari) guide.
+
+#### Safari-Specific Notes
+
+- Safari 14+ (macOS Big Sur or later) is required for Manifest V3 support
+- The extension uses a browser API polyfill for cross-browser compatibility
+- All features work identically to Chrome/Edge versions
+- Extension settings sync via iCloud if Safari sync is enabled
+- Performance is optimized for Safari's energy efficiency requirements
+
+**Need detailed Safari instructions?** See [SAFARI_SETUP.md](SAFARI_SETUP.md) for comprehensive setup, troubleshooting, and distribution guide.
 
 ## Configuration
 

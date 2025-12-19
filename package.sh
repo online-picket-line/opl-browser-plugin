@@ -12,6 +12,7 @@ mkdir -p dist
 echo "Creating Chrome/Edge package..."
 zip -r dist/opl-chrome-edge.zip \
   manifest.json \
+  browser-polyfill.js \
   api-service.js \
   background.js \
   content.js \
@@ -31,6 +32,7 @@ cp manifest-v2.json manifest.json
 
 zip -r dist/opl-firefox.zip \
   manifest.json \
+  browser-polyfill.js \
   api-service.js \
   background.js \
   content.js \
@@ -45,6 +47,22 @@ zip -r dist/opl-firefox.zip \
 # Restore original manifest
 mv manifest-v3-backup.json manifest.json
 
+# Package for Safari (Manifest V3)
+echo "Creating Safari package..."
+zip -r dist/opl-safari.zip \
+  manifest.json \
+  browser-polyfill.js \
+  api-service.js \
+  background.js \
+  content.js \
+  content.css \
+  popup.html \
+  popup.js \
+  block.html \
+  block.js \
+  icons/ \
+  -x "*.DS_Store" "*.swp"
+
 echo "✓ Packages created in dist/ directory:"
 ls -lh dist/
 
@@ -52,5 +70,10 @@ echo ""
 echo "Installation instructions:"
 echo "- Chrome/Edge: Use opl-chrome-edge.zip"
 echo "- Firefox: Use opl-firefox.zip"
+echo "- Safari: Use opl-safari.zip (requires Xcode conversion)"
+echo ""
+echo "For Safari development, you need to convert the extension:"
+echo "  xcrun safari-web-extension-converter dist/opl-safari --app-name \"Online Picket Line\""
 echo ""
 echo "For development, load the unpacked extension directory directly."
+
