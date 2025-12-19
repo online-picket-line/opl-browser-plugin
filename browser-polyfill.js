@@ -6,14 +6,22 @@
  * This polyfill ensures both work seamlessly.
  */
 
+// Get the global object (compatible with all contexts)
+var globalObject = (function() {
+  if (typeof globalThis !== 'undefined') return globalThis;
+  if (typeof window !== 'undefined') return window;
+  if (typeof self !== 'undefined') return self;
+  return this;
+})();
+
 // Use the browser namespace if available (Firefox, Safari), otherwise fall back to chrome (Chrome, Edge)
 if (typeof browser === 'undefined') {
   // Chrome/Edge: create browser namespace that points to chrome
-  globalThis.browser = chrome;
+  globalObject.browser = chrome;
 }
 
 // Ensure chrome namespace is available for code that uses it
 if (typeof chrome === 'undefined') {
   // Safari/Firefox: ensure chrome namespace exists for backwards compatibility
-  globalThis.chrome = browser;
+  globalObject.chrome = browser;
 }
