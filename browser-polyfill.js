@@ -15,13 +15,13 @@ var globalObject = (function() {
 })();
 
 // Use the browser namespace if available (Firefox, Safari), otherwise fall back to chrome (Chrome, Edge)
-if (typeof browser === 'undefined') {
+if (typeof browser === 'undefined' && typeof chrome !== 'undefined') {
   // Chrome/Edge: create browser namespace that points to chrome
   globalObject.browser = chrome;
 }
 
 // Ensure chrome namespace is available for code that uses it
-if (typeof chrome === 'undefined') {
+if (typeof chrome === 'undefined' && typeof browser !== 'undefined') {
   // Safari/Firefox: ensure chrome namespace exists for backwards compatibility
   globalObject.chrome = browser;
 }
