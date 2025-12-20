@@ -146,7 +146,7 @@ To test the extension:
 - **Full Documentation:** See `README.md`
 - **Testing Guide:** See `TESTING.html`
 - **Implementation Details:** See `IMPLEMENTATION_SUMMARY.md`
-- **API Documentation:** https://github.com/oplfun/online-picketline/blob/main/API_DOCUMENTATION.md
+- **API Documentation:** https://github.com/online-picket-line/online-picketline/blob/main/API_DOCUMENTATION.md
 
 ---
 

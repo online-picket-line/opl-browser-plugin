@@ -1,6 +1,6 @@
 # Online Picket Line - Browser Extension
 
-A cross-browser extension that helps users stay informed about labor actions and boycotts by integrating with the [Online Picketline API](https://github.com/oplfun/online-picketline). The extension notifies users when they visit websites associated with active labor actions.
+A cross-browser extension that helps users stay informed about labor actions and boycotts by integrating with the [Online Picketline API](https://github.com/online-picket-line/online-picketline). The extension notifies users when they visit websites associated with active labor actions.
 
 ## Features
 
@@ -181,7 +181,7 @@ node generate-icons.js
 
 ### API Integration
 
-The extension integrates with the [Online Picketline API](https://github.com/oplfun/online-picketline/blob/main/API_DOCUMENTATION.md).
+The extension integrates with the [Online Picketline API](https://github.com/online-picket-line/online-picketline/blob/main/API_DOCUMENTATION.md).
 
 **API Endpoint**: `GET /api/blocklist?format=json`
 
