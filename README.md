@@ -30,23 +30,26 @@ No authentication is required. The API is public and rate-limited (1 request per
 ## Installation
 
 
-### Chrome / Edge / Opera / Brave (Chromium-based browsers)
 
+### Chromium Browsers (Chrome, Edge, Opera, Brave, Vivaldi, etc.)
+
+The extension is fully compatible with all Chromium-based browsers, including Chrome, Edge, Opera, Brave, and Vivaldi.
 
 1. Download or clone this repository
-2. Open Chrome, Edge, Opera, or Brave and navigate to your browser's extensions page:
-  - Chrome: `chrome://extensions/`
-  - Edge: `edge://extensions/`
-  - Opera: `opera://extensions/`
-  - Brave: `brave://extensions/`
-3. Enable "Developer mode" (or "Developer mode"/"Allow extensions from other stores" in Opera)
+2. Open your Chromium browser and navigate to the extensions page:
+   - Chrome: `chrome://extensions/`
+   - Edge: `edge://extensions/`
+   - Opera: `opera://extensions/`
+   - Brave: `brave://extensions/`
+   - Vivaldi: `vivaldi://extensions/`
+3. Enable "Developer mode" (or "Allow extensions from other stores" in Opera)
 4. Click "Load unpacked"
 5. Select the `opl-browser-plugin` directory
-6. The extension should now be installed
+6. The extension should now be installed and work out of the box in any Chromium browser.
 
-**Opera Note:** Opera supports Chrome extensions natively. If prompted, enable "Allow extensions from other stores" in Opera's extensions page settings.
+**Opera Note:** Opera supports Chrome/Chromium extensions natively. If prompted, enable "Allow extensions from other stores" in Opera's extensions page settings.
 
-**Brave Note:** Brave supports Chrome extensions natively. Use the same installation steps as Chrome. If you encounter any issues, ensure "Developer mode" is enabled in Brave's extensions page.
+**Brave/Vivaldi Note:** These browsers support Chrome/Chromium extensions natively. Use the same installation steps as Chrome. If you encounter any issues, ensure "Developer mode" is enabled in the extensions page.
 
 ### Firefox
 
