@@ -1,14 +1,14 @@
-// API service to fetch labor actions from Online Picketline API
+
+// API service to fetch labor actions from Online Picketline API (v1.2 unified, public, no-auth)
 // Default API base URL - must be configured by user
 const DEFAULT_API_BASE_URL = '';
-const API_KEY_PREFIX = 'opk_';
 const CACHE_KEY = 'labor_actions_cache';
-const CACHE_DURATION = 900000; // 15 minutes in milliseconds (as recommended by API docs)
+const CACHE_DURATION = 300000; // 5 minutes in milliseconds (as per new API docs)
+
 
 class ApiService {
   constructor() {
     this.baseUrl = DEFAULT_API_BASE_URL;
-    this.apiKey = null;
   }
 
   /**
@@ -19,9 +19,6 @@ class ApiService {
     if (settings.apiUrl) {
       this.baseUrl = settings.apiUrl;
     }
-    if (settings.apiKey) {
-      this.apiKey = settings.apiKey;
-    }
   }
 
   /**
@@ -30,10 +27,9 @@ class ApiService {
    */
   async getSettings() {
     return new Promise((resolve) => {
-      chrome.storage.sync.get(['apiUrl', 'apiKey'], (result) => {
+      chrome.storage.sync.get(['apiUrl'], (result) => {
         resolve({
-          apiUrl: result.apiUrl || DEFAULT_API_BASE_URL,
-          apiKey: result.apiKey || null
+          apiUrl: result.apiUrl || DEFAULT_API_BASE_URL
         });
       });
     });
@@ -67,48 +63,39 @@ class ApiService {
       // Ensure we have the latest settings
       await this.init();
 
-      if (!this.apiKey) {
-        console.warn('No API key configured. Please set up API key in extension settings.');
-        return [];
-      }
-
-      // Fetch from Online Picketline API
+      // Fetch from Online Picketline API (no auth required)
       const url = `${this.baseUrl}/api/blocklist?format=json&includeInactive=false`;
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'X-API-Key': this.apiKey
-        }
-      });
+      const response = await fetch(url, { method: 'GET' });
 
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After') || '120';
+        throw new Error(`Rate limited. Retry after ${retryAfter} seconds`);
+      }
       if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Invalid API key. Please check your API key in extension settings.');
-        }
         throw new Error(`API request failed: ${response.status}`);
       }
 
       const data = await response.json();
-      
-      // Transform API response to internal format
+
+      // Transform API response to internal format (now includes actionResources)
       const transformedData = this.transformApiResponse(data);
-      
+
       // Cache the transformed data
       await this.setCachedData(transformedData);
-      
+
       console.log(`Fetched ${transformedData.length} labor actions from ${data.employers?.length || 0} employers`);
-      
+
       return transformedData;
     } catch (error) {
       console.error('Error fetching labor actions:', error);
-      
+
       // Return cached data if available, even if expired
       const cached = await this.getCachedData(true);
       if (cached) {
         console.log('Using stale cached data due to API error');
         return cached;
       }
-      
+
       // Return empty array if no cache available
       return [];
     }
@@ -128,10 +115,10 @@ class ApiService {
 
     // Group URLs by employer to create labor action entries
     const employerMap = new Map();
-    
+
     apiData.blocklist.forEach(entry => {
       const employerId = entry.employerId;
-      
+
       if (!employerMap.has(employerId)) {
         employerMap.set(employerId, {
           id: employerId,
@@ -142,28 +129,42 @@ class ApiService {
           status: 'active',
           target_urls: [],
           locations: [],
-          divisions: []
+          divisions: [],
+          actionResources: []
         });
       }
-      
+
       const action = employerMap.get(employerId);
-      
+
       // Add URL to targets
       const urlObj = this.parseUrl(entry.url);
       if (urlObj) {
         action.target_urls.push(urlObj.hostname);
       }
-      
+
       // Add location info if available
       if (entry.locationName && !action.locations.includes(entry.locationName)) {
         action.locations.push(entry.locationName);
       }
-      
+
       // Add division info if available
       if (entry.divisionName && !action.divisions.includes(entry.divisionName)) {
         action.divisions.push(entry.divisionName);
       }
     });
+
+    // Attach actionResources to each employer if present
+    if (apiData.actionResources && Array.isArray(apiData.actionResources.resources)) {
+      // Map resources by employerId (via actionId/organization if possible)
+      apiData.actionResources.resources.forEach(resource => {
+        // Try to match by organization name (may need to improve if API adds employerId to resources)
+        for (const action of employerMap.values()) {
+          if (resource.organization && action.company && resource.organization.toLowerCase().includes(action.company.toLowerCase())) {
+            action.actionResources.push(resource);
+          }
+        }
+      });
+    }
 
     return Array.from(employerMap.values());
   }

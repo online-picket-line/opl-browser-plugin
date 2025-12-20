@@ -8,9 +8,26 @@ echo "Packaging Online Picket Line Browser Extension..."
 # Create dist directory
 mkdir -p dist
 
+
 # Package for Chrome/Edge (Manifest V3)
 echo "Creating Chrome/Edge package..."
 zip -r dist/opl-chrome-edge.zip \
+  manifest.json \
+  browser-polyfill.js \
+  api-service.js \
+  background.js \
+  content.js \
+  content.css \
+  popup.html \
+  popup.js \
+  block.html \
+  block.js \
+  icons/ \
+  -x "*.DS_Store" "*.swp"
+
+# Package for Opera (Manifest V3, same as Chrome)
+echo "Creating Opera package..."
+zip -r dist/opl-opera.zip \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
@@ -68,7 +85,7 @@ ls -lh dist/
 
 echo ""
 echo "Installation instructions:"
-echo "- Chrome/Edge: Use opl-chrome-edge.zip"
+echo "- Chrome/Edge/Brave: Use opl-chrome-edge.zip"
 echo "- Firefox: Use opl-firefox.zip"
 echo "- Safari: Use opl-safari.zip (requires Xcode conversion)"
 echo ""

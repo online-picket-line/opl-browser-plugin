@@ -10,35 +10,43 @@ A cross-browser extension that helps users stay informed about labor actions and
   - **Block Mode**: Prevents access to the page with an interstitial screen
 - **Smart URL Matching**: Compares current page URLs against labor action targets from employers, social media, and company websites
 - **Automatic Updates**: Refreshes labor action data every 15 minutes (as recommended by API)
-- **API Configuration**: Easy setup with your Online Picketline instance URL and API key
+- **API Configuration**: Easy setup with your Online Picketline instance URL (no API key required)
 - **Configurable Settings**: User-friendly popup interface for changing behavior
-- **Multi-Browser Support**: Compatible with Chrome, Edge, Firefox, and Safari
+- **Multi-Browser Support**: Compatible with Chrome, Edge, Opera, Brave, Firefox, and Safari
 
 ## Prerequisites
+
 
 Before using this extension, you need:
 
 1. Access to an Online Picketline instance (e.g., `https://your-instance.com`)
-2. An API key from that instance
+2. No API key is required. The API is public and rate-limited (1 request per 2 minutes).
 
-### Getting an API Key
 
-1. Log in to your Online Picketline instance as a moderator or owner
-2. Navigate to the **API** tab
-3. Click **Create Key** and give it a descriptive name (e.g., "Browser Extension")
-4. Copy the generated API key (it starts with `opk_`)
-5. Store the key securely - it cannot be retrieved again
+### API Access
+
+No authentication is required. The API is public and rate-limited (1 request per 2 minutes per client). Just enter your instance URL in the extension settings.
 
 ## Installation
 
-### Chrome / Edge (Chromium-based browsers)
+
+### Chrome / Edge / Opera / Brave (Chromium-based browsers)
+
 
 1. Download or clone this repository
-2. Open Chrome/Edge and navigate to `chrome://extensions/` (or `edge://extensions/`)
-3. Enable "Developer mode" in the top right
+2. Open Chrome, Edge, Opera, or Brave and navigate to your browser's extensions page:
+  - Chrome: `chrome://extensions/`
+  - Edge: `edge://extensions/`
+  - Opera: `opera://extensions/`
+  - Brave: `brave://extensions/`
+3. Enable "Developer mode" (or "Developer mode"/"Allow extensions from other stores" in Opera)
 4. Click "Load unpacked"
 5. Select the `opl-browser-plugin` directory
 6. The extension should now be installed
+
+**Opera Note:** Opera supports Chrome extensions natively. If prompted, enable "Allow extensions from other stores" in Opera's extensions page settings.
+
+**Brave Note:** Brave supports Chrome extensions natively. Use the same installation steps as Chrome. If you encounter any issues, ensure "Developer mode" is enabled in Brave's extensions page.
 
 ### Firefox
 
@@ -105,10 +113,9 @@ After installation, you **must configure the extension** before it will work:
 
 1. Click the extension icon in your browser toolbar
 2. Enter your **API Base URL** (e.g., `https://your-instance.com`)
-3. Enter your **API Key** (starts with `opk_`)
-4. Click **Save Configuration**
-5. Click **Test API Connection** to verify your setup
-6. Click **Refresh Labor Actions** to load the current data
+3. Click **Save Configuration**
+4. Click **Test API Connection** to verify your setup
+5. Click **Refresh Labor Actions** to load the current data
 
 ## Usage
 
@@ -183,12 +190,12 @@ node generate-icons.js
 
 The extension integrates with the [Online Picketline API](https://github.com/online-picket-line/online-picketline/blob/main/API_DOCUMENTATION.md).
 
+
 **API Endpoint**: `GET /api/blocklist?format=json`
 
-**Required Headers**:
-- `X-API-Key`: Your API key (format: `opk_xxxxxxxxxxxxx`)
+**No authentication required.**
 
-**Response Format**:
+**Response Format:**
 ```json
 {
   "version": "1.0",
@@ -208,17 +215,42 @@ The extension integrates with the [Online Picketline API](https://github.com/onl
       "employerId": "emp-123",
       "label": "Facebook Page",
       "category": "social",
-      "reason": "Active labor action: strike",
-      "divisionName": "West Coast Division",
-      "locationName": "San Francisco Office"
+      "reason": "Active labor action: strike"
     }
-  ]
+  ],
+  "actionResources": {
+    "totalActions": 5,
+    "totalResources": 12,
+    "actions": [
+      {
+        "id": "action-123",
+        "organization": "UAW Local 456",
+        "actionType": "strike",
+        "status": "active",
+        "resourceCount": 3
+      }
+    ],
+    "resources": [
+      {
+        "actionId": "action-123",
+        "actionType": "strike",
+        "organization": "UAW Local 456",
+        "status": "active",
+        "url": "https://example.com/strike-news",
+        "label": "News Coverage",
+        "description": "Local news coverage of the strike",
+        "startDate": "2024-01-01",
+        "endDate": "2024-01-31",
+        "location": "Detroit, MI"
+      }
+    ]
+  }
 }
 ```
 
-The extension transforms this API response into an internal format for URL matching and display.
+The extension transforms this API response into an internal format for URL matching and display. The `actionResources` field is now available for rich notifications and context.
 
-**Caching**: The extension caches API responses for 15 minutes and automatically refreshes data to stay current with labor actions.
+**Caching**: The extension caches API responses for 5 minutes and automatically refreshes data to stay current with labor actions. The API is rate-limited to 1 request per 2 minutes per client. If rate-limited, the extension will use cached data and retry after the specified time.
 
 ### Customization
 
