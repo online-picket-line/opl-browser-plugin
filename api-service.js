@@ -63,9 +63,25 @@ class ApiService {
       // Ensure we have the latest settings
       await this.init();
 
+      if (!this.baseUrl) {
+        console.warn('API Base URL is not configured. Please configure it in the extension settings.');
+        // Return cached data if available, even if expired
+        const cached = await this.getCachedData(true);
+        if (cached) {
+          console.log('Using stale cached data due to missing API configuration');
+          return cached;
+        }
+        return [];
+      }
+
       // Fetch from Online Picketline API (no auth required)
       const url = `${this.baseUrl}/api/blocklist?format=json&includeInactive=false`;
-      const response = await fetch(url, { method: 'GET' });
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
 
       if (response.status === 429) {
         const retryAfter = response.headers.get('Retry-After') || '120';
@@ -123,10 +139,11 @@ class ApiService {
         employerMap.set(employerId, {
           id: employerId,
           title: `Labor Action: ${entry.employer}`,
-          description: entry.reason || 'Active labor action',
+          description: entry.actionDetails?.description || entry.reason || 'Active labor action',
           company: entry.employer,
-          type: this.extractActionType(entry.reason),
-          status: 'active',
+          type: entry.actionDetails?.actionType || this.extractActionType(entry.reason),
+          status: entry.actionDetails?.status || 'active',
+          more_info: entry.moreInfoUrl || (entry.actionDetails?.urls?.[0]?.url),
           target_urls: [],
           locations: [],
           divisions: [],
@@ -143,13 +160,29 @@ class ApiService {
       }
 
       // Add location info if available
-      if (entry.locationName && !action.locations.includes(entry.locationName)) {
-        action.locations.push(entry.locationName);
+      // Check both locationName (old) and location (new)
+      const loc = entry.locationName || entry.location;
+      if (loc && !action.locations.includes(loc)) {
+        action.locations.push(loc);
       }
 
       // Add division info if available
       if (entry.divisionName && !action.divisions.includes(entry.divisionName)) {
         action.divisions.push(entry.divisionName);
+      }
+
+      // Process actionDetails from new API format
+      if (entry.actionDetails && entry.actionDetails.urls && Array.isArray(entry.actionDetails.urls)) {
+        entry.actionDetails.urls.forEach(urlItem => {
+          // Avoid duplicates
+          if (!action.actionResources.some(r => r.url === urlItem.url)) {
+            action.actionResources.push({
+              url: urlItem.url,
+              label: urlItem.label || 'Resource',
+              source: 'official'
+            });
+          }
+        });
       }
     });
 
@@ -160,7 +193,10 @@ class ApiService {
         // Try to match by organization name (may need to improve if API adds employerId to resources)
         for (const action of employerMap.values()) {
           if (resource.organization && action.company && resource.organization.toLowerCase().includes(action.company.toLowerCase())) {
-            action.actionResources.push(resource);
+            // Avoid duplicates
+            if (!action.actionResources.some(r => r.url === resource.url)) {
+              action.actionResources.push(resource);
+            }
           }
         }
       });

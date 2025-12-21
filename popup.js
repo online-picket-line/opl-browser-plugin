@@ -94,7 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
     testConfigBtn.textContent = 'Testing...';
     statusDiv.className = 'status';
     // Test the API connection (no auth required)
-    fetch(`${apiUrl}/api/blocklist?format=json`)
+    fetch(`${apiUrl}/api/blocklist?format=json`, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    })
       .then(response => {
         if (response.status === 429) {
           const retryAfter = response.headers.get('Retry-After') || '120';

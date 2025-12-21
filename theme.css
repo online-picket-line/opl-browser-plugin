@@ -1,0 +1,139 @@
+/* theme.css */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code&display=swap');
+
+:root {
+  --background: oklch(0.98 0.005 140);
+  --foreground: oklch(0.12 0.15 140);
+  --card: oklch(0.96 0.008 140);
+  --card-foreground: oklch(0.12 0.15 140);
+  --primary: oklch(0.28 0.20 140);
+  --primary-foreground: oklch(0.99 0.005 140);
+  --secondary: oklch(0.88 0.08 140);
+  --secondary-foreground: oklch(0.15 0.15 140);
+  --muted: oklch(0.92 0.02 140);
+  --muted-foreground: oklch(0.35 0.10 140);
+  --accent: oklch(0.38 0.18 120);
+  --accent-foreground: oklch(0.99 0.005 140);
+  --destructive: oklch(0.45 0.22 15);
+  --destructive-foreground: oklch(0.99 0.005 140);
+  --border: oklch(0.75 0.08 140);
+  --input: oklch(0.75 0.08 140);
+  --ring: oklch(0.28 0.20 140);
+  --radius: 0rem;
+  
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+
+  --shadow-hard: 2px 2px 0px 0px var(--primary);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  font-family: var(--font-sans);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: var(--shadow-hard);
+  border: 1px solid var(--primary);
+}
+
+.btn-primary:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px 0px var(--primary);
+}
+
+.btn-primary:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0px 0px var(--primary);
+}
+
+.btn-secondary {
+  background-color: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0px 0px var(--border);
+}
+
+.btn-secondary:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px 0px var(--border);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+}
+
+.btn-outline:hover {
+  background-color: var(--muted);
+}
+
+.card {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  padding: 1rem;
+  box-shadow: var(--shadow-hard);
+}
+
+input[type="text"], input[type="password"] {
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  width: 100%;
+  font-family: var(--font-sans);
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.status {
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.status.success {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--primary);
+}
+
+.status.error {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+}
+
+.status.warning {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
