@@ -6,10 +6,11 @@ Successfully implemented a complete cross-browser extension that integrates with
 ## Completed Features
 
 ### Core Functionality
-✅ **API Integration**: Full integration with Online Picketline API (`GET /api/blocklist`)
-  - Fetches employer URLs and labor action data
-  - Transforms API response to internal format
-  - Supports employer hierarchy (company/division/location)
+✅ **API Integration**: Full integration with Online Picketline External API v3.0
+  - Requires API key authentication (X-API-Key header)
+  - Fetches extension format for optimized URL matching
+  - Supports content hash-based caching (304 Not Modified)
+  - Handles public/private API key rate limits
 
 ✅ **Two Display Modes**:
   - **Banner Mode** (default): Non-intrusive banner at bottom of page
@@ -91,13 +92,20 @@ Successfully implemented a complete cross-browser extension that integrates with
 
 ### Endpoint
 ```
-GET /api/blocklist?format=json&includeInactive=false
+GET /api/blocklist.json?format=extension
 ```
 
 ### Headers
 ```
-X-API-Key: opk_xxxxxxxxxxxxx
+X-API-Key: opl_xxxxxxxxxxxxx
+Accept: application/json
 ```
+
+### Content Hash Caching
+```
+GET /api/blocklist.json?format=extension&hash=abc123...
+```
+Returns 304 Not Modified if content unchanged
 
 ### Response Processing
 The extension transforms the API's blocklist format into internal labor action objects:
@@ -107,10 +115,12 @@ The extension transforms the API's blocklist format into internal labor action o
 - Maintains target URL list per employer
 
 ### Caching Strategy
-- **Cache Duration**: 15 minutes (900,000ms)
-- **Refresh Interval**: 15 minutes (periodic alarm)
+- **Cache Duration**: 5 minutes
+- **Content Hash**: SHA-256 hash-based caching with 304 responses
+- **Refresh Interval**: 15 minutes (periodic alarm) 
 - **Stale Cache**: Used as fallback when API unavailable
 - **Manual Refresh**: Available via popup button
+- **Rate Limits**: 10 req/2min (public), 100 req/15min (private)
 
 ## User Workflow
 

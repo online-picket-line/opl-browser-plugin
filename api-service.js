@@ -1,9 +1,10 @@
 
-// API service to fetch labor actions from Online Picketline API (v1.2 unified, public, no-auth)
-// Default API base URL - must be configured by user
+// API service to fetch labor actions from Online Picketline External API (v3.0)
+// Requires API key authentication (public or private)
 const DEFAULT_API_BASE_URL = '';
 const CACHE_KEY = 'labor_actions_cache';
-const CACHE_DURATION = 300000; // 5 minutes in milliseconds (as per new API docs)
+const CACHE_DURATION = 300000; // 5 minutes in milliseconds
+const CACHE_HASH_KEY = 'content_hash';
 
 
 class ApiService {
@@ -17,7 +18,7 @@ class ApiService {
   async init() {
     const settings = await this.getSettings();
     if (settings.apiUrl) {
-      this.baseUrl = settings.apiUrl;
+      this.baseUrl = settings.apiUrl.endsWith('/') ? settings.apiUrl.slice(0, -1) : settings.apiUrl;
     }
   }
 
@@ -27,9 +28,10 @@ class ApiService {
    */
   async getSettings() {
     return new Promise((resolve) => {
-      chrome.storage.sync.get(['apiUrl'], (result) => {
+      chrome.storage.sync.get(['apiUrl', 'apiKey'], (result) => {
         resolve({
-          apiUrl: result.apiUrl || DEFAULT_API_BASE_URL
+          apiUrl: result.apiUrl || DEFAULT_API_BASE_URL,
+          apiKey: result.apiKey || ''
         });
       });
     });
@@ -74,32 +76,77 @@ class ApiService {
         return [];
       }
 
-      // Fetch from Online Picketline API (no auth required)
-      const url = `${this.baseUrl}/api/blocklist?format=json&includeInactive=false`;
+      // Get API settings including key
+      const settings = await this.getSettings();
+      
+      if (!settings.apiKey) {
+        console.warn('API key is required. Please configure it in the extension settings.');
+        // Return cached data if available, even if expired
+        const cached = await this.getCachedData(true);
+        if (cached) {
+          console.log('Using stale cached data due to missing API key');
+          return cached;
+        }
+        return [];
+      }
+
+      // Get cached hash for efficient caching
+      const cachedHash = await this.getCachedHash();
+      
+      // Fetch from Online Picketline External API with required API key
+      let url = `${this.baseUrl}/api/blocklist.json?format=extension&includeInactive=false`;
+      if (cachedHash) {
+        url += `&hash=${cachedHash}`;
+      }
+      
+      const headers = {
+        'Accept': 'application/json',
+        'X-API-Key': settings.apiKey
+      };
+      
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Accept': 'application/json'
-        }
+        headers
       });
 
+      if (response.status === 304) {
+        // Content not modified, use cached data
+        console.log('Content not modified (304), using cached data');
+        const cached = await this.getCachedData(true);
+        if (cached) {
+          return cached;
+        }
+        // Fall through to fetch fresh if no cache
+      }
+      
       if (response.status === 429) {
         const retryAfter = response.headers.get('Retry-After') || '120';
         throw new Error(`Rate limited. Retry after ${retryAfter} seconds`);
       }
+      
+      if (response.status === 401) {
+        throw new Error('Invalid or missing API key. Please check your API key in settings.');
+      }
+      
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
+      
+      // Store content hash for future requests
+      const contentHash = response.headers.get('X-Content-Hash');
+      if (contentHash) {
+        await this.setCachedHash(contentHash);
+      }
 
-      // Transform API response to internal format (now includes actionResources)
-      const transformedData = this.transformApiResponse(data);
+      // Transform API response to internal format (new extension format)
+      const transformedData = this.transformExtensionApiResponse(data);
 
       // Cache the transformed data
       await this.setCachedData(transformedData);
 
-      console.log(`Fetched ${transformedData.length} labor actions from ${data.employers?.length || 0} employers`);
+      console.log(`Fetched ${transformedData.length} labor actions (Extension format v3.0)`);
 
       return transformedData;
     } catch (error) {
@@ -118,91 +165,59 @@ class ApiService {
   }
 
   /**
-   * Transform API response to internal format
-   * @param {Object} apiData - Raw API response from Online Picketline
-   * @param {Array} apiData.blocklist - Array of blocklist entries
-   * @param {Array} apiData.employers - Array of employer metadata
-   * @returns {Array} Transformed data grouped by employer
+   * Transform Extension API response to internal format
+   * @param {Object} extensionData - Raw extension format from API v3.0
+   * @returns {Array} Transformed data for internal use
    */
-  transformApiResponse(apiData) {
-    if (!apiData || !apiData.blocklist) {
+  transformExtensionApiResponse(extensionData) {
+    if (!extensionData || typeof extensionData !== 'object') {
       return [];
     }
 
-    // Group URLs by employer to create labor action entries
-    const employerMap = new Map();
+    const actions = [];
 
-    apiData.blocklist.forEach(entry => {
-      const employerId = entry.employerId;
-
-      if (!employerMap.has(employerId)) {
-        employerMap.set(employerId, {
-          id: employerId,
-          title: `Labor Action: ${entry.employer}`,
-          description: entry.actionDetails?.description || entry.reason || 'Active labor action',
-          company: entry.employer,
-          type: entry.actionDetails?.actionType || this.extractActionType(entry.reason),
-          status: entry.actionDetails?.status || 'active',
-          more_info: entry.moreInfoUrl || (entry.actionDetails?.urls?.[0]?.url),
-          target_urls: [],
-          locations: [],
-          divisions: [],
-          actionResources: []
-        });
+    // Process each organization in the extension format
+    for (const [orgName, orgData] of Object.entries(extensionData)) {
+      // Skip the _optimizedPatterns helper object
+      if (orgName === '_optimizedPatterns') {
+        continue;
       }
 
-      const action = employerMap.get(employerId);
+      // Extract action details with fallbacks
+      const actionDetails = orgData.actionDetails || {};
+      
+      const action = {
+        id: actionDetails.id || `org-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: actionDetails.organization 
+          ? `${actionDetails.actionType || 'Labor Action'}: ${actionDetails.organization}` 
+          : `Labor Action: ${orgName}`,
+        description: actionDetails.description || 'Active labor action',
+        company: orgName,
+        type: actionDetails.actionType || this.extractActionType('labor action'),
+        status: actionDetails.status || 'active',
+        more_info: orgData.moreInfoUrl || (actionDetails.urls?.[0]?.url) || '',
+        target_urls: (orgData.matchingUrlRegexes || []).map(regex => this.extractDomainFromRegex(regex)),
+        locations: actionDetails.location ? [actionDetails.location] : [],
+        divisions: [],
+        actionResources: actionDetails.urls || [],
+        // Store original extension data for advanced matching
+        _extensionData: orgData
+      };
 
-      // Add URL to targets
-      const urlObj = this.parseUrl(entry.url);
-      if (urlObj) {
-        action.target_urls.push(urlObj.hostname);
-      }
-
-      // Add location info if available
-      // Check both locationName (old) and location (new)
-      const loc = entry.locationName || entry.location;
-      if (loc && !action.locations.includes(loc)) {
-        action.locations.push(loc);
-      }
-
-      // Add division info if available
-      if (entry.divisionName && !action.divisions.includes(entry.divisionName)) {
-        action.divisions.push(entry.divisionName);
-      }
-
-      // Process actionDetails from new API format
-      if (entry.actionDetails && entry.actionDetails.urls && Array.isArray(entry.actionDetails.urls)) {
-        entry.actionDetails.urls.forEach(urlItem => {
-          // Avoid duplicates
-          if (!action.actionResources.some(r => r.url === urlItem.url)) {
-            action.actionResources.push({
-              url: urlItem.url,
-              label: urlItem.label || 'Resource',
-              source: 'official'
-            });
-          }
-        });
-      }
-    });
-
-    // Attach actionResources to each employer if present
-    if (apiData.actionResources && Array.isArray(apiData.actionResources.resources)) {
-      // Map resources by employerId (via actionId/organization if possible)
-      apiData.actionResources.resources.forEach(resource => {
-        // Try to match by organization name (may need to improve if API adds employerId to resources)
-        for (const action of employerMap.values()) {
-          if (resource.organization && action.company && resource.organization.toLowerCase().includes(action.company.toLowerCase())) {
-            // Avoid duplicates
-            if (!action.actionResources.some(r => r.url === resource.url)) {
-              action.actionResources.push(resource);
-            }
-          }
-        }
-      });
+      actions.push(action);
     }
 
-    return Array.from(employerMap.values());
+    return actions;
+  }
+
+  /**
+   * Extract domain from regex pattern
+   * @param {string} regex - URL matching regex
+   * @returns {string} Extracted domain
+   */
+  extractDomainFromRegex(regex) {
+    // Simple extraction - remove common regex chars to get domain
+    return regex.replace(/[\\^$*+?.()|[\]{}]/g, '').replace(/\.com.*/, '.com');
   }
 
   /**
@@ -288,7 +303,29 @@ class ApiService {
    */
   async clearCache() {
     return new Promise((resolve) => {
-      chrome.storage.local.remove([CACHE_KEY, 'cache_timestamp'], resolve);
+      chrome.storage.local.remove([CACHE_KEY, 'cache_timestamp', CACHE_HASH_KEY], resolve);
+    });
+  }
+
+  /**
+   * Get cached content hash
+   * @returns {Promise<string|null>}
+   */
+  async getCachedHash() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get([CACHE_HASH_KEY], (result) => {
+        resolve(result[CACHE_HASH_KEY] || null);
+      });
+    });
+  }
+
+  /**
+   * Set cached content hash
+   * @param {string} hash - Content hash from API
+   */
+  async setCachedHash(hash) {
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ [CACHE_HASH_KEY]: hash }, resolve);
     });
   }
 }

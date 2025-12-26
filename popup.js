@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const configHelp = document.getElementById('config-help');
 
   // Load current settings
-  chrome.storage.sync.get(['blockMode', 'apiUrl'], (result) => {
+  chrome.storage.sync.get(['blockMode', 'apiUrl', 'apiKey'], (result) => {
     const blockMode = result.blockMode || false;
     if (blockMode) {
       modeBlockRadio.checked = true;
@@ -25,9 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
       modeBannerRadio.checked = true;
     }
     apiUrlInput.value = result.apiUrl || '';
+    apiKeyInput.value = result.apiKey || '';
     // Show warning if API not configured
-    if (!result.apiUrl) {
-      showStatus('Please configure your API settings', 'warning');
+    if (!result.apiUrl || !result.apiKey) {
+      showStatus('Please configure your API URL and key', 'warning');
     }
   });
 
@@ -47,11 +48,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Save API configuration
   saveConfigBtn.addEventListener('click', () => {
-    const apiUrl = apiUrlInput.value.trim();
+    let apiUrl = apiUrlInput.value.trim();
+    let apiKey = apiKeyInput.value.trim();
+    
     if (!apiUrl) {
       showStatus('Please enter the API URL', 'error');
       return;
     }
+    
+    if (!apiKey) {
+      showStatus('Please enter your API key', 'error');
+      return;
+    }
+    
+    // Validate API key format
+    if (!apiKey.startsWith('opl_')) {
+      showStatus('API key should start with "opl_"', 'error');
+      return;
+    }
+    
+    // Remove trailing slash if present
+    if (apiUrl.endsWith('/')) {
+      apiUrl = apiUrl.slice(0, -1);
+    }
+    
     // Validate URL format
     try {
       new URL(apiUrl);
@@ -59,7 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
       showStatus('Invalid API URL format', 'error');
       return;
     }
-    chrome.storage.sync.set({ apiUrl }, () => {
+    
+    chrome.storage.sync.set({ apiUrl, apiKey }, () => {
       showStatus('API configuration saved successfully', 'success');
       // Clear cache to force refresh with new config
       chrome.runtime.sendMessage({ action: 'clearCache' }, () => {
@@ -86,31 +107,48 @@ document.addEventListener('DOMContentLoaded', () => {
   // Test API connection
   testConfigBtn.addEventListener('click', () => {
     const apiUrl = apiUrlInput.value.trim();
+    const apiKey = apiKeyInput.value.trim();
+    
     if (!apiUrl) {
       showStatus('Please enter API URL first', 'error');
       return;
     }
+    
+    if (!apiKey) {
+      showStatus('Please enter API key first', 'error');
+      return;
+    }
+    
     testConfigBtn.disabled = true;
     testConfigBtn.textContent = 'Testing...';
     statusDiv.className = 'status';
-    // Test the API connection (no auth required)
-    fetch(`${apiUrl}/api/blocklist?format=json`, {
+    
+    // Test the API connection with required authentication
+    fetch(`${apiUrl}/api/blocklist.json?format=extension`, {
       headers: {
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-API-Key': apiKey
       }
     })
       .then(response => {
+        if (response.status === 401) {
+          throw new Error('Invalid API key');
+        }
+        if (response.status === 403) {
+          throw new Error('API key lacks required permissions');
+        }
         if (response.status === 429) {
           const retryAfter = response.headers.get('Retry-After') || '120';
           throw new Error(`Rate limited. Retry after ${retryAfter} seconds`);
         }
         if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+          throw new Error(`API error: ${response.status} ${response.statusText}`);
         }
         return response.json();
       })
       .then(data => {
-        showStatus(`✓ Connected! Found ${data.totalUrls || 0} URLs from ${data.employers?.length || 0} employers`, 'success');
+        const orgCount = Object.keys(data).filter(key => key !== '_optimizedPatterns').length;
+        showStatus(`✓ Connected! Found ${orgCount} organizations in Extension format`, 'success');
       })
       .catch(error => {
         showStatus(`✗ Connection failed: ${error.message}`, 'error');

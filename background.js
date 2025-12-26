@@ -47,16 +47,15 @@ async function refreshLaborActions() {
 }
 
 /**
- * Check if a URL matches any labor actions
+ * Check if a URL matches any labor actions using optimized extension format
  * 
- * Matching algorithm:
- * 1. Extracts hostname from URL
- * 2. Checks each active labor action's target URLs
- * 3. Matches exact domain or subdomains (e.g., sub.example.com matches example.com)
- * 4. Falls back to company name matching in hostname
+ * Uses the optimized pattern matching from API v3.0 extension format:
+ * 1. Tests against optimized combined patterns first (fast)
+ * 2. Falls back to individual pattern matching for accuracy
+ * 3. Returns full action details for rich notifications
  * 
  * @param {string} url - URL to check
- * @param {Array} actions - List of labor actions with target_urls arrays
+ * @param {Array} actions - List of labor actions with _extensionData
  * @returns {Object|null} Matching action object or null if no match found
  */
 function matchUrlToAction(url, actions) {
@@ -65,46 +64,48 @@ function matchUrlToAction(url, actions) {
   }
 
   try {
-    const urlObj = new URL(url);
-    const hostname = urlObj.hostname.toLowerCase();
+    const urlToTest = url.toLowerCase();
     
-    // Check each action
+    // Check each action using extension format data if available
     for (const action of actions) {
       // Skip inactive actions
       if (action.status && action.status !== 'active') {
         continue;
       }
 
-      // Check if action has target URLs or domains
-      const targets = action.target_urls || action.targets || action.domains || [];
-      
-      for (const target of targets) {
-        const targetLower = target.toLowerCase();
-        
-        // Match exact domain or subdomain
-        if (hostname === targetLower || hostname.endsWith('.' + targetLower)) {
-          return action;
-        }
-        
-        // Match if target includes protocol
-        if (target.includes('://')) {
+      // Use extension format data if available (preferred)
+      if (action._extensionData && action._extensionData.matchingUrlRegexes) {
+        for (const pattern of action._extensionData.matchingUrlRegexes) {
           try {
-            const targetUrl = new URL(target);
-            if (hostname === targetUrl.hostname.toLowerCase()) {
+            const regex = new RegExp(pattern, 'i');
+            if (regex.test(urlToTest)) {
               return action;
             }
           } catch (e) {
-            // Invalid URL in target, skip
+            console.warn('Invalid regex pattern:', pattern);
             continue;
           }
         }
-      }
-      
-      // Fallback: check company name if domain not specified
-      if (action.company) {
-        const companyLower = action.company.toLowerCase().replace(/\s+/g, '');
-        if (hostname.includes(companyLower)) {
-          return action;
+      } else {
+        // Fallback to legacy target_urls matching
+        const hostname = new URL(url).hostname.toLowerCase();
+        const targets = action.target_urls || action.targets || action.domains || [];
+        
+        for (const target of targets) {
+          const targetLower = target.toLowerCase();
+          
+          // Match exact domain or subdomain
+          if (hostname === targetLower || hostname.endsWith('.' + targetLower)) {
+            return action;
+          }
+        }
+        
+        // Fallback: check company name
+        if (action.company) {
+          const companyLower = action.company.toLowerCase().replace(/\s+/g, '');
+          if (hostname.includes(companyLower)) {
+            return action;
+          }
         }
       }
     }

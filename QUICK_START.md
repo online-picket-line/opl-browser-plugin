@@ -29,9 +29,9 @@
    ```
    https://your-instance.com
    ```
-3. Enter your API key (get it from your instance's API tab):
+3. Enter your API key (get from your instance administrator):
    ```
-   opk_xxxxxxxxxxxxx
+   opl_your_key_here
    ```
 4. Click **Save Configuration**
 5. Click **Test API Connection** to verify
@@ -96,8 +96,8 @@ When you visit a website associated with an active labor action:
 **"No data loaded yet"**
 → Configure your API URL and key, then click Refresh
 
-**"Invalid API key"**
-→ Make sure your key starts with `opk_` and is copied correctly
+**"Invalid or missing API key"**
+→ Make sure your key starts with `opl_` and is copied correctly
 
 **"Connection failed"**
 → Check that your Online Picketline instance URL is correct and accessible

@@ -25,7 +25,12 @@ Before using this extension, you need:
 
 ### API Access
 
-No authentication is required. The API is public and rate-limited (1 request per 2 minutes per client). Just enter your instance URL in the extension settings.
+**API key is required.** The API uses key-based authentication for external clients:
+
+- **Public API Keys**: Safe for client-side code (browser extensions), 10 requests per 2 minutes per IP
+- **Private API Keys**: Server-side only, 100 requests per 15 minutes
+
+Get an API key from your instance administrator or through the API management interface.
 
 ## Installation
 
@@ -116,9 +121,10 @@ After installation, you **must configure the extension** before it will work:
 
 1. Click the extension icon in your browser toolbar
 2. Enter your **API Base URL** (e.g., `https://your-instance.com`)
-3. Click **Save Configuration**
-4. Click **Test API Connection** to verify your setup
-5. Click **Refresh Labor Actions** to load the current data
+3. Enter your **API Key** (e.g., `opl_your_key_here`)
+4. Click **Save Configuration**
+5. Click **Test API Connection** to verify your setup
+6. Click **Refresh Labor Actions** to load the current data
 
 ## Usage
 
@@ -191,69 +197,50 @@ node generate-icons.js
 
 ### API Integration
 
-The extension integrates with the [Online Picketline API](https://github.com/online-picket-line/online-picketline/blob/main/API_DOCUMENTATION.md).
+The extension integrates with the [Online Picketline External API v3.0](https://github.com/online-picket-line/online-picketline/blob/main/API_DOCUMENTATION.md).
 
+**API Endpoint**: `GET /api/blocklist.json`
 
-**API Endpoint**: `GET /api/blocklist?format=json`
-
-**No authentication required.**
+**Authentication required:** API key via `X-API-Key` header
 
 **Response Format:**
 ```json
 {
-  "version": "1.0",
-  "generatedAt": "2024-01-15T10:30:00Z",
-  "totalUrls": 5,
-  "employers": [
-    {
-      "id": "emp-123",
-      "name": "Example Corp",
-      "urlCount": 3
-    }
-  ],
-  "blocklist": [
-    {
-      "url": "https://facebook.com/examplecorp",
-      "employer": "Example Corp",
-      "employerId": "emp-123",
-      "label": "Facebook Page",
-      "category": "social",
-      "reason": "Active labor action: strike"
-    }
-  ],
-  "actionResources": {
-    "totalActions": 5,
-    "totalResources": 12,
-    "actions": [
-      {
-        "id": "action-123",
-        "organization": "UAW Local 456",
-        "actionType": "strike",
-        "status": "active",
-        "resourceCount": 3
-      }
+  "Employer Name": {
+    "moreInfoUrl": "https://example.com/info",
+    "matchingUrlRegexes": [
+      "example.com",
+      "facebook.com/example"
     ],
-    "resources": [
-      {
-        "actionId": "action-123",
-        "actionType": "strike",
-        "organization": "UAW Local 456",
-        "status": "active",
-        "url": "https://example.com/strike-news",
-        "label": "News Coverage",
-        "description": "Local news coverage of the strike",
-        "startDate": "2024-01-01",
-        "endDate": "2024-01-31",
-        "location": "Detroit, MI"
-      }
-    ]
+    "actionDetails": {
+      "id": "action-123",
+      "organization": "Workers Union Local 456",
+      "actionType": "strike",
+      "status": "active",
+      "description": "Workers striking for better wages",
+      "demands": "15% wage increase, healthcare coverage",
+      "location": "Detroit, MI",
+      "urls": [
+        {
+          "url": "https://example.com/strike-info",
+          "label": "Strike Information"
+        }
+      ]
+    }
+  },
+  "_optimizedPatterns": {
+    "Employer Name": "(example\\.com|facebook\\.com/example)"
   }
 }
 ```
 
 The extension transforms this API response into an internal format for URL matching and display. The `actionResources` field is now available for rich notifications and context.
 
-**Caching**: The extension caches API responses for 5 minutes and automatically refreshes data to stay current with labor actions. The API is rate-limited to 1 request per 2 minutes per client. If rate-limited, the extension will use cached data and retry after the specified time.
+**Caching**: The extension caches API responses for 5 minutes and automatically refreshes data to stay current with labor actions. The API uses content hash-based caching for efficiency. Rate limits:
+- Public API keys: 10 requests per 2 minutes per IP
+- Private API keys: 100 requests per 15 minutes
+
+If rate-limited, the extension will use cached data and retry after the specified time.
 
 ### Customization
 
