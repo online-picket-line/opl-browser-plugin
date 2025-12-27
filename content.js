@@ -10,18 +10,25 @@
   function checkCurrentPage() {
     // Check if user has bypassed the block
     if (sessionStorage.getItem('opl_bypass') === 'true') {
-      sessionStorage.removeItem('opl_bypass');
       return;
     }
 
     chrome.runtime.sendMessage(
       { action: 'checkUrl', url: window.location.href },
       (response) => {
-        if (response && response.match) {
-          if (response.blockMode) {
-            blockPage(response.match);
-          } else {
-            showBanner(response.match);
+        if (response) {
+          if (response.bypass) {
+            // User just bypassed the block page, set session flag
+            sessionStorage.setItem('opl_bypass', 'true');
+            return;
+          }
+
+          if (response.match) {
+            if (response.blockMode) {
+              blockPage(response.match);
+            } else {
+              showBanner(response.match);
+            }
           }
         }
       }
@@ -48,13 +55,23 @@
     const actionType = action.type || 'strike';
     const moreInfoUrl = action.url || action.more_info || '';
     
+    // Construct details string
+    let details = [];
+    if (action.locations && action.locations.length > 0) details.push(action.locations[0]);
+    if (action.startDate) details.push(`Since ${new Date(action.startDate).toLocaleDateString()}`);
+    const detailsHtml = details.length > 0 ? `<p class="opl-banner-details" style="font-size: 0.8em; opacity: 0.9; margin-top: 2px;">${details.join(' • ')}</p>` : '';
+
     banner.innerHTML = `
       <div class="opl-banner-content">
         <div class="opl-banner-icon">⚠️</div>
         <div class="opl-banner-text">
           <strong class="opl-banner-title">${escapeHtml(title)}</strong>
           <p class="opl-banner-description">${escapeHtml(description)}</p>
-          ${moreInfoUrl ? `<a href="${escapeHtml(moreInfoUrl)}" target="_blank" class="opl-banner-link">Learn More</a>` : ''}
+          ${detailsHtml}
+          <div class="opl-banner-links" style="margin-top: 4px;">
+            ${moreInfoUrl ? `<a href="${escapeHtml(moreInfoUrl)}" target="_blank" class="opl-banner-link">Learn More</a><span style="margin: 0 5px; opacity: 0.5;">|</span>` : ''}
+            <a href="https://onlinepicketline.com" target="_blank" class="opl-banner-link" style="font-size: 0.8em; opacity: 0.8;">Online Picket Line - OPL</a>
+          </div>
         </div>
         <button class="opl-banner-close" aria-label="Close banner">×</button>
       </div>
@@ -82,13 +99,17 @@
    * @param {Object} action - Labor action data
    */
   function blockPage(action) {
-    // Store action data for block page
-    sessionStorage.setItem('opl_blocked_action', JSON.stringify(action));
-    sessionStorage.setItem('opl_blocked_url', window.location.href);
-    
-    // Redirect to block page
-    const blockPageUrl = chrome.runtime.getURL('block.html');
-    window.location.href = blockPageUrl;
+    // Send data to background script to store for the block page
+    // We use background storage because sessionStorage is not shared between origins
+    chrome.runtime.sendMessage({
+      action: 'setBlockedState',
+      data: action,
+      url: window.location.href
+    }, () => {
+      // Redirect to block page after data is saved
+      const blockPageUrl = chrome.runtime.getURL('block.html');
+      window.location.href = blockPageUrl;
+    });
   }
 
   /**

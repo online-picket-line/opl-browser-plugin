@@ -198,6 +198,10 @@ class ApiService {
         more_info: orgData.moreInfoUrl || (actionDetails.urls?.[0]?.url) || '',
         target_urls: (orgData.matchingUrlRegexes || []).map(regex => this.extractDomainFromRegex(regex)),
         locations: actionDetails.location ? [actionDetails.location] : [],
+        demands: actionDetails.demands || '',
+        startDate: orgData.startTime || actionDetails.startDate || '',
+        endDate: orgData.endTime || actionDetails.endDate || '',
+        contactInfo: actionDetails.contactInfo || '',
         divisions: [],
         actionResources: actionDetails.urls || [],
         // Store original extension data for advanced matching

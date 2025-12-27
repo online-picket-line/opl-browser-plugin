@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Access Blocked - Labor Action</title>
+  <title>Access Blocked - Online Picket Line - OPL</title>
   <link rel="stylesheet" href="theme.css">
   <style>
     body {
@@ -124,6 +124,25 @@
       <span id="action-type" class="action-type">Labor Action</span>
       <h2 id="action-title">Loading...</h2>
       <p id="action-description">Please wait...</p>
+      
+      <div id="action-details" style="margin-top: 1.5rem; display: none; border-top: 1px solid var(--border); padding-top: 1rem;">
+        <div id="action-demands-container" style="margin-bottom: 1rem;">
+          <strong>Demands:</strong>
+          <p id="action-demands" style="margin-top: 0.25rem; font-size: 0.95rem;"></p>
+        </div>
+        
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.9rem;">
+          <div id="action-location-container">
+            <strong>Location:</strong>
+            <span id="action-location"></span>
+          </div>
+          <div id="action-dates-container">
+            <strong>Dates:</strong>
+            <span id="action-dates"></span>
+          </div>
+        </div>
+      </div>
+
       <div id="blocked-url" class="blocked-url"></div>
     </div>
 
@@ -134,7 +153,8 @@
     </div>
 
     <div class="footer">
-      <p>This block can be disabled in the extension settings.</p>
+      <p>This block can be disabled in OPL extension settings.</p>
+      <p style="margin-top: 0.5rem;">Powered by <a href="https://onlinepicketline.com" target="_blank" style="color: inherit; text-decoration: underline;">Online Picket Line - OPL</a></p>
     </div>
   </div>
 

@@ -8,14 +8,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const proceedBtn = document.getElementById('proceed-btn');
   const goBackBtn = document.getElementById('go-back-btn');
 
-  // Load blocked action data
-  const actionData = sessionStorage.getItem('opl_blocked_action');
-  const originalUrl = sessionStorage.getItem('opl_blocked_url');
-
-  if (actionData) {
-    try {
-      const action = JSON.parse(actionData);
+  // Load blocked action data from background script
+  chrome.runtime.sendMessage({ action: 'getBlockedState' }, (response) => {
+    if (response) {
+      updateUI(response.action, response.url);
       
+      // Store original URL for proceed button
+      window.originalUrl = response.url;
+    } else {
+      // Fallback or error state
+      document.getElementById('action-title').textContent = 'Error Loading Data';
+      document.getElementById('action-description').textContent = 'Could not retrieve labor action details. Please try refreshing.';
+    }
+  });
+
+  function updateUI(action, originalUrl) {
+    if (action) {
       // Update UI with action data
       actionTitle.textContent = action.title || 'Labor Action in Progress';
       actionDescription.textContent = action.description || 
@@ -29,40 +37,69 @@ document.addEventListener('DOMContentLoaded', () => {
         learnMoreBtn.href = action.url || action.more_info;
         learnMoreBtn.style.display = 'inline-block';
       }
-    } catch (e) {
-      console.error('Failed to parse action data:', e);
-    }
-  }
 
-  if (originalUrl) {
-    try {
-      const url = new URL(originalUrl);
-      blockedUrl.textContent = url.hostname;
-    } catch (e) {
-      blockedUrl.textContent = originalUrl;
+      // Show additional details if available
+      const detailsContainer = document.getElementById('action-details');
+      let hasDetails = false;
+
+      if (action.demands) {
+        document.getElementById('action-demands').textContent = action.demands;
+        document.getElementById('action-demands-container').style.display = 'block';
+        hasDetails = true;
+      } else {
+        document.getElementById('action-demands-container').style.display = 'none';
+      }
+
+      if (action.locations && action.locations.length > 0) {
+        document.getElementById('action-location').textContent = action.locations.join(', ');
+        document.getElementById('action-location-container').style.display = 'block';
+        hasDetails = true;
+      } else {
+        document.getElementById('action-location-container').style.display = 'none';
+      }
+
+      if (action.startDate) {
+        let dateText = new Date(action.startDate).toLocaleDateString();
+        if (action.endDate) {
+          dateText += ' - ' + new Date(action.endDate).toLocaleDateString();
+        } else {
+          dateText += ' - Present';
+        }
+        document.getElementById('action-dates').textContent = dateText;
+        document.getElementById('action-dates-container').style.display = 'block';
+        hasDetails = true;
+      } else {
+        document.getElementById('action-dates-container').style.display = 'none';
+      }
+
+      if (hasDetails) {
+        detailsContainer.style.display = 'block';
+      }
+    }
+
+    if (originalUrl) {
+      try {
+        const url = new URL(originalUrl);
+        blockedUrl.textContent = url.hostname;
+      } catch (e) {
+        blockedUrl.textContent = originalUrl;
+      }
     }
   }
 
   // Handle proceed button
   proceedBtn.addEventListener('click', () => {
-    if (originalUrl) {
-      // Clear session storage and navigate to original URL
-      sessionStorage.removeItem('opl_blocked_action');
-      sessionStorage.removeItem('opl_blocked_url');
-      
-      // Add a flag to prevent re-blocking
-      sessionStorage.setItem('opl_bypass', 'true');
-      
-      window.location.href = originalUrl;
+    const urlToProceed = window.originalUrl;
+    if (urlToProceed) {
+      // Notify background script to allow bypass
+      chrome.runtime.sendMessage({ action: 'allowBypass', url: urlToProceed }, () => {
+        window.location.href = urlToProceed;
+      });
     }
   });
 
   // Handle go back button
   goBackBtn.addEventListener('click', () => {
-    // Clear session storage
-    sessionStorage.removeItem('opl_blocked_action');
-    sessionStorage.removeItem('opl_blocked_url');
-    
     // Go back or close
     if (window.history.length > 1) {
       window.history.back();

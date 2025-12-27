@@ -3,6 +3,9 @@ importScripts('browser-polyfill.js');
 importScripts('api-service.js');
 
 const apiService = new ApiService();
+const allowedBypasses = new Map(); // tabId -> url
+// We use chrome.storage.local for blocked states to persist across service worker restarts
+// Key format: blocked_tab_${tabId}
 
 // Refresh labor actions on installation and periodically
 chrome.runtime.onInstalled.addListener(async () => {
@@ -119,6 +122,16 @@ function matchUrlToAction(url, actions) {
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'checkUrl') {
+    // Check for bypass
+    if (sender.tab && allowedBypasses.has(sender.tab.id)) {
+      const bypassedUrl = allowedBypasses.get(sender.tab.id);
+      if (request.url === bypassedUrl || request.url.startsWith(bypassedUrl)) {
+        allowedBypasses.delete(sender.tab.id);
+        sendResponse({ bypass: true });
+        return true;
+      }
+    }
+
     chrome.storage.local.get(['labor_actions'], (result) => {
       const actions = result.labor_actions || [];
       const match = matchUrlToAction(request.url, actions);
@@ -132,6 +145,34 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     
     // Return true to indicate async response
+    return true;
+  } else if (request.action === 'allowBypass') {
+    if (sender.tab) {
+      allowedBypasses.set(sender.tab.id, request.url);
+      // Clear after 1 minute to prevent memory leaks
+      setTimeout(() => allowedBypasses.delete(sender.tab.id), 60000);
+    }
+    sendResponse({ success: true });
+    return true;
+  } else if (request.action === 'setBlockedState') {
+    if (sender.tab) {
+      const key = `blocked_tab_${sender.tab.id}`;
+      chrome.storage.local.set({ [key]: {
+        action: request.data,
+        url: request.url,
+        timestamp: Date.now()
+      }}).then(() => {
+        sendResponse({ success: true });
+      });
+    }
+    return true;
+  } else if (request.action === 'getBlockedState') {
+    if (sender.tab) {
+      const key = `blocked_tab_${sender.tab.id}`;
+      chrome.storage.local.get([key], (result) => {
+        sendResponse(result[key] || null);
+      });
+    }
     return true;
   } else if (request.action === 'refreshActions') {
     refreshLaborActions().then((success) => {
