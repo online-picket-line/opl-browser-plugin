@@ -6,10 +6,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   const modeBannerRadio = document.getElementById('mode-banner');
   const modeBlockRadio = document.getElementById('mode-block');
-  const refreshBtn = document.getElementById('refresh-btn');
-  const testConfigBtn = document.getElementById('test-config-btn');
   const statusDiv = document.getElementById('status');
   const statsContent = document.getElementById('stats-content');
+  const connectionIndicator = document.getElementById('connection-indicator');
+  const connectionText = document.getElementById('connection-text');
 
   // Load current settings
   chrome.storage.sync.get(['blockMode'], (result) => {
@@ -39,69 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Test API connection
-  testConfigBtn.addEventListener('click', () => {
-    const apiUrl = 'https://onlinepicketline.com';
-    const apiKey = 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c';
-    
-    testConfigBtn.disabled = true;
-    testConfigBtn.textContent = 'Testing...';
-    statusDiv.className = 'status';
-    
-    // Test the API connection with required authentication
-    fetch(`${apiUrl}/api/blocklist.json?format=extension`, {
-      headers: {
-        'Accept': 'application/json',
-        'X-API-Key': apiKey
-      }
-    })
-      .then(response => {
-        if (response.status === 401) {
-          throw new Error('Invalid API key');
-        }
-        if (response.status === 403) {
-          throw new Error('API key lacks required permissions');
-        }
-        if (response.status === 429) {
-          const retryAfter = response.headers.get('Retry-After') || '120';
-          throw new Error(`Rate limited. Retry after ${retryAfter} seconds`);
-        }
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status} ${response.statusText}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        const orgCount = Object.keys(data).filter(key => key !== '_optimizedPatterns').length;
-        showStatus(`✓ Connected! Found ${orgCount} organizations in Extension format`, 'success');
-      })
-      .catch(error => {
-        showStatus(`✗ Connection failed: ${error.message}`, 'error');
-      })
-      .finally(() => {
-        testConfigBtn.disabled = false;
-        testConfigBtn.textContent = 'Test API Connection';
-      });
-  });
-
-  // Refresh labor actions
-  refreshBtn.addEventListener('click', () => {
-    refreshBtn.disabled = true;
-    refreshBtn.textContent = 'Refreshing...';
-    
-    chrome.runtime.sendMessage({ action: 'refreshActions' }, (response) => {
-      if (response && response.success) {
-        showStatus('Labor actions refreshed successfully', 'success');
-        loadStats();
-      } else {
-        showStatus(response?.error || 'Failed to refresh labor actions', 'error');
-      }
-      
-      refreshBtn.disabled = false;
-      refreshBtn.textContent = 'Refresh Labor Actions';
-    });
-  });
-
   /**
    * Show status message
    * @param {string} message - Status message
@@ -122,9 +59,18 @@ document.addEventListener('DOMContentLoaded', () => {
    * Load and display stats
    */
   function loadStats() {
-    chrome.storage.local.get(['labor_actions', 'cache_timestamp'], (result) => {
+    chrome.storage.local.get(['labor_actions', 'cache_timestamp', 'connection_status'], (result) => {
       const actions = result.labor_actions || [];
       const timestamp = result.cache_timestamp;
+      
+      // Update connection indicator
+      const status = result.connection_status || 'online';
+      if (connectionIndicator && connectionText) {
+        connectionIndicator.style.display = 'inline-flex';
+        connectionIndicator.className = `connection-status status-${status}`;
+        connectionText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+      }
+
       const activeActions = actions.filter(a => !a.status || a.status === 'active').length;
       const totalUrls = actions.reduce((sum, a) => sum + (a.target_urls?.length || 0), 0);
       let statsHtml = `<strong>${activeActions}</strong> active labor action${activeActions !== 1 ? 's' : ''}`;
@@ -147,6 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (activeActions === 0) {
         statsHtml = 'No data loaded yet<br>Configure API and refresh';
       }
+      
+      statsHtml += `<br><a href="https://onlinepicketline.com" target="_blank" style="color: inherit; text-decoration: underline; margin-top: 0.5rem; display: inline-block;">More Info at OnlinePicketLine.com</a>`;
+      
       statsContent.innerHTML = statsHtml;
     });
   }

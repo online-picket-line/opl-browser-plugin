@@ -15,10 +15,10 @@ const createMockDocument = () => {
   const elements = {
     'mode-banner': createMockElement('mode-banner'),
     'mode-block': createMockElement('mode-block'),
-    'refresh-btn': createMockElement('refresh-btn'),
-    'test-config-btn': createMockElement('test-config-btn'),
     'status': createMockElement('status'),
-    'stats-content': createMockElement('stats-content')
+    'stats-content': createMockElement('stats-content'),
+    'connection-indicator': createMockElement('connection-indicator'),
+    'connection-text': createMockElement('connection-text')
   };
 
   return {
@@ -50,86 +50,6 @@ describe('Popup Functionality', () => {
     global.fetch = jest.fn();
   });
 
-  describe('API Connection Testing', () => {
-    it('should test API connection successfully', async () => {
-      const testConnection = () => {
-        const apiUrl = 'https://onlinepicketline.com';
-        const apiKey = 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c';
-
-        return fetch(`${apiUrl}/api/blocklist.json?format=extension`, {
-          headers: {
-            'Accept': 'application/json',
-            'X-API-Key': apiKey
-          }
-        }).then(response => {
-          if (response.status === 401) {
-            throw new Error('Invalid API key');
-          }
-          if (response.status === 403) {
-            throw new Error('API key lacks required permissions');
-          }
-          if (!response.ok) {
-            throw new Error(`API error: ${response.status} ${response.statusText}`);
-          }
-          return response.json();
-        });
-      };
-
-      const mockResponse = {
-        status: 200,
-        ok: true,
-        json: () => Promise.resolve({
-          'Test Org': { matchingUrlRegexes: ['test.com'] },
-          '_optimizedPatterns': {}
-        })
-      };
-
-      global.fetch.mockResolvedValue(mockResponse);
-
-      const result = await testConnection();
-      expect(result).toBeDefined();
-      expect(fetch).toHaveBeenCalledWith(
-        'https://onlinepicketline.com/api/blocklist.json?format=extension',
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            'X-API-Key': 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c'
-          })
-        })
-      );
-    });
-
-    it('should handle authentication errors', async () => {
-      const testConnection = () => {
-        const apiUrl = 'https://onlinepicketline.com';
-        const apiKey = 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c';
-
-        return fetch(`${apiUrl}/api/blocklist.json?format=extension`, {
-          headers: {
-            'Accept': 'application/json',
-            'X-API-Key': apiKey
-          }
-        }).then(response => {
-          if (response.status === 401) {
-            throw new Error('Invalid API key');
-          }
-          if (response.status === 403) {
-            throw new Error('API key lacks required permissions');
-          }
-          return response.json();
-        });
-      };
-
-      global.fetch.mockResolvedValue({
-        status: 401,
-        ok: false,
-        statusText: 'Unauthorized'
-      });
-
-      await expect(testConnection())
-        .rejects.toThrow('Invalid API key');
-    });
-  });
-
   describe('Status Display', () => {
     it('should display success status', () => {
       const showStatus = (message, type) => {
@@ -151,6 +71,27 @@ describe('Popup Functionality', () => {
       expect(status.message).toBe('Invalid API key format');
       expect(status.type).toBe('error');
       expect(status.className).toBe('status error');
+    });
+
+    it('should update connection indicator', () => {
+      const updateIndicator = (status) => {
+        const indicator = { style: {}, className: '' };
+        const text = { textContent: '' };
+        
+        indicator.style.display = 'inline-flex';
+        indicator.className = `connection-status status-${status}`;
+        text.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        
+        return { indicator, text };
+      };
+
+      const online = updateIndicator('online');
+      expect(online.indicator.className).toBe('connection-status status-online');
+      expect(online.text.textContent).toBe('Online');
+
+      const offline = updateIndicator('offline');
+      expect(offline.indicator.className).toBe('connection-status status-offline');
+      expect(offline.text.textContent).toBe('Offline');
     });
   });
 
@@ -178,6 +119,8 @@ describe('Popup Functionality', () => {
           statsHtml += `<br>Last updated ${timeStr}`;
         }
         
+        statsHtml += `<br><a href="https://onlinepicketline.com" target="_blank" style="color: inherit; text-decoration: underline; margin-top: 0.5rem; display: inline-block;">More Info at OnlinePicketLine.com</a>`;
+        
         return statsHtml;
       };
 
@@ -188,6 +131,7 @@ describe('Popup Functionality', () => {
       expect(stats).toContain('<strong>2</strong> active labor actions');
       expect(stats).toContain('<strong>4</strong> URLs monitored');
       expect(stats).toContain('1 minute ago');
+      expect(stats).toContain('More Info at OnlinePicketLine.com');
     });
   });
 });

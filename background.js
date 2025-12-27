@@ -40,11 +40,30 @@ async function refreshLaborActions() {
     console.log(`Fetched ${actions.length} labor actions`);
     
     // Store in local storage for quick access
-    await chrome.storage.local.set({ labor_actions: actions });
+    await chrome.storage.local.set({ 
+      labor_actions: actions,
+      connection_status: 'online',
+      failure_count: 0
+    });
     
     return actions.length > 0 || true; // Return true even if empty (successful fetch)
   } catch (error) {
     console.error('Failed to refresh labor actions:', error);
+    
+    // Get current failure count
+    const result = await chrome.storage.local.get(['failure_count']);
+    const currentFailures = (result.failure_count || 0) + 1;
+    
+    const updates = {
+      failure_count: currentFailures
+    };
+    
+    if (currentFailures >= 3) {
+      updates.connection_status = 'offline';
+    }
+    
+    await chrome.storage.local.set(updates);
+    
     return false;
   }
 }

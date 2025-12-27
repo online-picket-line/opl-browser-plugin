@@ -102,12 +102,37 @@
       width: 100%;
       margin-bottom: 0.5rem;
     }
+    .connection-status {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 999px;
+      background-color: var(--muted);
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 0.5rem;
+    }
+    .status-online .status-dot {
+      background-color: #22c55e;
+    }
+    .status-offline .status-dot {
+      background-color: #ef4444;
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <h1>Online Picket Line - OPL</h1>
     <p>Support labor actions</p>
+    <div id="connection-indicator" class="connection-status" style="display: none;">
+      <div class="status-dot"></div>
+      <span id="connection-text">Online</span>
+    </div>
   </div>
 
   <div class="card section">
@@ -127,15 +152,14 @@
       <div class="option-content">
         <label for="mode-block">Block Access</label>
         <div class="option-description">
-          Prevent access to pages with active labor actions
+          Prevent access to pages with active labor actions. <br>
+          <em>Note: If you choose to "Proceed Anyway" on a blocked page, the block will be disabled for that tab until you close it.</em>
         </div>
       </div>
     </div>
   </div>
 
   <div class="section">
-    <button id="refresh-btn" class="btn btn-secondary btn-full">Refresh Labor Actions</button>
-    <button id="test-config-btn" class="btn btn-outline btn-full">Test API Connection</button>
     <div id="status" class="status"></div>
   </div>
 
