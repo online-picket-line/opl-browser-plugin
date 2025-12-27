@@ -77,7 +77,10 @@ describe('Content Script Integration', () => {
             <div class="opl-banner-text">
               <strong class="opl-banner-title">${title}</strong>
               <p class="opl-banner-description">${description}</p>
-              ${moreInfoUrl ? `<a href="${moreInfoUrl}" target="_blank" class="opl-banner-link">Learn More</a>` : ''}
+              <div class="opl-banner-links" style="margin-top: 4px;">
+                ${moreInfoUrl ? `<a href="${moreInfoUrl}" target="_blank" class="opl-banner-link">Learn More</a><span style="margin: 0 5px; opacity: 0.5;">|</span>` : ''}
+                <a href="https://onlinepicketline.com" target="_blank" class="opl-banner-link" style="font-size: 0.8em; opacity: 0.8;">Online Picket Line - OPL</a>
+              </div>
             </div>
             <button class="opl-banner-close" aria-label="Close banner">×</button>
           </div>

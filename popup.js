@@ -6,88 +6,23 @@
 document.addEventListener('DOMContentLoaded', () => {
   const modeBannerRadio = document.getElementById('mode-banner');
   const modeBlockRadio = document.getElementById('mode-block');
-  const apiUrlInput = document.getElementById('api-url');
-  const apiKeyInput = document.getElementById('api-key');
-  const saveConfigBtn = document.getElementById('save-config-btn');
   const refreshBtn = document.getElementById('refresh-btn');
   const testConfigBtn = document.getElementById('test-config-btn');
   const statusDiv = document.getElementById('status');
   const statsContent = document.getElementById('stats-content');
-  const toggleConfig = document.getElementById('toggle-config');
-  const configHelp = document.getElementById('config-help');
 
   // Load current settings
-  chrome.storage.sync.get(['blockMode', 'apiUrl', 'apiKey'], (result) => {
+  chrome.storage.sync.get(['blockMode'], (result) => {
     const blockMode = result.blockMode || false;
     if (blockMode) {
       modeBlockRadio.checked = true;
     } else {
       modeBannerRadio.checked = true;
     }
-    apiUrlInput.value = result.apiUrl || '';
-    apiKeyInput.value = result.apiKey || '';
-    // Show warning if API not configured
-    if (!result.apiUrl || !result.apiKey) {
-      showStatus('Please configure your API URL and key', 'warning');
-    }
   });
 
   // Load stats
   loadStats();
-
-  // Toggle config help
-  toggleConfig.addEventListener('click', () => {
-    if (configHelp.classList.contains('expanded')) {
-      configHelp.classList.remove('expanded');
-      toggleConfig.textContent = 'Show API setup guide';
-    } else {
-      configHelp.classList.add('expanded');
-      toggleConfig.textContent = 'Hide API setup guide';
-    }
-  });
-
-  // Save API configuration
-  saveConfigBtn.addEventListener('click', () => {
-    let apiUrl = apiUrlInput.value.trim();
-    let apiKey = apiKeyInput.value.trim();
-    
-    if (!apiUrl) {
-      showStatus('Please enter the API URL', 'error');
-      return;
-    }
-    
-    if (!apiKey) {
-      showStatus('Please enter your API key', 'error');
-      return;
-    }
-    
-    // Validate API key format
-    if (!apiKey.startsWith('opl_')) {
-      showStatus('API key should start with "opl_"', 'error');
-      return;
-    }
-    
-    // Remove trailing slash if present
-    if (apiUrl.endsWith('/')) {
-      apiUrl = apiUrl.slice(0, -1);
-    }
-    
-    // Validate URL format
-    try {
-      new URL(apiUrl);
-    } catch (e) {
-      showStatus('Invalid API URL format', 'error');
-      return;
-    }
-    
-    chrome.storage.sync.set({ apiUrl, apiKey }, () => {
-      showStatus('API configuration saved successfully', 'success');
-      // Clear cache to force refresh with new config
-      chrome.runtime.sendMessage({ action: 'clearCache' }, () => {
-        loadStats();
-      });
-    });
-  });
 
   // Save settings when radio buttons change
   modeBannerRadio.addEventListener('change', () => {
@@ -106,18 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Test API connection
   testConfigBtn.addEventListener('click', () => {
-    const apiUrl = apiUrlInput.value.trim();
-    const apiKey = apiKeyInput.value.trim();
-    
-    if (!apiUrl) {
-      showStatus('Please enter API URL first', 'error');
-      return;
-    }
-    
-    if (!apiKey) {
-      showStatus('Please enter API key first', 'error');
-      return;
-    }
+    const apiUrl = 'https://onlinepicketline.com';
+    const apiKey = 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c';
     
     testConfigBtn.disabled = true;
     testConfigBtn.textContent = 'Testing...';

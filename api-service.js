@@ -1,7 +1,8 @@
 
 // API service to fetch labor actions from Online Picketline External API (v3.0)
 // Requires API key authentication (public or private)
-const DEFAULT_API_BASE_URL = '';
+const DEFAULT_API_BASE_URL = 'https://onlinepicketline.com';
+const DEFAULT_API_KEY = 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c';
 const CACHE_KEY = 'labor_actions_cache';
 const CACHE_DURATION = 300000; // 5 minutes in milliseconds
 const CACHE_HASH_KEY = 'content_hash';
@@ -10,30 +11,26 @@ const CACHE_HASH_KEY = 'content_hash';
 class ApiService {
   constructor() {
     this.baseUrl = DEFAULT_API_BASE_URL;
+    this.apiKey = DEFAULT_API_KEY;
   }
 
   /**
    * Initialize the API service with settings
    */
   async init() {
-    const settings = await this.getSettings();
-    if (settings.apiUrl) {
-      this.baseUrl = settings.apiUrl.endsWith('/') ? settings.apiUrl.slice(0, -1) : settings.apiUrl;
-    }
+    // Settings are now hardcoded
+    this.baseUrl = DEFAULT_API_BASE_URL;
+    this.apiKey = DEFAULT_API_KEY;
   }
 
   /**
-   * Get API settings from storage
+   * Get API settings
    * @returns {Promise<Object>}
    */
   async getSettings() {
-    return new Promise((resolve) => {
-      chrome.storage.sync.get(['apiUrl', 'apiKey'], (result) => {
-        resolve({
-          apiUrl: result.apiUrl || DEFAULT_API_BASE_URL,
-          apiKey: result.apiKey || ''
-        });
-      });
+    return Promise.resolve({
+      apiUrl: DEFAULT_API_BASE_URL,
+      apiKey: DEFAULT_API_KEY
     });
   }
 
@@ -65,31 +62,6 @@ class ApiService {
       // Ensure we have the latest settings
       await this.init();
 
-      if (!this.baseUrl) {
-        console.warn('API Base URL is not configured. Please configure it in the extension settings.');
-        // Return cached data if available, even if expired
-        const cached = await this.getCachedData(true);
-        if (cached) {
-          console.log('Using stale cached data due to missing API configuration');
-          return cached;
-        }
-        return [];
-      }
-
-      // Get API settings including key
-      const settings = await this.getSettings();
-      
-      if (!settings.apiKey) {
-        console.warn('API key is required. Please configure it in the extension settings.');
-        // Return cached data if available, even if expired
-        const cached = await this.getCachedData(true);
-        if (cached) {
-          console.log('Using stale cached data due to missing API key');
-          return cached;
-        }
-        return [];
-      }
-
       // Get cached hash for efficient caching
       const cachedHash = await this.getCachedHash();
       
@@ -101,7 +73,7 @@ class ApiService {
       
       const headers = {
         'Accept': 'application/json',
-        'X-API-Key': settings.apiKey
+        'X-API-Key': this.apiKey
       };
       
       const response = await fetch(url, {

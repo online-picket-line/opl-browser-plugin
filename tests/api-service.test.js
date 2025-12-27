@@ -56,30 +56,12 @@ describe('ApiService', () => {
   });
 
   describe('getSettings', () => {
-    it('should return API settings from Chrome storage', async () => {
+    it('should return hardcoded API settings', async () => {
       const settings = await apiService.getSettings();
       
       expect(settings).toEqual({
-        apiUrl: 'https://test-instance.com',
-        apiKey: 'opl_test_key_12345'
-      });
-      
-      expect(mockChromeStorage.sync.get).toHaveBeenCalledWith(
-        ['apiUrl', 'apiKey'],
-        expect.any(Function)
-      );
-    });
-
-    it('should return defaults when no settings stored', async () => {
-      mockChromeStorage.sync.get.mockImplementation((keys, callback) => {
-        callback({});
-      });
-
-      const settings = await apiService.getSettings();
-      
-      expect(settings).toEqual({
-        apiUrl: '',
-        apiKey: ''
+        apiUrl: 'https://onlinepicketline.com',
+        apiKey: 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c'
       });
     });
   });
@@ -175,10 +157,10 @@ describe('ApiService', () => {
       const result = await apiService.getLaborActions();
       
       expect(fetch).toHaveBeenCalledWith(
-        'https://test-instance.com/api/blocklist.json?format=extension&includeInactive=false',
+        'https://onlinepicketline.com/api/blocklist.json?format=extension&includeInactive=false',
         expect.objectContaining({
           headers: expect.objectContaining({
-            'X-API-Key': 'opl_test_key_12345'
+            'X-API-Key': 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c'
           })
         })
       );
@@ -237,49 +219,6 @@ describe('ApiService', () => {
       const result = await apiService.getLaborActions();
       
       expect(result).toEqual([]);
-    });
-
-    it('should return empty array when no API key configured', async () => {
-      mockChromeStorage.sync.get.mockImplementation((keys, callback) => {
-        callback({
-          apiUrl: 'https://test-instance.com',
-          apiKey: ''  // No API key
-        });
-      });
-
-      // Setup no cached data
-      mockChromeStorage.local.get.mockImplementation((keys, callback) => {
-        callback({});
-      });
-
-      const result = await apiService.getLaborActions();
-      
-      expect(result).toEqual([]);
-      expect(fetch).not.toHaveBeenCalled();
-      expect(console.warn).toHaveBeenCalledWith(
-        'API key is required. Please configure it in the extension settings.'
-      );
-    });
-
-    it('should use stale cache when API key missing but cache exists', async () => {
-      mockChromeStorage.sync.get.mockImplementation((keys, callback) => {
-        callback({ apiUrl: 'https://test-instance.com', apiKey: '' });
-      });
-
-      mockChromeStorage.local.get.mockImplementation((keys, callback) => {
-        const result = {};
-        if (keys.includes('labor_actions_cache')) {
-          result.labor_actions_cache = mockTransformedActions;
-        }
-        if (keys.includes('cache_timestamp')) {
-          result.cache_timestamp = Date.now() - 300000; // 5 minutes old
-        }
-        callback(result);
-      });
-
-      const result = await apiService.getLaborActions();
-      
-      expect(result).toEqual(mockTransformedActions);
     });
   });
 
