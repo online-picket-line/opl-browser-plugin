@@ -6,12 +6,17 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -23,10 +28,13 @@ jobs:
         run: npm install
 
       - name: Run unit tests
-        run: npm test -- --ci --json --outputFile=jest-results.json
+        run: |
+          mkdir -p test-results
+          npm test -- --ci --json --outputFile=test-results/jest-results.json
 
       - name: Package browser extensions
-        if: ${{ always() }}
+        id: package
+        if: ${{ !cancelled() }}
         run: bash package.sh
 
       - name: Upload test results
@@ -34,13 +42,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jest-results
-          path: jest-results.json
+          path: test-results/jest-results.json
           if-no-files-found: warn
 
       - name: Upload packaged extensions
-        if: ${{ always() }}
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: extension-packages
-          path: dist/
-          if-no-files-found: error
+          path: dist/*.zip
+          if-no-files-found: warn

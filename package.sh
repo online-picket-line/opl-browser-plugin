@@ -5,13 +5,24 @@ set -e
 
 echo "Packaging Online Picket Line Browser Extension..."
 
+# Determine semantic version from git describe (expects tags like v1.2.3)
+RAW_VERSION=$(git describe --tags --match "v[0-9]*\.[0-9]*\.[0-9]*" --dirty --long 2>/dev/null || true)
+if [ -z "$RAW_VERSION" ]; then
+  HEAD_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+  RAW_VERSION="0.0.0-dev-${HEAD_SHA}"
+fi
+VERSION=${RAW_VERSION#v}
+
+echo "Using version: $VERSION"
+
 # Create dist directory
+rm -rf ./dist
 mkdir -p dist
 
 
 # Package for Chrome/Edge (Manifest V3)
 echo "Creating Chrome/Edge package..."
-zip -r dist/opl-chrome-edge.zip \
+zip -r "dist/opl-chrome-edge-${VERSION}.zip" \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
@@ -27,7 +38,7 @@ zip -r dist/opl-chrome-edge.zip \
 
 # Package for Opera (Manifest V3, same as Chrome)
 echo "Creating Opera package..."
-zip -r dist/opl-opera.zip \
+zip -r "dist/opl-opera-${VERSION}.zip" \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
@@ -47,7 +58,7 @@ echo "Creating Firefox package..."
 cp manifest.json manifest-v3-backup.json
 cp manifest-v2.json manifest.json
 
-zip -r dist/opl-firefox.zip \
+zip -r "dist/opl-firefox-${VERSION}.zip" \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
@@ -66,7 +77,7 @@ mv manifest-v3-backup.json manifest.json
 
 # Package for Safari (Manifest V3)
 echo "Creating Safari package..."
-zip -r dist/opl-safari.zip \
+zip -r "dist/opl-safari-${VERSION}.zip" \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
@@ -85,16 +96,15 @@ ls -lh dist/
 
 echo ""
 echo "Installation instructions:"
-echo "- Chrome/Edge/Brave: Use opl-chrome-edge.zip"
-echo "- Firefox: Use opl-firefox.zip"
-echo "- Safari: Use opl-safari.zip (requires Xcode conversion)"
+echo "- Chrome/Edge/Brave: Use opl-chrome-edge-${VERSION}.zip"
+echo "- Firefox: Use opl-firefox-${VERSION}.zip"
+echo "- Safari: Use opl-safari-${VERSION}.zip (requires Xcode conversion)"
 echo ""
-echo "For Safari development, first extract opl-safari.zip, then convert:"
-echo "  unzip dist/opl-safari.zip -d dist/opl-safari-unpacked"
+echo "For Safari development, first extract opl-safari-${VERSION}.zip, then convert:"
+echo "  unzip dist/opl-safari-${VERSION}.zip -d dist/opl-safari-unpacked"
 echo "  xcrun safari-web-extension-converter dist/opl-safari-unpacked --app-name \"Online Picket Line\""
 echo ""
 echo "Or convert directly from the source directory:"
 echo "  xcrun safari-web-extension-converter . --app-name \"Online Picket Line\""
 echo ""
 echo "For development, load the unpacked extension directory directly."
-
