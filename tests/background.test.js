@@ -90,6 +90,7 @@ describe('Background Script Logic', () => {
     mockApiServiceInstance.getLaborActions.mockResolvedValue([{ id: 1 }]);
     
     await refreshLaborActions();
+    jest.runAllTimers();
     
     expect(mockChrome.storage.local.set).toHaveBeenCalledWith(expect.objectContaining({
       connection_status: 'online',
@@ -105,6 +106,7 @@ describe('Background Script Logic', () => {
     mockChrome.storage.local.get.mockResolvedValue({ failure_count: 0 });
     
     await refreshLaborActions();
+    jest.runAllTimers();
     
     expect(mockChrome.storage.local.set).toHaveBeenCalledWith(expect.objectContaining({
       failure_count: 1
@@ -119,6 +121,7 @@ describe('Background Script Logic', () => {
     mockChrome.storage.local.get.mockResolvedValue({ failure_count: 2 });
     
     await refreshLaborActions();
+    jest.runAllTimers();
     
     expect(mockChrome.storage.local.set).toHaveBeenCalledWith(expect.objectContaining({
       failure_count: 3,
@@ -134,6 +137,7 @@ describe('Background Script Logic', () => {
     mockChrome.storage.local.get.mockResolvedValue({ failure_count: 1 });
     
     await refreshLaborActions();
+    jest.runAllTimers();
     
     expect(mockChrome.storage.local.set).toHaveBeenCalledWith(expect.objectContaining({
       failure_count: 2
