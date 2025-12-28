@@ -5,7 +5,6 @@ set -e
 
 echo "Packaging Online Picket Line Browser Extension..."
 
-# --- Versioning ---
 # Get version from git describe
 # Expected formats: v1.0.0, v1.0.0-5-g12345, v1.0, v1
 # If no tags exist, it returns the short hash (e.g. a1b2c3d)
@@ -44,11 +43,13 @@ else
   MAJOR="0"
   MINOR="0"
   PATCH="0"
-  # If we have a hash but no commits count (because it was just the hash), 
-  # we should probably treat it as a dev build.
-  if [ "$COMMITS" == "0" ]; then
-     COMMITS="1"
-  fi
+  COMMITS=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+  HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+fi
+
+# Ensure hash when commits exist
+if [ "$COMMITS" != "0" ] && [ -z "$HASH" ]; then
+  HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 fi
 
 # Construct versions
@@ -59,38 +60,45 @@ MANIFEST_VERSION="${MAJOR}.${MINOR}.${PATCH}.${COMMITS}"
 if [ "$COMMITS" == "0" ]; then
   PACKAGE_VERSION="${MAJOR}.${MINOR}.${PATCH}"
 else
-  # User request: short sha + offset
   PACKAGE_VERSION="${MAJOR}.${MINOR}.${PATCH}-${COMMITS}-g${HASH}"
 fi
 
 echo "Setting version to: Manifest=$MANIFEST_VERSION, Package=$PACKAGE_VERSION"
 
+# Temp files cleanup
+tmp_pkg=$(mktemp -t oplpkg.XXXXXX)
+tmp_manifest=$(mktemp -t oplpkg.XXXXXX)
+tmp_manifest_v2=$(mktemp -t oplpkg.XXXXXX)
+cleanup() {
+  rm -f "$tmp_pkg" "$tmp_manifest" "$tmp_manifest_v2"
+}
+trap cleanup EXIT
+
 # Update package.json
 if [ -f package.json ]; then
-  tmp=$(mktemp)
-  jq --arg v "$PACKAGE_VERSION" '.version = $v' package.json > "$tmp" && mv "$tmp" package.json
+  jq --arg v "$PACKAGE_VERSION" '.version = $v' package.json > "$tmp_pkg" && mv "$tmp_pkg" package.json
 fi
 
 # Update manifest.json
 if [ -f manifest.json ]; then
-  tmp=$(mktemp)
-  jq --arg v "$MANIFEST_VERSION" '.version = $v' manifest.json > "$tmp" && mv "$tmp" manifest.json
+  jq --arg v "$MANIFEST_VERSION" '.version = $v' manifest.json > "$tmp_manifest" && mv "$tmp_manifest" manifest.json
 fi
 
 # Update manifest-v2.json
 if [ -f manifest-v2.json ]; then
-  tmp=$(mktemp)
-  jq --arg v "$MANIFEST_VERSION" '.version = $v' manifest-v2.json > "$tmp" && mv "$tmp" manifest-v2.json
+  jq --arg v "$MANIFEST_VERSION" '.version = $v' manifest-v2.json > "$tmp_manifest_v2" && mv "$tmp_manifest_v2" manifest-v2.json
 fi
 # ------------------
 
 # Create dist directory
+rm -rf ./dist
 mkdir -p dist
 
+ZIP_SUFFIX="${PACKAGE_VERSION}"
 
 # Package for Chrome/Edge (Manifest V3)
 echo "Creating Chrome/Edge package..."
-zip -r dist/opl-chrome-edge.zip \
+zip -r "dist/opl-chrome-edge-${ZIP_SUFFIX}.zip" \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
@@ -106,7 +114,7 @@ zip -r dist/opl-chrome-edge.zip \
 
 # Package for Opera (Manifest V3, same as Chrome)
 echo "Creating Opera package..."
-zip -r dist/opl-opera.zip \
+zip -r "dist/opl-opera-${ZIP_SUFFIX}.zip" \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
@@ -126,7 +134,7 @@ echo "Creating Firefox package..."
 cp manifest.json manifest-v3-backup.json
 cp manifest-v2.json manifest.json
 
-zip -r dist/opl-firefox.zip \
+zip -r "dist/opl-firefox-${ZIP_SUFFIX}.zip" \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
@@ -145,7 +153,7 @@ mv manifest-v3-backup.json manifest.json
 
 # Package for Safari (Manifest V3)
 echo "Creating Safari package..."
-zip -r dist/opl-safari.zip \
+zip -r "dist/opl-safari-${ZIP_SUFFIX}.zip" \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
@@ -164,16 +172,15 @@ ls -lh dist/
 
 echo ""
 echo "Installation instructions:"
-echo "- Chrome/Edge/Brave: Use opl-chrome-edge.zip"
-echo "- Firefox: Use opl-firefox.zip"
-echo "- Safari: Use opl-safari.zip (requires Xcode conversion)"
+echo "- Chrome/Edge/Brave: Use opl-chrome-edge-${ZIP_SUFFIX}.zip"
+echo "- Firefox: Use opl-firefox-${ZIP_SUFFIX}.zip"
+echo "- Safari: Use opl-safari-${ZIP_SUFFIX}.zip (requires Xcode conversion)"
 echo ""
-echo "For Safari development, first extract opl-safari.zip, then convert:"
-echo "  unzip dist/opl-safari.zip -d dist/opl-safari-unpacked"
+echo "For Safari development, first extract opl-safari-${ZIP_SUFFIX}.zip, then convert:"
+echo "  unzip dist/opl-safari-${ZIP_SUFFIX}.zip -d dist/opl-safari-unpacked"
 echo "  xcrun safari-web-extension-converter dist/opl-safari-unpacked --app-name \"Online Picket Line\""
 echo ""
 echo "Or convert directly from the source directory:"
 echo "  xcrun safari-web-extension-converter . --app-name \"Online Picket Line\""
 echo ""
 echo "For development, load the unpacked extension directory directly."
-
