@@ -1,4 +1,4 @@
-  }
+
 
 const apiService = new ApiService();
 const allowedBypasses = new Map(); // tabId -> url
