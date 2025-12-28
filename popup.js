@@ -4,6 +4,12 @@
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Display extension version
+  const versionDiv = document.getElementById('version-info');
+  if (versionDiv && chrome.runtime && chrome.runtime.getManifest) {
+    const version = chrome.runtime.getManifest().version;
+    versionDiv.textContent = `Version: ${version}`;
+  }
   const modeBannerRadio = document.getElementById('mode-banner');
   const modeBlockRadio = document.getElementById('mode-block');
   const statusDiv = document.getElementById('status');

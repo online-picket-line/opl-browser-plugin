@@ -1,5 +1,11 @@
 // Block page script
 document.addEventListener('DOMContentLoaded', () => {
+  // Display extension version
+  const versionDiv = document.getElementById('block-version-info');
+  if (versionDiv && chrome.runtime && chrome.runtime.getManifest) {
+    const version = chrome.runtime.getManifest().version;
+    versionDiv.textContent = `Version: ${version}`;
+  }
   const actionTitle = document.getElementById('action-title');
   const actionDescription = document.getElementById('action-description');
   const actionType = document.getElementById('action-type');

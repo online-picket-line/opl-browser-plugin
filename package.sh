@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
+#!/usr/bin/env bash
+
 # Package script for browser extensions
+# NOTE: Do not re-zip artifacts in CI. The zip files created here are final and should be uploaded as-is.
 set -e
 
 echo "Packaging Online Picket Line Browser Extension..."

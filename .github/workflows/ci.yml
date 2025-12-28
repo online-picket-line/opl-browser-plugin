@@ -37,6 +37,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: bash package.sh
 
+      # The following upload steps use the zip files from dist/ as final artifacts. Do not re-zip in CI.
       - name: Upload Chrome/Edge Extension
         if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         uses: actions/upload-artifact@v4
