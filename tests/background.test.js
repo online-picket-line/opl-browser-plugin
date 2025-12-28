@@ -4,6 +4,10 @@ import fs from 'fs';
 import path from 'path';
 
 describe('Background Script Logic', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+    global.setTimeout = jest.fn((cb) => cb());
+  });
   let mockChrome;
   let mockApiServiceInstance;
   
