@@ -5,7 +5,6 @@ set -e
 
 echo "Packaging Online Picket Line Browser Extension..."
 
-# --- Versioning (aligned with main) ---
 # Get version from git describe
 # Expected formats: v1.0.0, v1.0.0-5-g12345, v1.0, v1
 # If no tags exist, it returns the short hash (e.g. a1b2c3d)

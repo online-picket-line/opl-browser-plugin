@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Online Picket Line - OPL",
-  "version": "1.0.0",
+  "version": "0.5.0.1",
   "description": "Browser extension to inform users about labor actions and boycotts. Compatible with Chrome, Edge, Opera, Brave, Firefox, and Safari.",
   "permissions": [
     "storage",
     "tabs",
     "webRequest",
-    "alarms"
+    "alarms",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -17,9 +18,16 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["browser-polyfill.js", "content.js"],
-      "css": ["content.css"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "browser-polyfill.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
       "run_at": "document_end"
     }
   ],
@@ -38,8 +46,12 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["block.html"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "block.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ]
 }
