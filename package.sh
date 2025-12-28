@@ -5,6 +5,85 @@ set -e
 
 echo "Packaging Online Picket Line Browser Extension..."
 
+# --- Versioning ---
+# Get version from git describe
+# Expected formats: v1.0.0, v1.0.0-5-g12345, v1.0, v1
+# If no tags exist, it returns the short hash (e.g. a1b2c3d)
+GIT_VERSION=$(git describe --tags --always 2>/dev/null || echo "0.0.0")
+echo "Git version: $GIT_VERSION"
+
+# Strip 'v' prefix
+CLEAN_VERSION=$(echo "$GIT_VERSION" | sed 's/^v//')
+
+# Parse: TAG-COMMITS-gHASH or just TAG/HASH
+if [[ "$CLEAN_VERSION" =~ ^(.*)-([0-9]+)-g([0-9a-f]+)$ ]]; then
+  TAG_PART="${BASH_REMATCH[1]}"
+  COMMITS="${BASH_REMATCH[2]}"
+  HASH="${BASH_REMATCH[3]}"
+else
+  TAG_PART="$CLEAN_VERSION"
+  COMMITS="0"
+  HASH=""
+fi
+
+# Parse TAG_PART into Major.Minor.Patch
+if [[ "$TAG_PART" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+  MAJOR="${BASH_REMATCH[1]}"
+  MINOR="${BASH_REMATCH[2]}"
+  PATCH="${BASH_REMATCH[3]}"
+elif [[ "$TAG_PART" =~ ^([0-9]+)\.([0-9]+)$ ]]; then
+  MAJOR="${BASH_REMATCH[1]}"
+  MINOR="${BASH_REMATCH[2]}"
+  PATCH="0"
+elif [[ "$TAG_PART" =~ ^([0-9]+)$ ]]; then
+  MAJOR="${BASH_REMATCH[1]}"
+  MINOR="0"
+  PATCH="0"
+else
+  echo "WARNING: Could not parse semantic version from '$TAG_PART'. Defaulting to 0.0.0."
+  MAJOR="0"
+  MINOR="0"
+  PATCH="0"
+  # If we have a hash but no commits count (because it was just the hash), 
+  # we should probably treat it as a dev build.
+  if [ "$COMMITS" == "0" ]; then
+     COMMITS="1"
+  fi
+fi
+
+# Construct versions
+# Manifest version must be 1-4 integers: X.Y.Z.Build
+MANIFEST_VERSION="${MAJOR}.${MINOR}.${PATCH}.${COMMITS}"
+
+# Package version (SemVer): X.Y.Z-Build
+if [ "$COMMITS" == "0" ]; then
+  PACKAGE_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+else
+  # User request: short sha + offset
+  PACKAGE_VERSION="${MAJOR}.${MINOR}.${PATCH}-${COMMITS}-g${HASH}"
+fi
+
+echo "Setting version to: Manifest=$MANIFEST_VERSION, Package=$PACKAGE_VERSION"
+
+# Update package.json
+if [ -f package.json ]; then
+  tmp=$(mktemp)
+  jq --arg v "$PACKAGE_VERSION" '.version = $v' package.json > "$tmp" && mv "$tmp" package.json
+fi
+
+# Update manifest.json
+if [ -f manifest.json ]; then
+  tmp=$(mktemp)
+  jq --arg v "$MANIFEST_VERSION" '.version = $v' manifest.json > "$tmp" && mv "$tmp" manifest.json
+fi
+
+# Update manifest-v2.json
+if [ -f manifest-v2.json ]; then
+  tmp=$(mktemp)
+  jq --arg v "$MANIFEST_VERSION" '.version = $v' manifest-v2.json > "$tmp" && mv "$tmp" manifest-v2.json
+fi
+# ------------------
+
 # Create dist directory
 mkdir -p dist
 

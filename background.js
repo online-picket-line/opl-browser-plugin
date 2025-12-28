@@ -1,15 +1,22 @@
 // Background service worker
 importScripts('browser-polyfill.js');
 importScripts('api-service.js');
+importScripts('upgrade.js');
 
 const apiService = new ApiService();
 const allowedBypasses = new Map(); // tabId -> url
 // We use chrome.storage.local for blocked states to persist across service worker restarts
 // Key format: blocked_tab_${tabId}
 
+// Check for updates on startup
+chrome.runtime.onStartup.addListener(() => {
+  checkForUpdates();
+});
+
 // Refresh labor actions on installation and periodically
 chrome.runtime.onInstalled.addListener(async () => {
   console.log('Extension installed, fetching labor actions...');
+  checkForUpdates(); // Also check on install/update
   await refreshLaborActions();
   
   // Set default settings
