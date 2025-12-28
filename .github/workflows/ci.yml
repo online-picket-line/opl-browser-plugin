@@ -37,14 +37,6 @@ jobs:
         if: ${{ !cancelled() }}
         run: bash package.sh
 
-      - name: Upload test results
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: jest-results
-          path: test-results/jest-results.json
-          if-no-files-found: warn
-
       - name: Upload Chrome/Edge Extension
         if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         uses: actions/upload-artifact@v4
