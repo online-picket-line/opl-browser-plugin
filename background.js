@@ -28,10 +28,10 @@ const allowedBypasses = new Map(); // tabId -> url
 // We use chrome.storage.local for blocked states to persist across service worker restarts
 // Key format: blocked_tab_${tabId}
 
-// Only register event listeners if not running in Jest
+// Only register event listeners if not running in Jest and chrome APIs are available
 const isJest = (typeof process !== 'undefined' && process.env && process.env.JEST_WORKER_ID !== undefined) ||
                 (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test');
-if (!isJest) {
+if (!isJest && typeof chrome !== 'undefined' && chrome.runtime) {
   // Check for updates on startup
   chrome.runtime.onStartup.addListener(() => {
     checkForUpdates();
@@ -170,78 +170,81 @@ function matchUrlToAction(url, actions) {
 }
 
 // Listen for messages from content scripts
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'checkUrl') {
-    // Check for bypass
-    if (sender.tab && allowedBypasses.has(sender.tab.id)) {
-      const bypassedUrl = allowedBypasses.get(sender.tab.id);
-      if (request.url === bypassedUrl || request.url.startsWith(bypassedUrl)) {
-        allowedBypasses.delete(sender.tab.id);
-        sendResponse({ bypass: true });
-        return true;
+// Only register if chrome APIs are available
+if (typeof chrome !== 'undefined' && chrome.runtime) {
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'checkUrl') {
+      // Check for bypass
+      if (sender.tab && allowedBypasses.has(sender.tab.id)) {
+        const bypassedUrl = allowedBypasses.get(sender.tab.id);
+        if (request.url === bypassedUrl || request.url.startsWith(bypassedUrl)) {
+          allowedBypasses.delete(sender.tab.id);
+          sendResponse({ bypass: true });
+          return true;
+        }
       }
-    }
 
-    chrome.storage.local.get(['labor_actions'], (result) => {
-      const actions = result.labor_actions || [];
-      const match = matchUrlToAction(request.url, actions);
-      
-      chrome.storage.sync.get(['blockMode'], (settings) => {
-        sendResponse({
-          match: match,
-          blockMode: settings.blockMode || false
+      chrome.storage.local.get(['labor_actions'], (result) => {
+        const actions = result.labor_actions || [];
+        const match = matchUrlToAction(request.url, actions);
+        
+        chrome.storage.sync.get(['blockMode'], (settings) => {
+          sendResponse({
+            match: match,
+            blockMode: settings.blockMode || false
+          });
         });
       });
-    });
-    
-    // Return true to indicate async response
-    return true;
-  } else if (request.action === 'allowBypass') {
-    if (sender.tab) {
-      allowedBypasses.set(sender.tab.id, request.url);
-      // Clear after 1 minute to prevent memory leaks
-      setTimeout(() => allowedBypasses.delete(sender.tab.id), 60000);
-    }
-    sendResponse({ success: true });
-    return true;
-  } else if (request.action === 'setBlockedState') {
-    if (sender.tab) {
-      const key = `blocked_tab_${sender.tab.id}`;
-      chrome.storage.local.set({ [key]: {
-        action: request.data,
-        url: request.url,
-        timestamp: Date.now()
-      }}).then(() => {
-        sendResponse({ success: true });
-      });
-    }
-    return true;
-  } else if (request.action === 'getBlockedState') {
-    if (sender.tab) {
-      const key = `blocked_tab_${sender.tab.id}`;
-      chrome.storage.local.get([key], (result) => {
-        sendResponse(result[key] || null);
-      });
-    }
-    return true;
-  } else if (request.action === 'refreshActions') {
-    refreshLaborActions().then((success) => {
-      if (success) {
-        sendResponse({ success: true });
-      } else {
-        sendResponse({ success: false, error: 'Failed to fetch labor actions. Check API configuration.' });
+      
+      // Return true to indicate async response
+      return true;
+    } else if (request.action === 'allowBypass') {
+      if (sender.tab) {
+        allowedBypasses.set(sender.tab.id, request.url);
+        // Clear after 1 minute to prevent memory leaks
+        setTimeout(() => allowedBypasses.delete(sender.tab.id), 60000);
       }
-    });
-    return true;
-  } else if (request.action === 'clearCache') {
-    getApiService().clearCache().then(() => {
       sendResponse({ success: true });
-    });
-    return true;
-  }
-});
+      return true;
+    } else if (request.action === 'setBlockedState') {
+      if (sender.tab) {
+        const key = `blocked_tab_${sender.tab.id}`;
+        chrome.storage.local.set({ [key]: {
+          action: request.data,
+          url: request.url,
+          timestamp: Date.now()
+        }}).then(() => {
+          sendResponse({ success: true });
+        });
+      }
+      return true;
+    } else if (request.action === 'getBlockedState') {
+      if (sender.tab) {
+        const key = `blocked_tab_${sender.tab.id}`;
+        chrome.storage.local.get([key], (result) => {
+          sendResponse(result[key] || null);
+        });
+      }
+      return true;
+    } else if (request.action === 'refreshActions') {
+      refreshLaborActions().then((success) => {
+        if (success) {
+          sendResponse({ success: true });
+        } else {
+          sendResponse({ success: false, error: 'Failed to fetch labor actions. Check API configuration.' });
+        }
+      });
+      return true;
+    } else if (request.action === 'clearCache') {
+      getApiService().clearCache().then(() => {
+        sendResponse({ success: true });
+      });
+      return true;
+    }
+  });
 
-// Initial fetch on startup (skip during Jest tests)
-if (typeof process === 'undefined' || !process.env || process.env.JEST_WORKER_ID === undefined) {
-  refreshLaborActions();
+  // Initial fetch on startup (skip during Jest tests)
+  if (typeof process === 'undefined' || !process.env || process.env.JEST_WORKER_ID === undefined) {
+    refreshLaborActions();
+  }
 }

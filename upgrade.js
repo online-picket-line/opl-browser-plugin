@@ -72,16 +72,19 @@ function notifyUpdateAvailable(url, version) {
 }
 
 // Handle notification clicks globally
-chrome.notifications.onClicked.addListener((notificationId) => {
-  if (notificationId === 'update-available') {
-    // We need to get the URL. Since we can't pass it easily in the ID, 
-    // we might need to fetch it again or store it.
-    // Or we can just open the releases page.
-    const releasesUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/latest`;
-    chrome.tabs.create({ url: releasesUrl });
-    chrome.notifications.clear(notificationId);
-  }
-});
+// Only register listener if chrome APIs are available (not in Node.js tests)
+if (typeof chrome !== 'undefined' && chrome.notifications) {
+  chrome.notifications.onClicked.addListener((notificationId) => {
+    if (notificationId === 'update-available') {
+      // We need to get the URL. Since we can't pass it easily in the ID, 
+      // we might need to fetch it again or store it.
+      // Or we can just open the releases page.
+      const releasesUrl = `https://github.com/${REPO_OWNER}/${REPO_NAME}/releases/latest`;
+      chrome.tabs.create({ url: releasesUrl });
+      chrome.notifications.clear(notificationId);
+    }
+  });
+}
 
 // Export to satisfy ES module requirements
 export {};
