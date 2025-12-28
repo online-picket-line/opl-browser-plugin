@@ -14,10 +14,19 @@ import ApiService from './api-service.js';
 // Lazy initialization for testability
 let apiService;
 function getApiService() {
-  if (!apiService) {
-    // Use global ApiService if available (for testing), otherwise use imported one
+  // In tests, always create a fresh instance to pick up mock changes
+  const isJest = (typeof process !== 'undefined' && process.env && process.env.JEST_WORKER_ID !== undefined) ||
+                  (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test');
+  
+  if (isJest) {
+    // Always use the latest global.ApiService mock in tests
     const ApiServiceClass = global.ApiService || ApiService;
-    apiService = new ApiServiceClass();
+    return new ApiServiceClass();
+  }
+  
+  // In production, cache the instance
+  if (!apiService) {
+    apiService = new ApiService();
   }
   return apiService;
 }
