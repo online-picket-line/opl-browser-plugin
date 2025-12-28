@@ -1,7 +1,8 @@
-// Background service worker
-importScripts('browser-polyfill.js');
-importScripts('api-service.js');
-importScripts('upgrade.js');
+
+// Background service worker (MV3 module)
+import './browser-polyfill.js';
+import { ApiService } from './api-service.js';
+import './upgrade.js';
 
 const apiService = new ApiService();
 const allowedBypasses = new Map(); // tabId -> url
