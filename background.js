@@ -9,34 +9,37 @@ const allowedBypasses = new Map(); // tabId -> url
 // We use chrome.storage.local for blocked states to persist across service worker restarts
 // Key format: blocked_tab_${tabId}
 
-// Check for updates on startup
-chrome.runtime.onStartup.addListener(() => {
-  checkForUpdates();
-});
+// Only register event listeners if not running in Jest
+const isJest = typeof process !== 'undefined' && process.env && process.env.JEST_WORKER_ID !== undefined;
+if (!isJest) {
+  // Check for updates on startup
+  chrome.runtime.onStartup.addListener(() => {
+    checkForUpdates();
+  });
 
-// Refresh labor actions on installation and periodically
-chrome.runtime.onInstalled.addListener(async () => {
-  console.log('Extension installed, fetching labor actions...');
-  checkForUpdates(); // Also check on install/update
-  await refreshLaborActions();
-  
-  // Set default settings
-  chrome.storage.sync.get(['blockMode'], (result) => {
-    if (result.blockMode === undefined) {
-      chrome.storage.sync.set({ blockMode: false }); // Default to banner mode
+  // Refresh labor actions on installation and periodically
+  chrome.runtime.onInstalled.addListener(async () => {
+    console.log('Extension installed, fetching labor actions...');
+    checkForUpdates(); // Also check on install/update
+    await refreshLaborActions();
+    // Set default settings
+    chrome.storage.sync.get(['blockMode'], (result) => {
+      if (result.blockMode === undefined) {
+        chrome.storage.sync.set({ blockMode: false }); // Default to banner mode
+      }
+    });
+  });
+
+  // Refresh labor actions periodically (every 15 minutes as recommended by API)
+  chrome.alarms.create('refreshLaborActions', { periodInMinutes: 15 });
+
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'refreshLaborActions') {
+      console.log('Periodic refresh of labor actions');
+      refreshLaborActions();
     }
   });
-});
-
-// Refresh labor actions periodically (every 15 minutes as recommended by API)
-chrome.alarms.create('refreshLaborActions', { periodInMinutes: 15 });
-
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'refreshLaborActions') {
-    console.log('Periodic refresh of labor actions');
-    refreshLaborActions();
-  }
-});
+}
 
 /**
  * Fetch and cache labor actions
@@ -218,5 +221,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Initial fetch on startup
-refreshLaborActions();
+// Initial fetch on startup (skip during Jest tests)
+if (typeof process === 'undefined' || !process.env || process.env.JEST_WORKER_ID === undefined) {
+  refreshLaborActions();
+}
