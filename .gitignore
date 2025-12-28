@@ -2,8 +2,8 @@
 node_modules/
 
 # Package locks
-package-lock.json
-yarn.lock
+# package-lock.json
+# yarn.lock
 
 # Build artifacts
 dist/
