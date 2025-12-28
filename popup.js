@@ -30,6 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load stats
   loadStats();
 
+  // Test block button
+  const testBlockBtn = document.getElementById('test-block-btn');
+  testBlockBtn.addEventListener('click', () => {
+    chrome.storage.local.set({force_block_example: true}, () => {
+      chrome.tabs.create({url: 'https://example.com'});
+    });
+  });
+
   // Save settings when radio buttons change
   modeBannerRadio.addEventListener('change', () => {
     if (modeBannerRadio.checked) {

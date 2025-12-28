@@ -33,6 +33,30 @@
         }
       }
     );
+
+    // Check for forced block on example.com
+    if (window.location.hostname === 'example.com') {
+      chrome.storage.local.get(['force_block_example'], (result) => {
+        if (result.force_block_example) {
+          // Clear the flag
+          chrome.storage.local.remove(['force_block_example']);
+          // Simulate action
+          const simulatedAction = {
+            title: 'Simulated Labor Action',
+            description: 'This is a test block for example.com to demonstrate the blocking functionality.',
+            type: 'test',
+            url: 'https://onlinepicketline.com'
+          };
+          chrome.storage.sync.get(['blockMode'], (settings) => {
+            if (settings.blockMode) {
+              blockPage(simulatedAction);
+            } else {
+              showBanner(simulatedAction);
+            }
+          });
+        }
+      });
+    }
   }
 
   /**

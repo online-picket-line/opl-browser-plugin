@@ -18,7 +18,8 @@ const createMockDocument = () => {
     'status': createMockElement('status'),
     'stats-content': createMockElement('stats-content'),
     'connection-indicator': createMockElement('connection-indicator'),
-    'connection-text': createMockElement('connection-text')
+    'connection-text': createMockElement('connection-text'),
+    'test-block-btn': createMockElement('test-block-btn')
   };
 
   return {
