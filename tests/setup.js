@@ -1,4 +1,5 @@
-// Test setup for browser extension environment
+import { jest } from '@jest/globals';
+
 global.chrome = {
   storage: {
     sync: {

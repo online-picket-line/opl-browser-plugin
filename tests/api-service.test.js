@@ -1,14 +1,15 @@
-const { 
-  mockExtensionData, 
-  mockTransformedActions, 
+
+import { jest } from '@jest/globals';
+import {
+  mockExtensionData,
+  mockTransformedActions,
   mockApiResponse200,
   mockApiResponse304,
   mockApiResponse401,
-  mockApiResponse429 
-} = require('./fixtures.js');
+  mockApiResponse429
+} from './fixtures.js';
 
-// Import the module under test
-const ApiService = require('../api-service.js');
+import ApiService from '../api-service.js';
 
 describe('ApiService', () => {
   let apiService;

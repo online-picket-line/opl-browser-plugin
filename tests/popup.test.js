@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 // Mock DOM elements for popup testing
 const createMockElement = (id, value = '') => ({
   id,

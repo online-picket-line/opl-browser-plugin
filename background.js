@@ -1,7 +1,7 @@
 
 // Background service worker (MV3 module)
 import './browser-polyfill.js';
-import { ApiService } from './api-service.js';
+import ApiService from './api-service.js';
 import './upgrade.js';
 
 const apiService = new ApiService();
@@ -42,7 +42,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
  * Fetch and cache labor actions
  * @returns {Promise<boolean>} Success status
  */
-async function refreshLaborActions() {
+export async function refreshLaborActions() {
   try {
     const actions = await apiService.getLaborActions();
     console.log(`Fetched ${actions.length} labor actions`);

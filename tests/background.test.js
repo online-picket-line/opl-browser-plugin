@@ -1,5 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+
+import { jest } from '@jest/globals';
+import fs from 'fs';
+import path from 'path';
 
 describe('Background Script Logic', () => {
   let mockChrome;
@@ -41,14 +43,25 @@ describe('Background Script Logic', () => {
           get: jest.fn(),
           set: jest.fn()
         }
+      },
+      notifications: {
+        create: jest.fn(),
+        onClicked: { addListener: jest.fn() },
+        clear: jest.fn()
+      },
+      tabs: {
+        create: jest.fn()
       }
     };
     global.chrome = mockChrome;
   });
 
   async function loadBackgroundScript() {
+    // ESM-compatible __dirname
+    const __filename = new URL(import.meta.url).pathname;
+    const __dirname = path.dirname(__filename);
     // Dynamically import the background script as an ES module
-    const backgroundModule = await import(path.resolve(__dirname, '../background.js'));
+    const backgroundModule = await import(new URL('../background.js', import.meta.url));
     // Wait for any startup logic if needed (if background.js exports a promise or init function)
     // If refreshLaborActions is exported, return it
     if (backgroundModule.refreshLaborActions) {

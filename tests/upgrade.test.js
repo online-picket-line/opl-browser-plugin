@@ -1,5 +1,7 @@
-const fs = require('fs');
-const path = require('path');
+
+import { jest } from '@jest/globals';
+import fs from 'fs';
+import path from 'path';
 
 describe('Upgrade Logic', () => {
   let mockChrome;
@@ -28,9 +30,11 @@ describe('Upgrade Logic', () => {
   });
 
   function loadUpgradeScript() {
+    // ESM-compatible __dirname
+    const __filename = new URL(import.meta.url).pathname;
+    const __dirname = path.dirname(__filename);
     const upgradePath = path.join(__dirname, '../upgrade.js');
     let content = fs.readFileSync(upgradePath, 'utf8');
-    
     // Wrap in an IIFE to avoid global scope pollution and allow re-execution
     // We also need to expose the function we want to test
     content = `
@@ -39,7 +43,6 @@ describe('Upgrade Logic', () => {
         global.checkForUpdates = checkForUpdates;
       })();
     `;
-    
     // Execute in the current scope
     eval(content);
   }

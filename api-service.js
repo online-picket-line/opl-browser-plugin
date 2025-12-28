@@ -306,7 +306,5 @@ class ApiService {
   }
 }
 
-// Export for use in other scripts
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = ApiService;
-}
+
+export default ApiService;

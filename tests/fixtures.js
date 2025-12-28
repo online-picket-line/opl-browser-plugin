@@ -150,7 +150,7 @@ const mockApiResponse429 = {
   }
 };
 
-module.exports = {
+export {
   mockExtensionData,
   mockTransformedActions,
   mockApiResponse200,
