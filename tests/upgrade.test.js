@@ -4,11 +4,21 @@ import fs from 'fs';
 import path from 'path';
 
 describe('Upgrade Logic', () => {
+    afterEach(() => {
+      // Clean up global.chrome and global.fetch
+      delete global.chrome;
+      delete global.fetch;
+      // Remove checkForUpdates from global
+      delete global.checkForUpdates;
+      // Remove all listeners from chrome.notifications.onClicked if possible
+      if (mockChrome && mockChrome.notifications && mockChrome.notifications.onClicked && mockChrome.notifications.onClicked.addListener.mockClear) {
+        mockChrome.notifications.onClicked.addListener.mockClear();
+      }
+    });
   let mockChrome;
   
   beforeEach(() => {
     jest.resetModules();
-    
     // Mock Chrome API
     mockChrome = {
       runtime: {
@@ -24,9 +34,8 @@ describe('Upgrade Logic', () => {
       }
     };
     global.chrome = mockChrome;
-    
-    // Mock fetch
-    global.fetch = jest.fn();
+    // Always mock fetch for safety
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({ tag_name: 'v1.0.0', html_url: 'http://example.com/release' }) });
   });
 
   function loadUpgradeScript() {
@@ -49,15 +58,12 @@ describe('Upgrade Logic', () => {
 
   it('should notify when a newer version is available', async () => {
     await loadUpgradeScript();
-    
     // Mock fetch response for a newer version
-    global.fetch.mockResolvedValue({
+    global.fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ tag_name: 'v1.1.0', html_url: 'http://example.com/release' })
     });
-
     await checkForUpdates();
-
     expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('releases/latest'));
     expect(mockChrome.notifications.create).toHaveBeenCalledWith(
       'update-available',
@@ -70,25 +76,19 @@ describe('Upgrade Logic', () => {
 
   it('should not notify when version is same or older', async () => {
     await loadUpgradeScript();
-    
     // Mock fetch response for same version
-    global.fetch.mockResolvedValue({
+    global.fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ tag_name: 'v1.0.0', html_url: 'http://example.com/release' })
     });
-
     await checkForUpdates();
-
     expect(mockChrome.notifications.create).not.toHaveBeenCalled();
   });
 
   it('should handle fetch errors gracefully', async () => {
     await loadUpgradeScript();
-    
-    global.fetch.mockRejectedValue(new Error('Network error'));
-
+    global.fetch.mockRejectedValueOnce(new Error('Network error'));
     await checkForUpdates();
-
     expect(mockChrome.notifications.create).not.toHaveBeenCalled();
   });
 
