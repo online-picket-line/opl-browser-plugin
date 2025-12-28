@@ -36,12 +36,12 @@ describe('Background Script Logic', () => {
       },
       storage: {
         local: {
-          set: jest.fn().mockResolvedValue(undefined),
-          get: jest.fn().mockResolvedValue({})
+          set: jest.fn().mockImplementation((data) => Promise.resolve()),
+          get: jest.fn().mockImplementation((keys) => Promise.resolve({}))
         },
         sync: {
-          get: jest.fn(),
-          set: jest.fn()
+          get: jest.fn().mockImplementation((keys) => Promise.resolve({})),
+          set: jest.fn().mockImplementation((data) => Promise.resolve())
         }
       },
       notifications: {
@@ -54,6 +54,7 @@ describe('Background Script Logic', () => {
       }
     };
     global.chrome = mockChrome;
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}), status: 200, headers: { get: () => null } });
   });
 
   async function loadBackgroundScript() {
