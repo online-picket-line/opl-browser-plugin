@@ -44,6 +44,8 @@ describe('Upgrade Logic', () => {
     const __dirname = path.dirname(__filename);
     const upgradePath = path.join(__dirname, '../upgrade.js');
     let content = fs.readFileSync(upgradePath, 'utf8');
+    // Remove ES module export statement for eval compatibility
+    content = content.replace(/export\s*{\s*};?\s*$/m, '');
     // Wrap in an IIFE to avoid global scope pollution and allow re-execution
     // We also need to expose the function we want to test
     content = `

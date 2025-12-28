@@ -25,3 +25,6 @@ if (typeof chrome === 'undefined' && typeof browser !== 'undefined') {
   // Safari/Firefox: ensure chrome namespace exists for backwards compatibility
   globalObject.chrome = browser;
 }
+
+// Export to satisfy ES module requirements
+export {};

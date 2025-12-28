@@ -82,3 +82,6 @@ chrome.notifications.onClicked.addListener((notificationId) => {
     chrome.notifications.clear(notificationId);
   }
 });
+
+// Export to satisfy ES module requirements
+export {};
