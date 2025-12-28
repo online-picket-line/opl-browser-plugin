@@ -45,10 +45,34 @@ jobs:
           path: test-results/jest-results.json
           if-no-files-found: warn
 
-      - name: Upload packaged extensions
+      - name: Upload Chrome/Edge Extension
         if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
-          name: extension-packages
-          path: dist/*.zip
+          name: opl-chrome-edge
+          path: dist/opl-chrome-edge-*.zip
+          if-no-files-found: warn
+
+      - name: Upload Opera Extension
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: opl-opera
+          path: dist/opl-opera-*.zip
+          if-no-files-found: warn
+
+      - name: Upload Firefox Extension
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: opl-firefox
+          path: dist/opl-firefox-*.zip
+          if-no-files-found: warn
+
+      - name: Upload Safari Extension
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: opl-safari
+          path: dist/opl-safari-*.zip
           if-no-files-found: warn
