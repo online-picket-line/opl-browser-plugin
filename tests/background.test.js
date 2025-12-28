@@ -19,11 +19,13 @@ describe('Background Script Logic', () => {
     
     // Mock importScripts
     global.importScripts = jest.fn();
+    global.checkForUpdates = jest.fn();
     
     // Mock Chrome API
     mockChrome = {
       runtime: {
         onInstalled: { addListener: jest.fn() },
+        onStartup: { addListener: jest.fn() },
         onMessage: { addListener: jest.fn() }
       },
       alarms: {
