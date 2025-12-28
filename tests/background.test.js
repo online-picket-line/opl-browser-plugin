@@ -1,42 +1,39 @@
 
-
 import { jest } from '@jest/globals';
-import fs from 'fs';
-import path from 'path';
+
+// Mock dependencies BEFORE importing background
+global.checkForUpdates = jest.fn();
 
 // Increase Jest timeout for all tests in this file
-jest.setTimeout(30000); // 30 seconds
+jest.setTimeout(30000);
+
+// Import after mocks are set
+import { refreshLaborActions } from '../background.js';
 
 describe('Background Script Logic', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-    global.setTimeout = jest.fn((cb) => cb());
-  });
   let mockChrome;
   let mockApiServiceInstance;
   
   beforeEach(() => {
-    // Reset mocks
-    jest.resetModules();
+    // Clear all mocks before each test
+    jest.clearAllMocks();
     
-    // Mock ApiService
+    // Mock ApiService instance
     mockApiServiceInstance = {
       getLaborActions: jest.fn().mockResolvedValue([]),
       clearCache: jest.fn()
     };
     
+    // Replace the global ApiService constructor
     global.ApiService = jest.fn(() => mockApiServiceInstance);
-    
-    // Mock importScripts
-    global.importScripts = jest.fn();
-    global.checkForUpdates = jest.fn();
     
     // Mock Chrome API
     mockChrome = {
       runtime: {
         onInstalled: { addListener: jest.fn() },
         onStartup: { addListener: jest.fn() },
-        onMessage: { addListener: jest.fn() }
+        onMessage: { addListener: jest.fn() },
+        getManifest: jest.fn(() => ({ version: '1.0.0' }))
       },
       alarms: {
         create: jest.fn(),
@@ -65,32 +62,10 @@ describe('Background Script Logic', () => {
     global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}), status: 200, headers: { get: () => null } });
   });
 
-  async function loadBackgroundScript() {
-    // ESM-compatible __dirname
-    const __filename = new URL(import.meta.url).pathname;
-    const __dirname = path.dirname(__filename);
-    // Dynamically import the background script as an ES module
-    const backgroundModule = await import(new URL('../background.js', import.meta.url));
-    // Wait for any startup logic if needed (if background.js exports a promise or init function)
-    // If refreshLaborActions is exported, return it
-    if (backgroundModule.refreshLaborActions) {
-      return backgroundModule.refreshLaborActions;
-    }
-    // Fallback: try to get from global if not exported
-    if (typeof global.refreshLaborActions === 'function') {
-      return global.refreshLaborActions;
-    }
-    throw new Error('refreshLaborActions not found in background.js');
-  }
-
   it('should set status to online on successful fetch', async () => {
-    const refreshLaborActions = await loadBackgroundScript();
-    mockChrome.storage.local.set.mockClear();
-    
     mockApiServiceInstance.getLaborActions.mockResolvedValue([{ id: 1 }]);
     
     await refreshLaborActions();
-    jest.runAllTimers();
     
     expect(mockChrome.storage.local.set).toHaveBeenCalledWith(expect.objectContaining({
       connection_status: 'online',
@@ -99,14 +74,12 @@ describe('Background Script Logic', () => {
   });
 
   it('should increment failure count on error', async () => {
-    const refreshLaborActions = await loadBackgroundScript();
     mockChrome.storage.local.set.mockClear();
     
     mockApiServiceInstance.getLaborActions.mockRejectedValue(new Error('Network error'));
     mockChrome.storage.local.get.mockResolvedValue({ failure_count: 0 });
     
     await refreshLaborActions();
-    jest.runAllTimers();
     
     expect(mockChrome.storage.local.set).toHaveBeenCalledWith(expect.objectContaining({
       failure_count: 1
@@ -114,14 +87,12 @@ describe('Background Script Logic', () => {
   });
 
   it('should set status to offline after 3 failures', async () => {
-    const refreshLaborActions = await loadBackgroundScript();
     mockChrome.storage.local.set.mockClear();
     
     mockApiServiceInstance.getLaborActions.mockRejectedValue(new Error('Network error'));
     mockChrome.storage.local.get.mockResolvedValue({ failure_count: 2 });
     
     await refreshLaborActions();
-    jest.runAllTimers();
     
     expect(mockChrome.storage.local.set).toHaveBeenCalledWith(expect.objectContaining({
       failure_count: 3,
@@ -130,14 +101,12 @@ describe('Background Script Logic', () => {
   });
   
   it('should not set offline status if failures < 3', async () => {
-    const refreshLaborActions = await loadBackgroundScript();
     mockChrome.storage.local.set.mockClear();
     
     mockApiServiceInstance.getLaborActions.mockRejectedValue(new Error('Network error'));
     mockChrome.storage.local.get.mockResolvedValue({ failure_count: 1 });
     
     await refreshLaborActions();
-    jest.runAllTimers();
     
     expect(mockChrome.storage.local.set).toHaveBeenCalledWith(expect.objectContaining({
       failure_count: 2

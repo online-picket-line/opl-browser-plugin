@@ -24,6 +24,16 @@ global.chrome = {
     onAlarm: {
       addListener: jest.fn()
     }
+  },
+  notifications: {
+    create: jest.fn(),
+    clear: jest.fn(),
+    onClicked: {
+      addListener: jest.fn()
+    }
+  },
+  tabs: {
+    create: jest.fn()
   }
 };
 
