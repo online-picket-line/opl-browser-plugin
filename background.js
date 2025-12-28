@@ -1,15 +1,8 @@
 
 // Background service worker (MV3 module)
-const isJest = (typeof process !== 'undefined' && process.env && process.env.JEST_WORKER_ID !== undefined) ||
-                (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test');
-
-// Only import browser polyfill and upgrade in production
-if (!isJest) {
-  await import('./browser-polyfill.js');
-  await import('./upgrade.js');
-}
-
+import './browser-polyfill.js';
 import ApiService from './api-service.js';
+import './upgrade.js';
 
 // Lazy initialization for testability
 let apiService;
@@ -36,6 +29,8 @@ const allowedBypasses = new Map(); // tabId -> url
 // Key format: blocked_tab_${tabId}
 
 // Only register event listeners if not running in Jest
+const isJest = (typeof process !== 'undefined' && process.env && process.env.JEST_WORKER_ID !== undefined) ||
+                (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'test');
 if (!isJest) {
   // Check for updates on startup
   chrome.runtime.onStartup.addListener(() => {
