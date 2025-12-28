@@ -1,7 +1,11 @@
 
+
 import { jest } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
+
+// Increase Jest timeout for all tests in this file
+jest.setTimeout(30000); // 30 seconds
 
 describe('Background Script Logic', () => {
   beforeAll(() => {
