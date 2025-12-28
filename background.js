@@ -15,7 +15,9 @@ import ApiService from './api-service.js';
 let apiService;
 function getApiService() {
   if (!apiService) {
-    apiService = new ApiService();
+    // Use global ApiService if available (for testing), otherwise use imported one
+    const ApiServiceClass = global.ApiService || ApiService;
+    apiService = new ApiServiceClass();
   }
   return apiService;
 }
