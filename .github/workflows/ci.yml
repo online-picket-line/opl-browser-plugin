@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run unit tests
+        run: npm test -- --ci --json --outputFile=jest-results.json
+
+      - name: Package browser extensions
+        if: ${{ always() }}
+        run: bash package.sh
+
+      - name: Upload test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: jest-results
+          path: jest-results.json
+          if-no-files-found: warn
+
+      - name: Upload packaged extensions
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-packages
+          path: dist/
+          if-no-files-found: error
