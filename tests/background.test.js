@@ -47,21 +47,18 @@ describe('Background Script Logic', () => {
   });
 
   async function loadBackgroundScript() {
-    const backgroundPath = path.join(__dirname, '../background.js');
-    const content = fs.readFileSync(backgroundPath, 'utf8');
-    
-    // Execute the script in the global scope
-    // The last statement is refreshLaborActions(), so eval returns its promise
-    const startupPromise = eval(content);
-    
-    // Wait for startup to finish so it doesn't interfere with tests
-    try {
-      await startupPromise;
-    } catch (e) {
-      // Ignore startup errors
+    // Dynamically import the background script as an ES module
+    const backgroundModule = await import(path.resolve(__dirname, '../background.js'));
+    // Wait for any startup logic if needed (if background.js exports a promise or init function)
+    // If refreshLaborActions is exported, return it
+    if (backgroundModule.refreshLaborActions) {
+      return backgroundModule.refreshLaborActions;
     }
-    
-    return refreshLaborActions; 
+    // Fallback: try to get from global if not exported
+    if (typeof global.refreshLaborActions === 'function') {
+      return global.refreshLaborActions;
+    }
+    throw new Error('refreshLaborActions not found in background.js');
   }
 
   it('should set status to online on successful fetch', async () => {
