@@ -173,6 +173,18 @@ zip -r "dist/opl-safari-${ZIP_SUFFIX}.zip" \
 echo "✓ Packages created in dist/ directory:"
 ls -lh dist/
 
+# Also produce unpacked directories used by CI to avoid double-zipping artifacts
+rm -rf ./dist-unpacked
+mkdir -p ./dist-unpacked
+for z in dist/*.zip; do
+  if [ -f "$z" ]; then
+    name=$(basename "$z" .zip)
+    echo "Unpacking $z -> dist-unpacked/$name/"
+    mkdir -p "dist-unpacked/$name"
+    unzip -q "$z" -d "dist-unpacked/$name"
+  fi
+done
+
 echo ""
 echo "Installation instructions:"
 echo "- Chrome/Edge/Brave: Use opl-chrome-edge-${ZIP_SUFFIX}.zip"

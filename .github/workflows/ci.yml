@@ -5,6 +5,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -37,13 +38,14 @@ jobs:
         if: ${{ !cancelled() }}
         run: bash package.sh
 
-      # The following upload steps use the zip files from dist/ as final artifacts. Do not re-zip in CI.
+      # The following upload steps upload unpacked directories so CI zips artifacts only once.
+      # package.sh now creates unpacked folders under dist-unpacked/ alongside the zip files.
       - name: Upload Chrome/Edge Extension
         if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         uses: actions/upload-artifact@v4
         with:
           name: opl-chrome-edge
-          path: dist/opl-chrome-edge-*.zip
+          path: dist-unpacked/opl-chrome-edge-*
           if-no-files-found: warn
 
       - name: Upload Opera Extension
@@ -51,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: opl-opera
-          path: dist/opl-opera-*.zip
+          path: dist-unpacked/opl-opera-*
           if-no-files-found: warn
 
       - name: Upload Firefox Extension
@@ -59,7 +61,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: opl-firefox
-          path: dist/opl-firefox-*.zip
+          path: dist-unpacked/opl-firefox-*
           if-no-files-found: warn
 
       - name: Upload Safari Extension
@@ -67,5 +69,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: opl-safari
-          path: dist/opl-safari-*.zip
+          path: dist-unpacked/opl-safari-*
           if-no-files-found: warn
