@@ -174,7 +174,7 @@ class ApiService {
         startDate: orgData.startTime || actionDetails.startDate || '',
         endDate: orgData.endTime || actionDetails.endDate || '',
         contactInfo: actionDetails.contactInfo || '',
-        logoUrl: actionDetails.logoUrl || '',
+        logoUrl: actionDetails.logoUrl || actionDetails.unionImageUrl || '',
         divisions: [],
         actionResources: actionDetails.urls || [],
         // Store original extension data for advanced matching
