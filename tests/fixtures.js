@@ -18,6 +18,7 @@ const mockExtensionData = {
       "description": "Workers striking for fair wages and benefits",
       "demands": "15% wage increase, healthcare coverage",
       "contactInfo": "support@wirecutterunion.org",
+      "logoUrl": "https://example.com/logos/wirecutter-union.png",
       "location": "New York, NY",
       "urls": [
         {
@@ -47,6 +48,7 @@ const mockExtensionData = {
       "status": "active",
       "description": "Consumer boycott for worker rights",
       "demands": "Union recognition, fair wages",
+      "logoUrl": "https://example.com/logos/workers-united.png",
       "location": "Detroit, MI",
       "urls": [
         {
@@ -73,6 +75,7 @@ const mockTransformedActions = [
     more_info: "https://twitter.com/wirecutterunion/status/123",
     target_urls: ["wirecutter.com", "nytimes.com", "facebook.com", "twitter.com"],
     locations: ["New York, NY"],
+    logoUrl: "https://example.com/logos/wirecutter-union.png",
     divisions: [],
     actionResources: [
       {
@@ -93,6 +96,7 @@ const mockTransformedActions = [
     more_info: "https://example.com/strike-info",
     target_urls: ["example.com", "www.example.com", "facebook.com"],
     locations: ["Detroit, MI"],
+    logoUrl: "https://example.com/logos/workers-united.png",
     divisions: [],
     actionResources: [
       {

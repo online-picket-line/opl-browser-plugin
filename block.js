@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const actionDescription = document.getElementById('action-description');
   const actionType = document.getElementById('action-type');
   const blockedUrl = document.getElementById('blocked-url');
+  const unionLogo = document.getElementById('union-logo');
   const learnMoreBtn = document.getElementById('learn-more-btn');
   const proceedBtn = document.getElementById('proceed-btn');
   const goBackBtn = document.getElementById('go-back-btn');
@@ -24,6 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateUI(action, originalUrl) {
     if (action) {
+      // Display union logo if available
+      if (action.logoUrl) {
+        unionLogo.src = action.logoUrl;
+        unionLogo.style.display = 'block';
+      } else {
+        unionLogo.style.display = 'none';
+      }
+
       // Update UI with action data
       actionTitle.textContent = action.title || 'Labor Action in Progress';
       actionDescription.textContent = action.description || 

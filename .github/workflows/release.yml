@@ -140,8 +140,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: release-packages-v${{ steps.get_version.outputs.version }}
-        path: dist/*.zip
+        path: dist/
         retention-days: 365
+        compression-level: 0
         
     - name: Display release summary
       run: |

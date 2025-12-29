@@ -15,6 +15,7 @@ describe('Block Page', () => {
       'action-description': { textContent: '', style: {} },
       'action-type': { textContent: '', style: {} },
       'blocked-url': { textContent: '', style: {} },
+      'union-logo': { src: '', style: { display: 'none' } },
       'learn-more-btn': { href: '', style: { display: 'none' }, addEventListener: jest.fn() },
       'proceed-btn': { addEventListener: jest.fn() },
       'go-back-btn': { addEventListener: jest.fn() },
@@ -165,6 +166,47 @@ describe('Block Page', () => {
       
       expect(elements['action-location'].textContent).toBe('New York, Los Angeles, Chicago');
       expect(elements['action-location-container'].style.display).toBe('block');
+    });
+    
+    it('should display union logo if available', () => {
+      const action = {
+        title: 'Test Action',
+        logoUrl: 'https://example.com/logo.png'
+      };
+      
+      const updateUI = (action) => {
+        if (action.logoUrl) {
+          elements['union-logo'].src = action.logoUrl;
+          elements['union-logo'].style.display = 'block';
+        } else {
+          elements['union-logo'].style.display = 'none';
+        }
+      };
+      
+      updateUI(action);
+      
+      expect(elements['union-logo'].src).toBe('https://example.com/logo.png');
+      expect(elements['union-logo'].style.display).toBe('block');
+    });
+    
+    it('should hide union logo if not available', () => {
+      const action = {
+        title: 'Test Action',
+        logoUrl: ''
+      };
+      
+      const updateUI = (action) => {
+        if (action.logoUrl) {
+          elements['union-logo'].src = action.logoUrl;
+          elements['union-logo'].style.display = 'block';
+        } else {
+          elements['union-logo'].style.display = 'none';
+        }
+      };
+      
+      updateUI(action);
+      
+      expect(elements['union-logo'].style.display).toBe('none');
     });
     
     it('should display action dates if available', () => {

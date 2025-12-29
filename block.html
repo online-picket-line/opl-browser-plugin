@@ -37,12 +37,14 @@
       margin-bottom: 1rem;
       font-weight: 600;
       color: var(--destructive);
+      font-family: var(--font-serif);
     }
 
     .subtitle {
       font-size: 1.25rem;
       margin-bottom: 2rem;
       color: var(--muted-foreground);
+      font-family: var(--font-sans);
     }
 
     .card {
@@ -52,10 +54,20 @@
       box-shadow: 4px 4px 0px 0px var(--destructive);
     }
 
+    .union-logo {
+      max-width: 200px;
+      max-height: 100px;
+      margin-bottom: 1rem;
+      display: block;
+      border-radius: var(--radius);
+    }
+
     .card h2 {
       font-size: 1.5rem;
       margin-bottom: 0.75rem;
       color: var(--foreground);
+      font-family: var(--font-serif);
+      font-weight: 600;
     }
 
     .card p {
@@ -121,6 +133,7 @@
     <p class="subtitle">This page is currently subject to a labor action</p>
 
     <div class="card">
+      <img id="union-logo" class="union-logo" style="display: none;" alt="Union logo" />
       <span id="action-type" class="action-type">Labor Action</span>
       <h2 id="action-title">Loading...</h2>
       <p id="action-description">Please wait...</p>

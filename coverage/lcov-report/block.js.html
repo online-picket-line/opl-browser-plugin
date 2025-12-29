@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/59</span>
+                <span class='fraction'>0/64</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/34</span>
+                <span class='fraction'>0/36</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/59</span>
+                <span class='fraction'>0/64</span>
             </div>
         
             
@@ -173,23 +173,33 @@
 <a name='L108'></a><a href='#L108'>108</a>
 <a name='L109'></a><a href='#L109'>109</a>
 <a name='L110'></a><a href='#L110'>110</a>
-<a name='L111'></a><a href='#L111'>111</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L111'></a><a href='#L111'>111</a>
+<a name='L112'></a><a href='#L112'>112</a>
+<a name='L113'></a><a href='#L113'>113</a>
+<a name='L114'></a><a href='#L114'>114</a>
+<a name='L115'></a><a href='#L115'>115</a>
+<a name='L116'></a><a href='#L116'>116</a>
+<a name='L117'></a><a href='#L117'>117</a>
+<a name='L118'></a><a href='#L118'>118</a>
+<a name='L119'></a><a href='#L119'>119</a>
+<a name='L120'></a><a href='#L120'>120</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -199,6 +209,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -289,6 +307,7 @@
   const actionDescription = <span class="cstat-no" title="statement not covered" >document.getElementById('action-description');</span>
   const actionType = <span class="cstat-no" title="statement not covered" >document.getElementById('action-type');</span>
   const blockedUrl = <span class="cstat-no" title="statement not covered" >document.getElementById('blocked-url');</span>
+  const unionLogo = <span class="cstat-no" title="statement not covered" >document.getElementById('union-logo');</span>
   const learnMoreBtn = <span class="cstat-no" title="statement not covered" >document.getElementById('learn-more-btn');</span>
   const proceedBtn = <span class="cstat-no" title="statement not covered" >document.getElementById('proceed-btn');</span>
   const goBackBtn = <span class="cstat-no" title="statement not covered" >document.getElementById('go-back-btn');</span>
@@ -309,6 +328,14 @@
 &nbsp;
   function <span class="fstat-no" title="function not covered" >updateUI(</span>action, originalUrl) {
 <span class="cstat-no" title="statement not covered" >    if (action) {</span>
+      // Display union logo if available
+<span class="cstat-no" title="statement not covered" >      if (action.logoUrl) {</span>
+<span class="cstat-no" title="statement not covered" >        unionLogo.src = action.logoUrl;</span>
+<span class="cstat-no" title="statement not covered" >        unionLogo.style.display = 'block';</span>
+      } else {
+<span class="cstat-no" title="statement not covered" >        unionLogo.style.display = 'none';</span>
+      }
+&nbsp;
       // Update UI with action data
 <span class="cstat-no" title="statement not covered" >      actionTitle.textContent = action.title || 'Labor Action in Progress';</span>
 <span class="cstat-no" title="statement not covered" >      actionDescription.textContent = action.description || </span>
@@ -400,7 +427,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-29T17:51:54.398Z
+                at 2025-12-29T18:39:49.091Z
             </div>
         <script src="prettify.js"></script>
         <script>

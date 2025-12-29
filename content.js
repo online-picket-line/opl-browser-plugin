@@ -54,6 +54,7 @@
     const description = action.description || 'This company is currently subject to a labor action.';
     const actionType = action.type || 'strike';
     const moreInfoUrl = action.url || action.more_info || '';
+    const logoUrl = action.logoUrl || '';
     
     // Construct details string
     let details = [];
@@ -61,9 +62,12 @@
     if (action.startDate) details.push(`Since ${new Date(action.startDate).toLocaleDateString()}`);
     const detailsHtml = details.length > 0 ? `<p class="opl-banner-details" style="font-size: 0.8em; opacity: 0.9; margin-top: 2px;">${details.join(' • ')}</p>` : '';
 
+    // Build logo HTML if available
+    const logoHtml = logoUrl ? `<img src="${escapeHtml(logoUrl)}" alt="Union logo" class="opl-banner-logo" />` : `<div class="opl-banner-icon">⚠️</div>`;
+
     banner.innerHTML = `
       <div class="opl-banner-content">
-        <div class="opl-banner-icon">⚠️</div>
+        ${logoHtml}
         <div class="opl-banner-text">
           <strong class="opl-banner-title">${escapeHtml(title)}</strong>
           <p class="opl-banner-description">${escapeHtml(description)}</p>

@@ -75,13 +75,38 @@ describe('ApiService', () => {
         company: 'Wirecutter',
         type: 'strike',
         status: 'active',
-        description: 'Workers striking for fair wages and benefits'
+        description: 'Workers striking for fair wages and benefits',
+        logoUrl: 'https://example.com/logos/wirecutter-union.png'
       });
       expect(result[1]).toMatchObject({
         company: 'Example Corp',
         type: 'boycott',
         status: 'active',
-        description: 'Consumer boycott for worker rights'
+        description: 'Consumer boycott for worker rights',
+        logoUrl: 'https://example.com/logos/workers-united.png'
+      });
+    });
+
+    it('should handle missing logoUrl gracefully', () => {
+      const dataWithoutLogo = {
+        "Test Org": {
+          "moreInfoUrl": "https://test.com",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "Test Org",
+            "actionType": "strike",
+            "status": "active"
+          }
+        }
+      };
+      
+      const result = apiService.transformExtensionApiResponse(dataWithoutLogo);
+      
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        company: 'Test Org',
+        logoUrl: ''
       });
     });
 
