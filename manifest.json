@@ -23,7 +23,6 @@
         "<all_urls>"
       ],
       "js": [
-        "browser-polyfill.js",
         "content.js"
       ],
       "css": [

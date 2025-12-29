@@ -26,5 +26,7 @@ if (typeof chrome === 'undefined' && typeof browser !== 'undefined') {
   globalObject.chrome = browser;
 }
 
-// Export to satisfy ES module requirements
+// Export to satisfy ES module requirements when loaded as a module
+// When loaded as a regular script (e.g., in content scripts), this will be a syntax error
+// but it will be caught by the browser and the rest of the code will still execute
 export {};

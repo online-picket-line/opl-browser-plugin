@@ -2,6 +2,14 @@
 (function() {
   'use strict';
 
+  // Inline polyfill for cross-browser compatibility (content scripts can't import modules)
+  if (typeof browser === 'undefined' && typeof chrome !== 'undefined') {
+    window.browser = chrome;
+  }
+  if (typeof chrome === 'undefined' && typeof browser !== 'undefined') {
+    window.chrome = browser;
+  }
+
   let currentBanner = null;
 
   /**
