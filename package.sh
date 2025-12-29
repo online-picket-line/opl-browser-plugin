@@ -15,6 +15,7 @@ zip -r dist/opl-chrome-edge.zip \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
+  update-service.js \
   background.js \
   content.js \
   content.css \
@@ -31,6 +32,7 @@ zip -r dist/opl-opera.zip \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
+  update-service.js \
   background.js \
   content.js \
   content.css \
@@ -51,6 +53,7 @@ zip -r dist/opl-firefox.zip \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
+  update-service.js \
   background.js \
   content.js \
   content.css \
@@ -70,6 +73,7 @@ zip -r dist/opl-safari.zip \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
+  update-service.js \
   background.js \
   content.js \
   content.css \
