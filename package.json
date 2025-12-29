@@ -24,6 +24,7 @@
       "*.js",
       "!browser-polyfill.js",
       "!generate-icons.js",
+      "!update-service.js",
       "!tests/**"
     ],
     "testMatch": [

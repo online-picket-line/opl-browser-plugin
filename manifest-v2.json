@@ -11,7 +11,7 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["browser-polyfill.js", "api-service.js", "update-service.js", "background.js"]
+    "scripts": ["browser-polyfill.js", "api-service.js", "background.js"]
   },
   "content_scripts": [
     {

@@ -1,10 +1,8 @@
 // Background service worker
 importScripts('browser-polyfill.js');
 importScripts('api-service.js');
-importScripts('update-service.js');
 
 const apiService = new ApiService();
-const updateService = new UpdateService();
 const allowedBypasses = new Map(); // tabId -> url
 // We use chrome.storage.local for blocked states to persist across service worker restarts
 // Key format: blocked_tab_${tabId}
@@ -20,21 +18,12 @@ chrome.runtime.onInstalled.addListener(async () => {
       chrome.storage.sync.set({ blockMode: false }); // Default to banner mode
     }
   });
-  
-  // Check for updates on installation
-  checkForUpdates();
 });
-
-// Check for updates daily
-chrome.alarms.create('checkForUpdates', { periodInMinutes: 60 * 24 }); // Once per day
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'refreshLaborActions') {
     console.log('Periodic refresh of labor actions');
     refreshLaborActions();
-  } else if (alarm.name === 'checkForUpdates') {
-    console.log('Periodic update check');
-    checkForUpdates();
   }
 });
 
@@ -215,64 +204,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse({ success: true });
     });
     return true;
-  } else if (request.action === 'checkUpdate') {
-    // Check for updates and return result
-    updateService.getCachedUpdate().then(async (cachedUpdate) => {
-      if (cachedUpdate) {
-        sendResponse({
-          updateAvailable: true,
-          currentVersion: cachedUpdate.currentVersion,
-          latestVersion: cachedUpdate.latestVersion,
-          releaseInfo: cachedUpdate.releaseInfo
-        });
-      } else {
-        sendResponse({ updateAvailable: false });
-      }
-    });
-    return true;
-  } else if (request.action === 'openUpdatePage') {
-    // Open the GitHub releases page
-    updateService.getCachedUpdate().then((update) => {
-      const url = update?.releaseInfo?.htmlUrl;
-      updateService.openUpdatePage(url);
-      sendResponse({ success: true });
-    });
-    return true;
-  } else if (request.action === 'dismissUpdate') {
-    // Dismiss the current update notification
-    updateService.getCachedUpdate().then((update) => {
-      if (update) {
-        updateService.dismissUpdate(update.latestVersion).then(() => {
-          sendResponse({ success: true });
-        });
-      } else {
-        sendResponse({ success: false });
-      }
-    });
-    return true;
   }
 });
 
-/**
- * Check for updates
- * @returns {Promise<void>}
- */
-async function checkForUpdates() {
-  try {
-    const updateInfo = await updateService.checkForUpdate();
-    
-    if (updateInfo) {
-      console.log('Update available:', updateInfo);
-      // Update is available and stored in cache
-      // The popup will check for it when opened
-    }
-  } catch (error) {
-    console.error('Error checking for updates:', error);
-  }
-}
-
 // Initial fetch on startup
 refreshLaborActions();
-
-// Check for updates on startup
-checkForUpdates();

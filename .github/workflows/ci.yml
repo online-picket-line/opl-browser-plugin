@@ -38,7 +38,7 @@ jobs:
         retention-days: 30
 
   build:
-    name: Build Plugins
+    name: Build Extensions
     runs-on: ubuntu-latest
     needs: test
     
@@ -58,50 +58,62 @@ jobs:
     - name: Generate icons
       run: node generate-icons.js
       
-    - name: Build plugins
+    - name: Build extension packages
       run: bash package.sh
       
-    - name: Prepare artifacts (extract zip contents)
-      run: |
-        mkdir -p artifacts
-        unzip -q dist/opl-chrome-edge.zip -d artifacts/opl-chrome-edge
-        unzip -q dist/opl-firefox.zip -d artifacts/opl-firefox
-        unzip -q dist/opl-opera.zip -d artifacts/opl-opera
-        unzip -q dist/opl-safari.zip -d artifacts/opl-safari
-      
-    - name: Upload Chrome/Edge plugin
+    - name: Upload Chrome Web Store package
       uses: actions/upload-artifact@v4
       with:
-        name: opl-chrome-edge
-        path: artifacts/opl-chrome-edge/
+        name: chrome-webstore-package
+        path: dist/opl-chrome-edge.zip
         retention-days: 90
         
-    - name: Upload Firefox plugin
+    - name: Upload Firefox Add-ons package
       uses: actions/upload-artifact@v4
       with:
-        name: opl-firefox
-        path: artifacts/opl-firefox/
+        name: firefox-addons-package
+        path: dist/opl-firefox.zip
         retention-days: 90
         
-    - name: Upload Opera plugin
+    - name: Upload Opera Add-ons package
       uses: actions/upload-artifact@v4
       with:
-        name: opl-opera
-        path: artifacts/opl-opera/
+        name: opera-addons-package
+        path: dist/opl-opera.zip
         retention-days: 90
         
-    - name: Upload Safari plugin
+    - name: Upload Safari package
       uses: actions/upload-artifact@v4
       with:
-        name: opl-safari
-        path: artifacts/opl-safari/
+        name: safari-package
+        path: dist/opl-safari.zip
+        retention-days: 90
+        
+    - name: Upload all packages (combined)
+      uses: actions/upload-artifact@v4
+      with:
+        name: all-browser-packages
+        path: dist/*.zip
         retention-days: 90
         
     - name: Display build summary
       run: |
         echo "### Build Summary 📦" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Built extensions:" >> $GITHUB_STEP_SUMMARY
-        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-        ls -lh dist/ >> $GITHUB_STEP_SUMMARY
-        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "Built store-ready extension packages:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "| Browser | Package | Size |" >> $GITHUB_STEP_SUMMARY
+        echo "|---------|---------|------|" >> $GITHUB_STEP_SUMMARY
+        for file in dist/*.zip; do
+          name=$(basename "$file" .zip)
+          size=$(du -h "$file" | cut -f1)
+          echo "| ${name#opl-} | \`$(basename "$file")\` | $size |" >> $GITHUB_STEP_SUMMARY
+        done
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "#### Ready for Store Submission ✅" >> $GITHUB_STEP_SUMMARY
+        echo "- **Chrome Web Store**: Download \`chrome-webstore-package\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Firefox Add-ons**: Download \`firefox-addons-package\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Opera Add-ons**: Download \`opera-addons-package\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Safari App Store**: Download \`safari-package\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "See [STORE_UPDATE_GUIDE.md](STORE_UPDATE_GUIDE.md) for submission instructions." >> $GITHUB_STEP_SUMMARY

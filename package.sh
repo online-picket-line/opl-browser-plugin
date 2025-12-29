@@ -15,7 +15,6 @@ zip -r dist/opl-chrome-edge.zip \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
-  update-service.js \
   background.js \
   content.js \
   content.css \
@@ -23,6 +22,7 @@ zip -r dist/opl-chrome-edge.zip \
   popup.js \
   block.html \
   block.js \
+  theme.css \
   icons/ \
   -x "*.DS_Store" "*.swp"
 
@@ -32,7 +32,6 @@ zip -r dist/opl-opera.zip \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
-  update-service.js \
   background.js \
   content.js \
   content.css \
@@ -40,6 +39,7 @@ zip -r dist/opl-opera.zip \
   popup.js \
   block.html \
   block.js \
+  theme.css \
   icons/ \
   -x "*.DS_Store" "*.swp"
 
@@ -53,7 +53,6 @@ zip -r dist/opl-firefox.zip \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
-  update-service.js \
   background.js \
   content.js \
   content.css \
@@ -61,6 +60,7 @@ zip -r dist/opl-firefox.zip \
   popup.js \
   block.html \
   block.js \
+  theme.css \
   icons/ \
   -x "*.DS_Store" "*.swp"
 
@@ -73,7 +73,6 @@ zip -r dist/opl-safari.zip \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
-  update-service.js \
   background.js \
   content.js \
   content.css \
@@ -81,6 +80,7 @@ zip -r dist/opl-safari.zip \
   popup.js \
   block.html \
   block.js \
+  theme.css \
   icons/ \
   -x "*.DS_Store" "*.swp"
 
