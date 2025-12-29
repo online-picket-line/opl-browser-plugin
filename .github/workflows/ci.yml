@@ -61,12 +61,37 @@ jobs:
     - name: Build plugins
       run: bash package.sh
       
-    - name: Upload build artifacts
+    - name: Upload Chrome/Edge plugin
       uses: actions/upload-artifact@v4
       with:
-        name: browser-extensions
-        path: dist/*.zip
+        name: opl-chrome-edge
+        path: dist/opl-chrome-edge.zip
         retention-days: 90
+        compression-level: 0
+        
+    - name: Upload Firefox plugin
+      uses: actions/upload-artifact@v4
+      with:
+        name: opl-firefox
+        path: dist/opl-firefox.zip
+        retention-days: 90
+        compression-level: 0
+        
+    - name: Upload Opera plugin
+      uses: actions/upload-artifact@v4
+      with:
+        name: opl-opera
+        path: dist/opl-opera.zip
+        retention-days: 90
+        compression-level: 0
+        
+    - name: Upload Safari plugin
+      uses: actions/upload-artifact@v4
+      with:
+        name: opl-safari
+        path: dist/opl-safari.zip
+        retention-days: 90
+        compression-level: 0
         
     - name: Display build summary
       run: |
