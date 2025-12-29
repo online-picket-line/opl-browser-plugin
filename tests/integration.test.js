@@ -1,8 +1,5 @@
-
-
-import { jest } from '@jest/globals';
-import { mockExtensionData, mockTransformedActions } from './fixtures.js';
-import ApiService from '../api-service.js';
+// Integration tests that test the complete flow
+const { mockExtensionData, mockTransformedActions } = require('./fixtures.js');
 
 describe.skip('End-to-End Integration', () => {
   let mockChrome;
@@ -43,6 +40,9 @@ describe.skip('End-to-End Integration', () => {
 
     // Mock fetch
     global.fetch = jest.fn();
+
+    // Import after mocks are set up
+    ApiService = require('../api-service.js');
   });
 
   describe('Complete Extension Workflow', () => {

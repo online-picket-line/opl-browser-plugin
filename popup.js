@@ -4,12 +4,6 @@
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Display extension version
-  const versionDiv = document.getElementById('version-info');
-  if (versionDiv && chrome.runtime && chrome.runtime.getManifest) {
-    const version = chrome.runtime.getManifest().version;
-    versionDiv.textContent = `Version: ${version}`;
-  }
   const modeBannerRadio = document.getElementById('mode-banner');
   const modeBlockRadio = document.getElementById('mode-block');
   const statusDiv = document.getElementById('status');
@@ -29,14 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load stats
   loadStats();
-
-  // Test block button
-  const testBlockBtn = document.getElementById('test-block-btn');
-  testBlockBtn.addEventListener('click', () => {
-    chrome.storage.local.set({force_block_example: true}, () => {
-      chrome.tabs.create({url: 'https://example.com'});
-    });
-  });
 
   // Save settings when radio buttons change
   modeBannerRadio.addEventListener('change', () => {

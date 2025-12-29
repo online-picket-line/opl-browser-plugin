@@ -1,6 +1,3 @@
-
-import { jest } from '@jest/globals';
-import ApiService from '../api-service.js';
 // Error handling and edge case tests
 describe.skip('Error Handling and Edge Cases', () => {
   let mockChrome;
@@ -24,6 +21,8 @@ describe.skip('Error Handling and Edge Cases', () => {
     };
     global.chrome = mockChrome;
     global.fetch = jest.fn();
+    
+    ApiService = require('../api-service.js');
   });
 
   describe('Network Error Handling', () => {

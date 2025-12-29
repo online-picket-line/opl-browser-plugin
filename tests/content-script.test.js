@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals';
 describe('Content Script Integration', () => {
   let mockChrome;
   let mockSessionStorage;

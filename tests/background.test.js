@@ -1,39 +1,30 @@
-
-import { jest } from '@jest/globals';
-
-// Mock dependencies BEFORE importing background
-global.checkForUpdates = jest.fn();
-
-// Increase Jest timeout for all tests in this file
-jest.setTimeout(30000);
-
-// Import after mocks are set
-import { refreshLaborActions } from '../background.js';
+const fs = require('fs');
+const path = require('path');
 
 describe('Background Script Logic', () => {
   let mockChrome;
   let mockApiServiceInstance;
   
   beforeEach(() => {
-    // Clear all mocks before each test
-    jest.clearAllMocks();
+    // Reset mocks
+    jest.resetModules();
     
-    // Mock ApiService instance
+    // Mock ApiService
     mockApiServiceInstance = {
       getLaborActions: jest.fn().mockResolvedValue([]),
       clearCache: jest.fn()
     };
     
-    // Replace the global ApiService constructor
     global.ApiService = jest.fn(() => mockApiServiceInstance);
+    
+    // Mock importScripts
+    global.importScripts = jest.fn();
     
     // Mock Chrome API
     mockChrome = {
       runtime: {
         onInstalled: { addListener: jest.fn() },
-        onStartup: { addListener: jest.fn() },
-        onMessage: { addListener: jest.fn() },
-        getManifest: jest.fn(() => ({ version: '1.0.0' }))
+        onMessage: { addListener: jest.fn() }
       },
       alarms: {
         create: jest.fn(),
@@ -41,28 +32,40 @@ describe('Background Script Logic', () => {
       },
       storage: {
         local: {
-          set: jest.fn().mockImplementation((data) => Promise.resolve()),
-          get: jest.fn().mockImplementation((keys) => Promise.resolve({}))
+          set: jest.fn().mockResolvedValue(undefined),
+          get: jest.fn().mockResolvedValue({})
         },
         sync: {
-          get: jest.fn().mockImplementation((keys) => Promise.resolve({})),
-          set: jest.fn().mockImplementation((data) => Promise.resolve())
+          get: jest.fn(),
+          set: jest.fn()
         }
-      },
-      notifications: {
-        create: jest.fn(),
-        onClicked: { addListener: jest.fn() },
-        clear: jest.fn()
-      },
-      tabs: {
-        create: jest.fn()
       }
     };
     global.chrome = mockChrome;
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}), status: 200, headers: { get: () => null } });
   });
 
+  async function loadBackgroundScript() {
+    const backgroundPath = path.join(__dirname, '../background.js');
+    const content = fs.readFileSync(backgroundPath, 'utf8');
+    
+    // Execute the script in the global scope
+    // The last statement is refreshLaborActions(), so eval returns its promise
+    const startupPromise = eval(content);
+    
+    // Wait for startup to finish so it doesn't interfere with tests
+    try {
+      await startupPromise;
+    } catch (e) {
+      // Ignore startup errors
+    }
+    
+    return refreshLaborActions; 
+  }
+
   it('should set status to online on successful fetch', async () => {
+    const refreshLaborActions = await loadBackgroundScript();
+    mockChrome.storage.local.set.mockClear();
+    
     mockApiServiceInstance.getLaborActions.mockResolvedValue([{ id: 1 }]);
     
     await refreshLaborActions();
@@ -74,6 +77,7 @@ describe('Background Script Logic', () => {
   });
 
   it('should increment failure count on error', async () => {
+    const refreshLaborActions = await loadBackgroundScript();
     mockChrome.storage.local.set.mockClear();
     
     mockApiServiceInstance.getLaborActions.mockRejectedValue(new Error('Network error'));
@@ -87,6 +91,7 @@ describe('Background Script Logic', () => {
   });
 
   it('should set status to offline after 3 failures', async () => {
+    const refreshLaborActions = await loadBackgroundScript();
     mockChrome.storage.local.set.mockClear();
     
     mockApiServiceInstance.getLaborActions.mockRejectedValue(new Error('Network error'));
@@ -101,6 +106,7 @@ describe('Background Script Logic', () => {
   });
   
   it('should not set offline status if failures < 3', async () => {
+    const refreshLaborActions = await loadBackgroundScript();
     mockChrome.storage.local.set.mockClear();
     
     mockApiServiceInstance.getLaborActions.mockRejectedValue(new Error('Network error'));

@@ -1,5 +1,4 @@
-import { jest } from '@jest/globals';
-
+// Test setup for browser extension environment
 global.chrome = {
   storage: {
     sync: {
@@ -24,16 +23,6 @@ global.chrome = {
     onAlarm: {
       addListener: jest.fn()
     }
-  },
-  notifications: {
-    create: jest.fn(),
-    clear: jest.fn(),
-    onClicked: {
-      addListener: jest.fn()
-    }
-  },
-  tabs: {
-    create: jest.fn()
   }
 };
 

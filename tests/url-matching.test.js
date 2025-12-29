@@ -1,6 +1,4 @@
-
-import { jest } from '@jest/globals';
-import { mockTransformedActions } from './fixtures.js';
+const { mockTransformedActions } = require('./fixtures.js');
 
 // Mock the background script functions
 const originalMatchUrlToAction = global.matchUrlToAction;
