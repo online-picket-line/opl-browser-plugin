@@ -34,10 +34,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     refreshLaborActions();
   } else if (alarm.name === 'checkForUpdates') {
     console.log('Periodic update check');
-    checkForUpdateaddListener((alarm) => {
-  if (alarm.name === 'refreshLaborActions') {
-    console.log('Periodic refresh of labor actions');
-    refreshLaborActions();
+    checkForUpdates();
   }
 });
 
