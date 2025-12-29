@@ -61,37 +61,41 @@ jobs:
     - name: Build plugins
       run: bash package.sh
       
+    - name: Prepare artifacts (extract zip contents)
+      run: |
+        mkdir -p artifacts
+        unzip -q dist/opl-chrome-edge.zip -d artifacts/opl-chrome-edge
+        unzip -q dist/opl-firefox.zip -d artifacts/opl-firefox
+        unzip -q dist/opl-opera.zip -d artifacts/opl-opera
+        unzip -q dist/opl-safari.zip -d artifacts/opl-safari
+      
     - name: Upload Chrome/Edge plugin
       uses: actions/upload-artifact@v4
       with:
         name: opl-chrome-edge
-        path: dist/opl-chrome-edge.zip
+        path: artifacts/opl-chrome-edge/
         retention-days: 90
-        compression-level: 0
         
     - name: Upload Firefox plugin
       uses: actions/upload-artifact@v4
       with:
         name: opl-firefox
-        path: dist/opl-firefox.zip
+        path: artifacts/opl-firefox/
         retention-days: 90
-        compression-level: 0
         
     - name: Upload Opera plugin
       uses: actions/upload-artifact@v4
       with:
         name: opl-opera
-        path: dist/opl-opera.zip
+        path: artifacts/opl-opera/
         retention-days: 90
-        compression-level: 0
         
     - name: Upload Safari plugin
       uses: actions/upload-artifact@v4
       with:
         name: opl-safari
-        path: dist/opl-safari.zip
+        path: artifacts/opl-safari/
         retention-days: 90
-        compression-level: 0
         
     - name: Display build summary
       run: |
