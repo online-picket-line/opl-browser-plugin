@@ -109,8 +109,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle go back button
   goBackBtn.addEventListener('click', () => {
-    // Go back or close
-    if (window.history.length > 1) {
+    // Check if we have a meaningful history to go back to
+    // If we came directly from a new tab (like test mode), redirect to onlinepicketline.com
+    if (window.history.length <= 2 && window.originalUrl) {
+      // History is too short (just the blocked page), go to onlinepicketline.com
+      window.location.href = 'https://onlinepicketline.com';
+    } else if (window.history.length > 1) {
       window.history.back();
     } else {
       window.close();

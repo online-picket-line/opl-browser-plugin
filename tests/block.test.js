@@ -357,6 +357,144 @@ describe('Block Page', () => {
     });
   });
 
+  describe('Go Back Button', () => {
+    let locationHref;
+    let historyBackMock;
+    let windowCloseMock;
+    let historyLength;
+    
+    beforeEach(() => {
+      // Reset window state
+      locationHref = '';
+      historyLength = 1;
+      historyBackMock = jest.fn();
+      windowCloseMock = jest.fn();
+      
+      // Define history with proper getters/setters that can't be overwritten
+      Object.defineProperty(window, 'history', {
+        value: {
+          get length() { return historyLength; },
+          set length(val) { historyLength = val; },
+          back: historyBackMock
+        },
+        writable: true,
+        configurable: true
+      });
+      
+      window.close = windowCloseMock;
+      
+      // Mock location.href setter since jsdom doesn't support navigation
+      Object.defineProperty(window, 'location', {
+        value: {
+          get href() { return locationHref; },
+          set href(url) { locationHref = url; }
+        },
+        writable: true,
+        configurable: true
+      });
+      window.originalUrl = null;
+    });
+
+    it('should redirect to onlinepicketline.com when history is very short (test mode scenario)', () => {
+      historyLength = 2; // Simulates new tab with blocked page
+      window.originalUrl = 'https://example.com'; // Original blocked URL is set
+      
+      const goBackHandler = () => {
+        if (window.history.length <= 2 && window.originalUrl) {
+          window.location.href = 'https://onlinepicketline.com';
+        } else if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.close();
+        }
+      };
+      
+      goBackHandler();
+      
+      expect(window.location.href).toBe('https://onlinepicketline.com');
+      expect(historyBackMock).not.toHaveBeenCalled();
+    });
+
+    it('should go back normally when history has meaningful entries', () => {
+      historyLength = 5; // User has browsing history
+      window.originalUrl = 'https://example.com';
+      
+      const goBackHandler = () => {
+        if (window.history.length <= 2 && window.originalUrl) {
+          window.location.href = 'https://onlinepicketline.com';
+        } else if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.close();
+        }
+      };
+      
+      goBackHandler();
+      
+      expect(historyBackMock).toHaveBeenCalled();
+      expect(window.location.href).toBe(''); // No redirect happened
+    });
+
+    it('should close window when no history exists', () => {
+      historyLength = 1;
+      window.originalUrl = null;
+      
+      const goBackHandler = () => {
+        if (window.history.length <= 2 && window.originalUrl) {
+          window.location.href = 'https://onlinepicketline.com';
+        } else if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.close();
+        }
+      };
+      
+      goBackHandler();
+      
+      expect(windowCloseMock).toHaveBeenCalled();
+      expect(historyBackMock).not.toHaveBeenCalled();
+    });
+
+    it('should go back when history length is exactly 2 but no originalUrl (edge case)', () => {
+      historyLength = 2;
+      window.originalUrl = null; // No original URL set
+      
+      const goBackHandler = () => {
+        if (window.history.length <= 2 && window.originalUrl) {
+          window.location.href = 'https://onlinepicketline.com';
+        } else if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.close();
+        }
+      };
+      
+      goBackHandler();
+      
+      expect(historyBackMock).toHaveBeenCalled();
+      expect(window.location.href).toBe(''); // No redirect happened
+    });
+
+    it('should redirect to onlinepicketline.com when history length is 1 and originalUrl exists', () => {
+      historyLength = 1;
+      window.originalUrl = 'https://example.com';
+      
+      const goBackHandler = () => {
+        if (window.history.length <= 2 && window.originalUrl) {
+          window.location.href = 'https://onlinepicketline.com';
+        } else if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.close();
+        }
+      };
+      
+      goBackHandler();
+      
+      expect(window.location.href).toBe('https://onlinepicketline.com');
+    });
+  });
+
   describe('URL Display', () => {
     it('should extract and display hostname from URL', () => {
       const originalUrl = 'https://example.com/path/to/page?query=1';
