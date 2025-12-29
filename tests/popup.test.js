@@ -110,7 +110,7 @@ describe('Popup Functionality', () => {
       ];
 
       const loadStats = (actions, timestamp) => {
-        const activeActions = actions.filter(a => !a.status || a.status === 'active').length;
+        const activeActions = actions.filter(a => (!a.status || a.status === 'active') && !a._isTestAction).length;
         const totalUrls = actions.reduce((sum, a) => sum + (a.target_urls?.length || 0), 0);
         
         let statsHtml = `<strong>${activeActions}</strong> active labor action${activeActions !== 1 ? 's' : ''}`;
@@ -138,6 +138,33 @@ describe('Popup Functionality', () => {
       expect(stats).toContain('<strong>4</strong> URLs monitored');
       expect(stats).toContain('1 minute ago');
       expect(stats).toContain('More Info at OnlinePicketLine.com');
+    });
+
+    it('should exclude test actions from active count', () => {
+      const mockActions = [
+        { status: 'active', target_urls: ['realsite.com'] },
+        { status: 'active', target_urls: ['example.com'], _isTestAction: true },
+        { status: 'active', target_urls: ['another.com'] }
+      ];
+
+      const loadStats = (actions, timestamp) => {
+        const activeActions = actions.filter(a => (!a.status || a.status === 'active') && !a._isTestAction).length;
+        const totalUrls = actions.reduce((sum, a) => sum + (a.target_urls?.length || 0), 0);
+        
+        let statsHtml = `<strong>${activeActions}</strong> active labor action${activeActions !== 1 ? 's' : ''}`;
+        if (totalUrls > 0) {
+          statsHtml += `<br><strong>${totalUrls}</strong> URL${totalUrls !== 1 ? 's' : ''} monitored`;
+        }
+        
+        return statsHtml;
+      };
+
+      const stats = loadStats(mockActions);
+      
+      // Should show 2 active actions (excluding the test action)
+      expect(stats).toContain('<strong>2</strong> active labor actions');
+      // Should still count all URLs including test action URLs
+      expect(stats).toContain('<strong>3</strong> URLs monitored');
     });
   });
 

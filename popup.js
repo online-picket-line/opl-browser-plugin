@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         connectionText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
       }
 
-      const activeActions = actions.filter(a => !a.status || a.status === 'active').length;
+      const activeActions = actions.filter(a => (!a.status || a.status === 'active') && !a._isTestAction).length;
       const totalUrls = actions.reduce((sum, a) => sum + (a.target_urls?.length || 0), 0);
       let statsHtml = `<strong>${activeActions}</strong> active labor action${activeActions !== 1 ? 's' : ''}`;
       if (totalUrls > 0) {
