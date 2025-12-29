@@ -495,4 +495,59 @@ describe('UpdateService Integration', () => {
       'update_dismissed_version'
     ]);
   });
+
+  describe('Service Worker Compatibility', () => {
+    test('should not reference window object (service worker compatibility)', () => {
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Read the update-service.js file
+      const filePath = path.join(__dirname, '..', 'update-service.js');
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      
+      // Check that the file doesn't contain problematic window references
+      // Allow 'window' in comments but not in actual code
+      const codeLines = fileContent.split('\n')
+        .filter(line => !line.trim().startsWith('//') && !line.trim().startsWith('*'));
+      const codeOnly = codeLines.join('\n');
+      
+      // Should not have typeof window checks or window assignments in the module export section
+      expect(codeOnly).not.toMatch(/typeof\s+window\s*!==\s*['"]undefined['"]/);
+      expect(codeOnly).not.toMatch(/window\.UpdateService/);
+      
+      // Verify the file ends with proper module.exports only (no window fallback)
+      const lastLines = fileContent.trim().split('\n').slice(-10).join('\n');
+      expect(lastLines).toContain('module.exports');
+      expect(lastLines).not.toMatch(/window\.UpdateService\s*=/);
+    });
+
+    test('should be loadable in a simulated service worker environment', () => {
+      // Simulate service worker global scope (no window object)
+      const originalWindow = global.window;
+      delete global.window;
+      
+      try {
+        // Try to require/reload the module
+        delete require.cache[require.resolve('../update-service.js')];
+        const UpdateServiceReloaded = require('../update-service.js');
+        
+        // Should successfully create an instance
+        const instance = new UpdateServiceReloaded();
+        expect(instance).toBeDefined();
+        expect(instance.GITHUB_REPO).toBe('online-picket-line/opl-browser-plugin');
+      } finally {
+        // Restore window if it existed
+        if (originalWindow !== undefined) {
+          global.window = originalWindow;
+        }
+      }
+    });
+
+    test('UpdateService class should be available via module.exports', () => {
+      const UpdateServiceExported = require('../update-service.js');
+      expect(UpdateServiceExported).toBeDefined();
+      expect(typeof UpdateServiceExported).toBe('function');
+      expect(UpdateServiceExported.name).toBe('UpdateService');
+    });
+  });
 });

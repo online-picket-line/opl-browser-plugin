@@ -240,8 +240,7 @@ class UpdateService {
 }
 
 // Make it available to other scripts
+// Service worker context uses 'self' instead of 'window'
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = UpdateService;
-} else if (typeof window !== 'undefined') {
-  window.UpdateService = UpdateService;
 }

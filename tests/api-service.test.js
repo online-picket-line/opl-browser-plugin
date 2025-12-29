@@ -289,4 +289,46 @@ describe('ApiService', () => {
       expect(result).toBeNull();
     });
   });
+
+  describe('Service Worker Compatibility', () => {
+    test('should not reference window object (service worker compatibility)', () => {
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Read the api-service.js file
+      const filePath = path.join(__dirname, '..', 'api-service.js');
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      
+      // Check that the file doesn't contain problematic window references
+      const codeLines = fileContent.split('\n')
+        .filter(line => !line.trim().startsWith('//') && !line.trim().startsWith('*'));
+      const codeOnly = codeLines.join('\n');
+      
+      // Should not have typeof window checks or window assignments
+      expect(codeOnly).not.toMatch(/typeof\s+window\s*!==\s*['"]undefined['"]/);
+      expect(codeOnly).not.toMatch(/window\.ApiService/);
+    });
+
+    test('should be loadable in a simulated service worker environment', () => {
+      // Simulate service worker global scope (no window object)
+      const originalWindow = global.window;
+      delete global.window;
+      
+      try {
+        // Try to require/reload the module
+        delete require.cache[require.resolve('../api-service.js')];
+        const ApiServiceReloaded = require('../api-service.js');
+        
+        // Should successfully create an instance
+        const instance = new ApiServiceReloaded();
+        expect(instance).toBeDefined();
+        expect(instance.baseUrl).toBeDefined();
+      } finally {
+        // Restore window if it existed
+        if (originalWindow !== undefined) {
+          global.window = originalWindow;
+        }
+      }
+    });
+  });
 });
