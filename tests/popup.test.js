@@ -3,6 +3,7 @@ const createMockElement = (id, value = '') => ({
   id,
   value,
   textContent: '',
+  innerHTML: '',
   disabled: false,
   checked: false,
   style: { display: '' },
@@ -18,7 +19,8 @@ const createMockDocument = () => {
     'status': createMockElement('status'),
     'stats-content': createMockElement('stats-content'),
     'connection-indicator': createMockElement('connection-indicator'),
-    'connection-text': createMockElement('connection-text')
+    'connection-text': createMockElement('connection-text'),
+    'test-mode-btn': createMockElement('test-mode-btn')
   };
 
   return {
@@ -38,6 +40,10 @@ describe('Popup Functionality', () => {
     mockChrome = {
       storage: {
         sync: {
+          get: jest.fn(),
+          set: jest.fn()
+        },
+        local: {
           get: jest.fn(),
           set: jest.fn()
         }
@@ -132,6 +138,365 @@ describe('Popup Functionality', () => {
       expect(stats).toContain('<strong>4</strong> URLs monitored');
       expect(stats).toContain('1 minute ago');
       expect(stats).toContain('More Info at OnlinePicketLine.com');
+    });
+  });
+
+  describe('Test Mode Functionality', () => {
+    beforeEach(() => {
+      mockChrome.tabs = {
+        create: jest.fn()
+      };
+      global.chrome = mockChrome;
+    });
+
+    it('should inject test action for example.com with all required fields', async () => {
+      const mockCurrentActions = [
+        { id: 'action-1', company: 'Company A', target_urls: ['companya.com'] }
+      ];
+
+      mockChrome.storage.local.get.mockImplementation((keys, callback) => {
+        callback({ labor_actions: mockCurrentActions });
+      });
+
+      mockChrome.storage.local.set.mockImplementation((data, callback) => {
+        callback();
+      });
+
+      const enableTestMode = () => {
+        return new Promise((resolve, reject) => {
+          mockChrome.storage.local.get(['labor_actions'], (result) => {
+            const currentActions = result.labor_actions || [];
+            
+            const testAction = {
+              id: 'test-example-com',
+              title: 'TEST MODE: Example Company Workers Strike',
+              description: 'This is a test action to demonstrate the Online Picket Line plugin functionality. Workers at Example Company are demanding better wages, improved working conditions, and union recognition. This test will show how the plugin blocks or warns about sites with active labor actions.',
+              company: 'Example Company',
+              type: 'strike',
+              status: 'active',
+              more_info: 'https://onlinepicketline.com/about',
+              target_urls: ['example.com', 'www.example.com'],
+              locations: ['Worldwide'],
+              demands: 'Fair wages, safe working conditions, union recognition',
+              startDate: new Date().toISOString().split('T')[0],
+              contactInfo: 'test@onlinepicketline.com',
+              divisions: ['All Divisions'],
+              actionResources: [
+                {
+                  title: 'Strike Information',
+                  url: 'https://onlinepicketline.com/about'
+                },
+                {
+                  title: 'How to Support',
+                  url: 'https://onlinepicketline.com'
+                }
+              ],
+              _isTestAction: true,
+              _extensionData: {
+                matchingUrlRegexes: ['^https?://(?:www\\.)?example\\.com'],
+                moreInfoUrl: 'https://onlinepicketline.com/about',
+                actionDetails: {
+                  id: 'test-example-com',
+                  organization: 'Example Company',
+                  actionType: 'strike',
+                  description: 'Test labor action for plugin verification',
+                  status: 'active',
+                  location: 'Worldwide',
+                  startDate: new Date().toISOString().split('T')[0],
+                  demands: 'Fair wages, safe working conditions, union recognition',
+                  contactInfo: 'test@onlinepicketline.com',
+                  urls: [
+                    {
+                      title: 'Strike Information',
+                      url: 'https://onlinepicketline.com/about'
+                    }
+                  ]
+                }
+              }
+            };
+            
+            const filteredActions = currentActions.filter(a => !a._isTestAction);
+            const updatedActions = [...filteredActions, testAction];
+            
+            mockChrome.storage.local.set({
+              labor_actions: updatedActions,
+              cache_timestamp: Date.now(),
+              test_mode_enabled: true
+            }, () => {
+              if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+              } else {
+                resolve(updatedActions);
+              }
+            });
+          });
+        });
+      };
+
+      const result = await enableTestMode();
+      
+      // Verify the test action was added
+      expect(result).toHaveLength(2);
+      const testAction = result.find(a => a.id === 'test-example-com');
+      
+      // Verify required fields
+      expect(testAction).toBeDefined();
+      expect(testAction.id).toBe('test-example-com');
+      expect(testAction.title).toContain('TEST MODE');
+      expect(testAction.company).toBe('Example Company');
+      expect(testAction.type).toBe('strike');
+      expect(testAction.status).toBe('active');
+      expect(testAction.target_urls).toEqual(['example.com', 'www.example.com']);
+      expect(testAction._isTestAction).toBe(true);
+      
+      // Verify storage was called correctly
+      expect(mockChrome.storage.local.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          test_mode_enabled: true,
+          cache_timestamp: expect.any(Number)
+        }),
+        expect.any(Function)
+      );
+    });
+
+    it('should include comprehensive test data fields', async () => {
+      mockChrome.storage.local.get.mockImplementation((keys, callback) => {
+        callback({ labor_actions: [] });
+      });
+
+      mockChrome.storage.local.set.mockImplementation((data, callback) => {
+        callback();
+      });
+
+      const enableTestMode = () => {
+        return new Promise((resolve) => {
+          mockChrome.storage.local.get(['labor_actions'], (result) => {
+            const testAction = {
+              id: 'test-example-com',
+              title: 'TEST MODE: Example Company Workers Strike',
+              description: 'This is a test action to demonstrate the Online Picket Line plugin functionality. Workers at Example Company are demanding better wages, improved working conditions, and union recognition. This test will show how the plugin blocks or warns about sites with active labor actions.',
+              company: 'Example Company',
+              type: 'strike',
+              status: 'active',
+              more_info: 'https://onlinepicketline.com/about',
+              target_urls: ['example.com', 'www.example.com'],
+              locations: ['Worldwide'],
+              demands: 'Fair wages, safe working conditions, union recognition',
+              startDate: new Date().toISOString().split('T')[0],
+              contactInfo: 'test@onlinepicketline.com',
+              divisions: ['All Divisions'],
+              actionResources: [
+                { title: 'Strike Information', url: 'https://onlinepicketline.com/about' },
+                { title: 'How to Support', url: 'https://onlinepicketline.com' }
+              ],
+              _isTestAction: true
+            };
+            
+            mockChrome.storage.local.set({
+              labor_actions: [testAction],
+              cache_timestamp: Date.now(),
+              test_mode_enabled: true
+            }, () => resolve(testAction));
+          });
+        });
+      };
+
+      const testAction = await enableTestMode();
+      
+      // Verify all comprehensive fields
+      expect(testAction.description).toContain('demonstrate the Online Picket Line');
+      expect(testAction.locations).toEqual(['Worldwide']);
+      expect(testAction.demands).toBe('Fair wages, safe working conditions, union recognition');
+      expect(testAction.contactInfo).toBe('test@onlinepicketline.com');
+      expect(testAction.divisions).toEqual(['All Divisions']);
+      expect(testAction.actionResources).toHaveLength(2);
+      expect(testAction.actionResources[0].title).toBe('Strike Information');
+      expect(testAction.actionResources[0].url).toBe('https://onlinepicketline.com/about');
+      expect(testAction.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    });
+
+    it('should include extension data format for URL matching', async () => {
+      mockChrome.storage.local.get.mockImplementation((keys, callback) => {
+        callback({ labor_actions: [] });
+      });
+
+      mockChrome.storage.local.set.mockImplementation((data, callback) => {
+        callback();
+      });
+
+      const enableTestMode = () => {
+        return new Promise((resolve) => {
+          mockChrome.storage.local.get(['labor_actions'], (result) => {
+            const testAction = {
+              id: 'test-example-com',
+              company: 'Example Company',
+              target_urls: ['example.com', 'www.example.com'],
+              _isTestAction: true,
+              _extensionData: {
+                matchingUrlRegexes: ['^https?://(?:www\\.)?example\\.com'],
+                moreInfoUrl: 'https://onlinepicketline.com/about',
+                actionDetails: {
+                  id: 'test-example-com',
+                  organization: 'Example Company',
+                  actionType: 'strike',
+                  description: 'Test labor action for plugin verification',
+                  status: 'active',
+                  location: 'Worldwide',
+                  startDate: new Date().toISOString().split('T')[0],
+                  demands: 'Fair wages, safe working conditions, union recognition',
+                  contactInfo: 'test@onlinepicketline.com',
+                  urls: [
+                    { title: 'Strike Information', url: 'https://onlinepicketline.com/about' }
+                  ]
+                }
+              }
+            };
+            
+            mockChrome.storage.local.set({
+              labor_actions: [testAction]
+            }, () => resolve(testAction));
+          });
+        });
+      };
+
+      const testAction = await enableTestMode();
+      
+      // Verify extension data structure
+      expect(testAction._extensionData).toBeDefined();
+      expect(testAction._extensionData.matchingUrlRegexes).toEqual(['^https?://(?:www\\.)?example\\.com']);
+      expect(testAction._extensionData.moreInfoUrl).toBe('https://onlinepicketline.com/about');
+      expect(testAction._extensionData.actionDetails).toBeDefined();
+      expect(testAction._extensionData.actionDetails.organization).toBe('Example Company');
+      expect(testAction._extensionData.actionDetails.actionType).toBe('strike');
+    });
+
+    it('should replace existing test action when enabling test mode again', async () => {
+      const existingTestAction = {
+        id: 'old-test',
+        company: 'Old Test',
+        _isTestAction: true
+      };
+      
+      const regularAction = {
+        id: 'regular-1',
+        company: 'Regular Company'
+      };
+
+      mockChrome.storage.local.get.mockImplementation((keys, callback) => {
+        callback({ labor_actions: [regularAction, existingTestAction] });
+      });
+
+      mockChrome.storage.local.set.mockImplementation((data, callback) => {
+        callback();
+      });
+
+      const enableTestMode = () => {
+        return new Promise((resolve) => {
+          mockChrome.storage.local.get(['labor_actions'], (result) => {
+            const currentActions = result.labor_actions || [];
+            const testAction = {
+              id: 'test-example-com',
+              company: 'Example Company',
+              _isTestAction: true
+            };
+            
+            const filteredActions = currentActions.filter(a => !a._isTestAction);
+            const updatedActions = [...filteredActions, testAction];
+            
+            mockChrome.storage.local.set({
+              labor_actions: updatedActions
+            }, () => resolve(updatedActions));
+          });
+        });
+      };
+
+      const result = await enableTestMode();
+      
+      // Should have only 2 actions: the regular one and the new test one
+      expect(result).toHaveLength(2);
+      expect(result.find(a => a.id === 'regular-1')).toBeDefined();
+      expect(result.find(a => a.id === 'test-example-com')).toBeDefined();
+      expect(result.find(a => a.id === 'old-test')).toBeUndefined();
+    });
+
+    it('should open example.com in new tab when test button is clicked', async () => {
+      const testButton = mockDocument.getElementById('test-mode-btn');
+      
+      // Simulate button click handler
+      mockChrome.storage.local.get.mockImplementation((keys, callback) => {
+        callback({ labor_actions: [] });
+      });
+
+      mockChrome.storage.local.set.mockImplementation((data, callback) => {
+        callback();
+      });
+
+      const handleTestButtonClick = async () => {
+        return new Promise((resolve) => {
+          mockChrome.storage.local.get(['labor_actions'], (result) => {
+            const testAction = {
+              id: 'test-example-com',
+              company: 'Example Company',
+              target_urls: ['example.com', 'www.example.com'],
+              _isTestAction: true
+            };
+            
+            mockChrome.storage.local.set({
+              labor_actions: [testAction],
+              test_mode_enabled: true
+            }, () => {
+              mockChrome.tabs.create({ url: 'https://example.com' });
+              resolve();
+            });
+          });
+        });
+      };
+
+      await handleTestButtonClick();
+      
+      // Verify tab was created with correct URL
+      expect(mockChrome.tabs.create).toHaveBeenCalledWith({ url: 'https://example.com' });
+      expect(mockChrome.storage.local.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          test_mode_enabled: true
+        }),
+        expect.any(Function)
+      );
+    });
+
+    it('should set test_mode_enabled flag when activating test mode', async () => {
+      mockChrome.storage.local.get.mockImplementation((keys, callback) => {
+        callback({ labor_actions: [] });
+      });
+
+      let savedData;
+      mockChrome.storage.local.set.mockImplementation((data, callback) => {
+        savedData = data;
+        callback();
+      });
+
+      const enableTestMode = () => {
+        return new Promise((resolve) => {
+          mockChrome.storage.local.get(['labor_actions'], (result) => {
+            const testAction = {
+              id: 'test-example-com',
+              _isTestAction: true
+            };
+            
+            mockChrome.storage.local.set({
+              labor_actions: [testAction],
+              cache_timestamp: Date.now(),
+              test_mode_enabled: true
+            }, () => resolve());
+          });
+        });
+      };
+
+      await enableTestMode();
+      
+      expect(savedData.test_mode_enabled).toBe(true);
+      expect(savedData.cache_timestamp).toBeDefined();
+      expect(typeof savedData.cache_timestamp).toBe('number');
     });
   });
 });

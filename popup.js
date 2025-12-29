@@ -24,6 +24,24 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load stats
   loadStats();
 
+  // Test mode button
+  const testModeBtn = document.getElementById('test-mode-btn');
+  if (testModeBtn) {
+    testModeBtn.addEventListener('click', async () => {
+      try {
+        // Enable test mode and inject test data
+        await enableTestMode();
+        showStatus('Test mode enabled! Opening example.com...', 'success');
+        
+        // Open example.com in a new tab
+        chrome.tabs.create({ url: 'https://example.com' });
+      } catch (error) {
+        console.error('Error enabling test mode:', error);
+        showStatus('Failed to enable test mode', 'error');
+      }
+    });
+  }
+
   // Save settings when radio buttons change
   modeBannerRadio.addEventListener('change', () => {
     if (modeBannerRadio.checked) {
@@ -97,6 +115,86 @@ document.addEventListener('DOMContentLoaded', () => {
       statsHtml += `<br><a href="https://onlinepicketline.com" target="_blank" style="color: inherit; text-decoration: underline; margin-top: 0.5rem; display: inline-block;">More Info at OnlinePicketLine.com</a>`;
       
       statsContent.innerHTML = statsHtml;
+    });
+  }
+
+  /**
+   * Enable test mode by injecting test data for example.com
+   */
+  async function enableTestMode() {
+    return new Promise((resolve, reject) => {
+      // Get current labor actions
+      chrome.storage.local.get(['labor_actions'], (result) => {
+        const currentActions = result.labor_actions || [];
+        
+        // Create test action for example.com
+        const testAction = {
+          id: 'test-example-com',
+          title: 'TEST MODE: Example Company Workers Strike',
+          description: 'This is a test action to demonstrate the Online Picket Line plugin functionality. Workers at Example Company are demanding better wages, improved working conditions, and union recognition. This test will show how the plugin blocks or warns about sites with active labor actions.',
+          company: 'Example Company',
+          type: 'strike',
+          status: 'active',
+          more_info: 'https://onlinepicketline.com/about',
+          target_urls: ['example.com', 'www.example.com'],
+          locations: ['Worldwide'],
+          demands: 'Fair wages, safe working conditions, union recognition',
+          startDate: new Date().toISOString().split('T')[0],
+          contactInfo: 'test@onlinepicketline.com',
+          divisions: ['All Divisions'],
+          actionResources: [
+            {
+              title: 'Strike Information',
+              url: 'https://onlinepicketline.com/about'
+            },
+            {
+              title: 'How to Support',
+              url: 'https://onlinepicketline.com'
+            }
+          ],
+          _isTestAction: true,
+          _extensionData: {
+            matchingUrlRegexes: ['^https?://(?:www\\.)?example\\.com'],
+            moreInfoUrl: 'https://onlinepicketline.com/about',
+            actionDetails: {
+              id: 'test-example-com',
+              organization: 'Example Company',
+              actionType: 'strike',
+              description: 'Test labor action for plugin verification',
+              status: 'active',
+              location: 'Worldwide',
+              startDate: new Date().toISOString().split('T')[0],
+              demands: 'Fair wages, safe working conditions, union recognition',
+              contactInfo: 'test@onlinepicketline.com',
+              urls: [
+                {
+                  title: 'Strike Information',
+                  url: 'https://onlinepicketline.com/about'
+                }
+              ]
+            }
+          }
+        };
+        
+        // Remove any existing test action and add new one
+        const filteredActions = currentActions.filter(a => !a._isTestAction);
+        const updatedActions = [...filteredActions, testAction];
+        
+        // Save updated actions
+        chrome.storage.local.set({
+          labor_actions: updatedActions,
+          cache_timestamp: Date.now(),
+          test_mode_enabled: true
+        }, () => {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+          } else {
+            // Reload stats to show the new test action
+            loadStats();
+            resolve();
+          }
+        });
+      });
     });
   }
 });
