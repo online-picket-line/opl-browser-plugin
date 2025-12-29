@@ -2,7 +2,7 @@
 node_modules/
 
 # Package locks
-package-lock.json
+# package-lock.json should be committed for reproducible builds
 yarn.lock
 
 # Build artifacts
