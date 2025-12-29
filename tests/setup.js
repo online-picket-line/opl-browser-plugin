@@ -16,13 +16,19 @@ global.chrome = {
     onMessage: {
       addListener: jest.fn()
     },
-    getURL: jest.fn()
+    getURL: jest.fn(),
+    getManifest: jest.fn(() => ({ version: '1.0.0', name: 'Online Picket Line - OPL' }))
   },
   alarms: {
     create: jest.fn(),
     onAlarm: {
       addListener: jest.fn()
     }
+  },
+  tabs: {
+    create: jest.fn(),
+    query: jest.fn(),
+    update: jest.fn()
   }
 };
 

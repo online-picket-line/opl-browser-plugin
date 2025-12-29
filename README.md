@@ -10,6 +10,7 @@ A cross-browser extension that helps users stay informed about labor actions and
   - **Block Mode**: Prevents access to the page with an interstitial screen
 - **Smart URL Matching**: Compares current page URLs against labor action targets from employers, social media, and company websites
 - **Automatic Updates**: Refreshes labor action data every 15 minutes (as recommended by API)
+- **In-App Update Notifications**: Automatically checks for new extension versions from GitHub and notifies users
 - **API Configuration**: Easy setup with your Online Picketline instance URL (no API key required)
 - **Configurable Settings**: User-friendly popup interface for changing behavior
 - **Multi-Browser Support**: Compatible with Chrome, Edge, Opera, Brave, Firefox, and Safari
@@ -257,12 +258,25 @@ For development/testing, you can also modify the default URL in `api-service.js`
 const DEFAULT_API_BASE_URL = 'https://your-instance.com';
 ```
 
+## Extension Updates
+
+The extension includes an automatic update notification system:
+
+- **Automatic Checks**: Checks for new versions once every 24 hours
+- **GitHub Integration**: Fetches latest releases from the official repository
+- **Update Notifications**: Shows a banner in the popup when updates are available
+- **One-Click Updates**: Click "Update Now" to go directly to the download page
+- **Dismissible**: Dismiss update notifications for specific versions
+
+For more details about the update mechanism, see [UPDATE_MECHANISM.md](UPDATE_MECHANISM.md).
+
 ## Privacy
 
-- The extension only communicates with the configured API endpoint
+- The extension only communicates with the configured API endpoint and GitHub (for update checks)
 - No personal browsing data is collected or transmitted
 - All data is stored locally in your browser
 - The extension only activates when visiting sites associated with labor actions
+- Update checks use public GitHub API with no authentication required
 
 ## Contributing
 

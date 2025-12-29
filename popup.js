@@ -10,6 +10,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const statsContent = document.getElementById('stats-content');
   const connectionIndicator = document.getElementById('connection-indicator');
   const connectionText = document.getElementById('connection-text');
+  
+  // Update notification elements
+  const updateNotification = document.getElementById('update-notification');
+  const updateVersionText = document.getElementById('update-version-text');
+  const updateBtn = document.getElementById('update-btn');
+  const dismissUpdateBtn = document.getElementById('dismiss-update-btn');
 
   // Load current settings
   chrome.storage.sync.get(['blockMode'], (result) => {
@@ -23,6 +29,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load stats
   loadStats();
+  
+  // Check for updates
+  checkForUpdates();
+
+  // Update notification event listeners
+  if (updateBtn) {
+    updateBtn.addEventListener('click', () => {
+      // Send message to background to open update page
+      chrome.runtime.sendMessage({ action: 'openUpdatePage' }, () => {
+        if (chrome.runtime.lastError) {
+          console.error('Error opening update page:', chrome.runtime.lastError);
+        }
+      });
+    });
+  }
+
+  if (dismissUpdateBtn) {
+    dismissUpdateBtn.addEventListener('click', () => {
+      // Send message to background to dismiss update
+      chrome.runtime.sendMessage({ action: 'dismissUpdate' }, () => {
+        if (chrome.runtime.lastError) {
+          console.error('Error dismissing update:', chrome.runtime.lastError);
+        } else {
+          // Hide the notification
+          if (updateNotification) {
+            updateNotification.style.display = 'none';
+          }
+        }
+      });
+    });
+  }
+
+  /**
+   * Check for updates and display notification if available
+   */
+  function checkForUpdates() {
+    chrome.runtime.sendMessage({ action: 'checkUpdate' }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.error('Error checking for updates:', chrome.runtime.lastError);
+        return;
+      }
+      
+      if (response && response.updateAvailable) {
+        const { currentVersion, latestVersion } = response;
+        
+        // Show update notification
+        if (updateNotification && updateVersionText) {
+          updateVersionText.textContent = `Version ${latestVersion} is available (you have ${currentVersion})`;
+          updateNotification.style.display = 'block';
+        }
+      }
+    });
+  }
 
   // Test mode button
   const testModeBtn = document.getElementById('test-mode-btn');
