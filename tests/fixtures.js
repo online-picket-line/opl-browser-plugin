@@ -20,18 +20,7 @@ const mockExtensionData = {
       "contactInfo": "support@wirecutterunion.org",
       "logoUrl": "https://example.com/logos/wirecutter-union.png",
       "location": "New York, NY",
-      "urls": [
-        {
-          "url": "https://twitter.com/wirecutterunion/status/123",
-          "label": "Official Strike Page",
-          "description": "Latest updates from the union"
-        },
-        {
-          "url": "https://gofundme.com/wirecutter-strike",
-          "label": "Strike Fund",
-          "description": "Donate to support striking workers"
-        }
-      ]
+      "learnMoreUrl": "https://twitter.com/wirecutterunion/status/123"
     }
   },
   "Example Corp": {
@@ -50,12 +39,7 @@ const mockExtensionData = {
       "demands": "Union recognition, fair wages",
       "logoUrl": "https://example.com/logos/workers-united.png",
       "location": "Detroit, MI",
-      "urls": [
-        {
-          "url": "https://example.com/boycott",
-          "label": "Boycott Information"
-        }
-      ]
+      "learnMoreUrl": "https://example.com/boycott"
     }
   },
   "_optimizedPatterns": {
@@ -67,7 +51,7 @@ const mockExtensionData = {
 const mockTransformedActions = [
   {
     id: "action-123",
-    title: "strike: Wirecutter Union",
+    title: "Wirecutter Union",
     description: "Workers striking for fair wages and benefits",
     company: "Wirecutter",
     type: "strike",
@@ -75,20 +59,14 @@ const mockTransformedActions = [
     more_info: "https://twitter.com/wirecutterunion/status/123",
     target_urls: ["wirecutter.com", "nytimes.com", "facebook.com", "twitter.com"],
     locations: ["New York, NY"],
+    demands: "15% wage increase, healthcare coverage",
     logoUrl: "https://example.com/logos/wirecutter-union.png",
     divisions: [],
-    actionResources: [
-      {
-        "url": "https://twitter.com/wirecutterunion/status/123",
-        "label": "Official Strike Page",
-        "description": "Latest updates from the union"
-      }
-    ],
     _extensionData: mockExtensionData["Wirecutter"]
   },
   {
     id: "action-456",
-    title: "boycott: Workers United Local 789",
+    title: "Workers United Local 789",
     description: "Consumer boycott for worker rights",
     company: "Example Corp",
     type: "boycott",
@@ -96,14 +74,9 @@ const mockTransformedActions = [
     more_info: "https://example.com/strike-info",
     target_urls: ["example.com", "www.example.com", "facebook.com"],
     locations: ["Detroit, MI"],
+    demands: "Union recognition, fair wages",
     logoUrl: "https://example.com/logos/workers-united.png",
     divisions: [],
-    actionResources: [
-      {
-        "url": "https://example.com/boycott",
-        "label": "Boycott Information"
-      }
-    ],
     _extensionData: mockExtensionData["Example Corp"]
   }
 ];

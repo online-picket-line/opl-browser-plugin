@@ -274,11 +274,13 @@
 <a name='L209'></a><a href='#L209'>209</a>
 <a name='L210'></a><a href='#L210'>210</a>
 <a name='L211'></a><a href='#L211'>211</a>
-<a name='L212'></a><a href='#L212'>212</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -490,6 +492,7 @@
 <span class="cstat-no" title="statement not covered" >importScripts('api-service.js');</span>
 &nbsp;
 const apiService = <span class="cstat-no" title="statement not covered" >new ApiService();</span>
+&nbsp;
 const allowedBypasses = <span class="cstat-no" title="statement not covered" >new Map();</span> // tabId -&gt; url
 // We use chrome.storage.local for blocked states to persist across service worker restarts
 // Key format: blocked_tab_${tabId}
@@ -498,7 +501,7 @@ const allowedBypasses = <span class="cstat-no" title="statement not covered" >ne
 <span class="cstat-no" title="statement not covered" >chrome.runtime.onInstalled.addListener(<span class="fstat-no" title="function not covered" >as</span>ync () =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  console.log('Extension installed, fetching labor actions...');</span>
 <span class="cstat-no" title="statement not covered" >  await refreshLaborActions();</span>
-  
+&nbsp;
   // Set default settings
 <span class="cstat-no" title="statement not covered" >  chrome.storage.sync.get(['blockMode'], <span class="fstat-no" title="function not covered" >(r</span>esult) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    if (result.blockMode === undefined) {</span>
@@ -522,44 +525,44 @@ async function <span class="fstat-no" title="function not covered" >refreshLabor
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const actions = <span class="cstat-no" title="statement not covered" >await apiService.getLaborActions();</span>
 <span class="cstat-no" title="statement not covered" >    console.log(`Fetched ${actions.length} labor actions`);</span>
-    
+&nbsp;
     // Store in local storage for quick access
-<span class="cstat-no" title="statement not covered" >    await chrome.storage.local.set({ </span>
+<span class="cstat-no" title="statement not covered" >    await chrome.storage.local.set({</span>
       labor_actions: actions,
       connection_status: 'online',
       failure_count: 0
     });
-    
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    return actions.length &gt; 0 || true; </span>// Return true even if empty (successful fetch)
   } catch (error) {
 <span class="cstat-no" title="statement not covered" >    console.error('Failed to refresh labor actions:', error);</span>
-    
+&nbsp;
     // Get current failure count
     const result = <span class="cstat-no" title="statement not covered" >await chrome.storage.local.get(['failure_count']);</span>
     const currentFailures = <span class="cstat-no" title="statement not covered" >(result.failure_count || 0) + 1;</span>
-    
+&nbsp;
     const updates = <span class="cstat-no" title="statement not covered" >{</span>
       failure_count: currentFailures
     };
-    
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    if (currentFailures &gt;= 3) {</span>
 <span class="cstat-no" title="statement not covered" >      updates.connection_status = 'offline';</span>
     }
-    
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    await chrome.storage.local.set(updates);</span>
-    
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    return false;</span>
   }
 }
 &nbsp;
 /**
  * Check if a URL matches any labor actions using optimized extension format
- * 
+ *
  * Uses the optimized pattern matching from API v3.0 extension format:
  * 1. Tests against optimized combined patterns first (fast)
  * 2. Falls back to individual pattern matching for accuracy
  * 3. Returns full action details for rich notifications
- * 
+ *
  * @param {string} url - URL to check
  * @param {Array} actions - List of labor actions with _extensionData
  * @returns {Object|null} Matching action object or null if no match found
@@ -571,7 +574,7 @@ function <span class="fstat-no" title="function not covered" >matchUrlToAction(<
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const urlToTest = <span class="cstat-no" title="statement not covered" >url.toLowerCase();</span>
-    
+&nbsp;
     // Check each action using extension format data if available
 <span class="cstat-no" title="statement not covered" >    for (const action of actions) {</span>
       // Skip inactive actions
@@ -587,7 +590,7 @@ function <span class="fstat-no" title="function not covered" >matchUrlToAction(<
 <span class="cstat-no" title="statement not covered" >            if (regex.test(urlToTest)) {</span>
 <span class="cstat-no" title="statement not covered" >              return action;</span>
             }
-          } catch (e) {
+          } catch (_e) {
 <span class="cstat-no" title="statement not covered" >            console.warn('Invalid regex pattern:', pattern);</span>
 <span class="cstat-no" title="statement not covered" >            continue;</span>
           }
@@ -596,16 +599,16 @@ function <span class="fstat-no" title="function not covered" >matchUrlToAction(<
         // Fallback to legacy target_urls matching
         const hostname = <span class="cstat-no" title="statement not covered" >new URL(url).hostname.toLowerCase();</span>
         const targets = <span class="cstat-no" title="statement not covered" >action.target_urls || action.targets || action.domains || [];</span>
-        
+&nbsp;
 <span class="cstat-no" title="statement not covered" >        for (const target of targets) {</span>
           const targetLower = <span class="cstat-no" title="statement not covered" >target.toLowerCase();</span>
-          
+&nbsp;
           // Match exact domain or subdomain
 <span class="cstat-no" title="statement not covered" >          if (hostname === targetLower || hostname.endsWith('.' + targetLower)) {</span>
 <span class="cstat-no" title="statement not covered" >            return action;</span>
           }
         }
-        
+&nbsp;
         // Fallback: check company name
 <span class="cstat-no" title="statement not covered" >        if (action.company) {</span>
           const companyLower = <span class="cstat-no" title="statement not covered" >action.company.toLowerCase().replace(/\s+/g, '');</span>
@@ -638,7 +641,7 @@ function <span class="fstat-no" title="function not covered" >matchUrlToAction(<
 <span class="cstat-no" title="statement not covered" >    chrome.storage.local.get(['labor_actions'], <span class="fstat-no" title="function not covered" >(r</span>esult) =&gt; {</span>
       const actions = <span class="cstat-no" title="statement not covered" >result.labor_actions || [];</span>
       const match = <span class="cstat-no" title="statement not covered" >matchUrlToAction(request.url, actions);</span>
-      
+&nbsp;
 <span class="cstat-no" title="statement not covered" >      chrome.storage.sync.get(['blockMode'], <span class="fstat-no" title="function not covered" >(s</span>ettings) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >        sendResponse({</span>
           match: match,
@@ -646,7 +649,7 @@ function <span class="fstat-no" title="function not covered" >matchUrlToAction(<
         });
       });
     });
-    
+&nbsp;
     // Return true to indicate async response
 <span class="cstat-no" title="statement not covered" >    return true;</span>
   } else <span class="cstat-no" title="statement not covered" >if (request.action === 'allowBypass') {</span>
@@ -703,7 +706,7 @@ function <span class="fstat-no" title="function not covered" >matchUrlToAction(<
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-29T18:39:49.091Z
+                at 2025-12-30T21:05:05.529Z
             </div>
         <script src="prettify.js"></script>
         <script>

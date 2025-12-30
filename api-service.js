@@ -280,16 +280,15 @@ class ApiService {
         company: orgName,
         type: actionDetails.actionType || this.extractActionType('labor action'),
         status: actionDetails.status || 'active',
-        more_info: orgData.moreInfoUrl || (actionDetails.urls?.[0]?.url) || '',
+        more_info: orgData.moreInfoUrl || actionDetails.learnMoreUrl || '',
         target_urls: (orgData.matchingUrlRegexes || []).map(regex => this.extractDomainFromRegex(regex)),
         locations: actionDetails.location ? [actionDetails.location] : [],
         demands: actionDetails.demands || '',
         startDate: orgData.startTime || actionDetails.startDate || '',
         endDate: orgData.endTime || actionDetails.endDate || '',
         contactInfo: actionDetails.contactInfo || '',
-        logoUrl: actionDetails.logoUrl || actionDetails.unionImageUrl || '',
+        logoUrl: actionDetails.logoUrl || '',
         divisions: [],
-        actionResources: actionDetails.urls || [],
         // Store original extension data for advanced matching
         _extensionData: orgData
       };

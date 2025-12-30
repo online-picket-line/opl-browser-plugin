@@ -247,7 +247,8 @@
 <a name='L182'></a><a href='#L182'>182</a>
 <a name='L183'></a><a href='#L183'>183</a>
 <a name='L184'></a><a href='#L184'>184</a>
-<a name='L185'></a><a href='#L185'>185</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L185'></a><a href='#L185'>185</a>
+<a name='L186'></a><a href='#L186'>186</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -431,7 +432,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// API Migration Helper Script
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// API Migration Helper Script
 // This script helps identify changes needed when updating to a new API version
 &nbsp;
 class ApiMigrationHelper {
@@ -445,15 +447,15 @@ class ApiMigrationHelper {
    */
 <span class="fstat-no" title="function not covered" >  as</span>ync compareApiResponses() {
 <span class="cstat-no" title="statement not covered" >    console.log('🔍 Comparing API responses...');</span>
-    
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    try {</span>
       // Test old API endpoint
       const oldResponse = <span class="cstat-no" title="statement not covered" >await this.testEndpoint(this.oldApiUrl, '/api/blocklist?format=json');</span>
-      
+&nbsp;
       // Test potential new endpoints
       const newEndpoints = <span class="cstat-no" title="statement not covered" >[</span>
         '/api/blocklist?format=json',
-        '/api/v1/blocklist?format=json', 
+        '/api/v1/blocklist?format=json',
         '/api/v2/blocklist?format=json',
         '/api/labor-actions',
         '/api/actions'
@@ -462,7 +464,7 @@ class ApiMigrationHelper {
 <span class="cstat-no" title="statement not covered" >      for (const endpoint of newEndpoints) {</span>
 <span class="cstat-no" title="statement not covered" >        console.log(`\n📡 Testing ${endpoint}...`);</span>
         const newResponse = <span class="cstat-no" title="statement not covered" >await this.testEndpoint(this.newApiUrl, endpoint);</span>
-        
+&nbsp;
 <span class="cstat-no" title="statement not covered" >        if (newResponse.success &amp;&amp; oldResponse.success) {</span>
 <span class="cstat-no" title="statement not covered" >          this.compareDataStructures(oldResponse.data, newResponse.data, endpoint);</span>
         }
@@ -482,10 +484,10 @@ class ApiMigrationHelper {
       });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      if (!response.ok) {</span>
-<span class="cstat-no" title="statement not covered" >        return { </span>
-          success: false, 
-          status: response.status, 
-          error: `HTTP ${response.status}` 
+<span class="cstat-no" title="statement not covered" >        return {</span>
+          success: false,
+          status: response.status,
+          error: `HTTP ${response.status}`
         };
       }
 &nbsp;
@@ -501,11 +503,11 @@ class ApiMigrationHelper {
    */
 <span class="fstat-no" title="function not covered" >  co</span>mpareDataStructures(oldData, newData, endpoint) {
 <span class="cstat-no" title="statement not covered" >    console.log(`\n🔄 Comparing data structure for ${endpoint}:`);</span>
-    
+&nbsp;
     // Check top-level structure
     const oldKeys = <span class="cstat-no" title="statement not covered" >Object.keys(oldData);</span>
     const newKeys = <span class="cstat-no" title="statement not covered" >Object.keys(newData);</span>
-    
+&nbsp;
     const addedKeys = <span class="cstat-no" title="statement not covered" >newKeys.filter(<span class="fstat-no" title="function not covered" >ke</span>y =&gt; <span class="cstat-no" title="statement not covered" >!oldKeys.includes(key))</span>;</span>
     const removedKeys = <span class="cstat-no" title="statement not covered" >oldKeys.filter(<span class="fstat-no" title="function not covered" >ke</span>y =&gt; <span class="cstat-no" title="statement not covered" >!newKeys.includes(key))</span>;</span>
     const commonKeys = <span class="cstat-no" title="statement not covered" >oldKeys.filter(<span class="fstat-no" title="function not covered" >ke</span>y =&gt; <span class="cstat-no" title="statement not covered" >newKeys.includes(key))</span>;</span>
@@ -513,14 +515,14 @@ class ApiMigrationHelper {
 <span class="cstat-no" title="statement not covered" >    if (addedKeys.length &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >      console.log('➕ Added fields:', addedKeys);</span>
     }
-    
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    if (removedKeys.length &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >      console.log('❌ Removed fields:', removedKeys);</span>
     }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (commonKeys.length &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >      console.log('✅ Common fields:', commonKeys);</span>
-      
+&nbsp;
       // Check blocklist structure specifically
 <span class="cstat-no" title="statement not covered" >      if (oldData.blocklist &amp;&amp; newData.blocklist) {</span>
 <span class="cstat-no" title="statement not covered" >        this.compareBlocklistStructure(oldData.blocklist, newData.blocklist);</span>
@@ -538,20 +540,20 @@ class ApiMigrationHelper {
     }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    console.log('\n📋 Comparing blocklist item structure:');</span>
-    
+&nbsp;
     const oldItem = <span class="cstat-no" title="statement not covered" >oldBlocklist[0];</span>
     const newItem = <span class="cstat-no" title="statement not covered" >newBlocklist[0];</span>
-    
+&nbsp;
     const oldItemKeys = <span class="cstat-no" title="statement not covered" >Object.keys(oldItem);</span>
     const newItemKeys = <span class="cstat-no" title="statement not covered" >Object.keys(newItem);</span>
-    
+&nbsp;
     const addedFields = <span class="cstat-no" title="statement not covered" >newItemKeys.filter(<span class="fstat-no" title="function not covered" >ke</span>y =&gt; <span class="cstat-no" title="statement not covered" >!oldItemKeys.includes(key))</span>;</span>
     const removedFields = <span class="cstat-no" title="statement not covered" >oldItemKeys.filter(<span class="fstat-no" title="function not covered" >ke</span>y =&gt; <span class="cstat-no" title="statement not covered" >!newItemKeys.includes(key))</span>;</span>
-    
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    if (addedFields.length &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >      console.log('➕ New blocklist fields:', addedFields);</span>
     }
-    
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    if (removedFields.length &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >      console.log('❌ Removed blocklist fields:', removedFields);</span>
     }
@@ -567,12 +569,12 @@ class ApiMigrationHelper {
   /**
    * Generate migration recommendations
    */
-<span class="fstat-no" title="function not covered" >  ge</span>nerateMigrationPlan(changes) {
+<span class="fstat-no" title="function not covered" >  ge</span>nerateMigrationPlan(_changes) {
 <span class="cstat-no" title="statement not covered" >    console.log('\n📝 Migration Plan:');</span>
 <span class="cstat-no" title="statement not covered" >    console.log('==================');</span>
-    
+&nbsp;
     const updates = <span class="cstat-no" title="statement not covered" >[];</span>
-    
+&nbsp;
     // Add specific recommendations based on common changes
 <span class="cstat-no" title="statement not covered" >    updates.push({</span>
       file: 'api-service.js',
@@ -584,7 +586,7 @@ class ApiMigrationHelper {
     });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    updates.push({</span>
-      file: 'popup.js', 
+      file: 'popup.js',
       changes: [
         'Add API key input field if authentication added',
         'Update connection test logic',
@@ -615,14 +617,15 @@ class ApiMigrationHelper {
 // migrator.compareApiResponses();
 &nbsp;
 // Export for use in console
-<span class="cstat-no" title="statement not covered" >window.ApiMigrationHelper = ApiMigrationHelper;</span></pre></td></tr></table></pre>
+<span class="cstat-no" title="statement not covered" >window.ApiMigrationHelper = ApiMigrationHelper;</span>
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-29T18:39:49.091Z
+                at 2025-12-30T21:05:05.529Z
             </div>
         <script src="prettify.js"></script>
         <script>

@@ -132,7 +132,9 @@
 <a name='L67'></a><a href='#L67'>67</a>
 <a name='L68'></a><a href='#L68'>68</a>
 <a name='L69'></a><a href='#L69'>69</a>
-<a name='L70'></a><a href='#L70'>70</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L70'></a><a href='#L70'>70</a>
+<a name='L71'></a><a href='#L71'>71</a>
+<a name='L72'></a><a href='#L72'>72</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -173,19 +175,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -195,20 +192,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// API Testing Script
 // Run this in browser console to test API endpoints
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >testCurrentAPI(</span>) {
   const baseUrl = <span class="cstat-no" title="statement not covered" >'YOUR_INSTANCE_URL';</span> // Replace with actual URL
-  
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  console.log('Testing current API endpoint...');</span>
-  
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const response = <span class="cstat-no" title="statement not covered" >await fetch(`${baseUrl}/api/blocklist?format=json`, {</span>
       method: 'GET',
@@ -216,16 +220,16 @@ async function <span class="fstat-no" title="function not covered" >testCurrentA
         'Accept': 'application/json'
       }
     });
-    
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    console.log('Response status:', response.status);</span>
 <span class="cstat-no" title="statement not covered" >    console.log('Response headers:', Object.fromEntries(response.headers.entries()));</span>
-    
+&nbsp;
 <span class="cstat-no" title="statement not covered" >    if (response.ok) {</span>
       const data = <span class="cstat-no" title="statement not covered" >await response.json();</span>
 <span class="cstat-no" title="statement not covered" >      console.log('Response data structure:', data);</span>
 <span class="cstat-no" title="statement not covered" >      console.log('Blocklist entries:', data.blocklist?.length || 0);</span>
 <span class="cstat-no" title="statement not covered" >      console.log('Employers:', data.employers?.length || 0);</span>
-      
+&nbsp;
       // Test data structure
 <span class="cstat-no" title="statement not covered" >      if (data.blocklist &amp;&amp; data.blocklist.length &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >        console.log('Sample blocklist entry:', data.blocklist[0]);</span>
@@ -241,16 +245,17 @@ async function <span class="fstat-no" title="function not covered" >testCurrentA
 }
 &nbsp;
 // Test alternative endpoints
+// eslint-disable-next-line no-unused-vars
 async function <span class="fstat-no" title="function not covered" >testAlternativeEndpoints(</span>) {
   const baseUrl = <span class="cstat-no" title="statement not covered" >'YOUR_INSTANCE_URL';</span> // Replace with actual URL
   const endpoints = <span class="cstat-no" title="statement not covered" >[</span>
     '/api/v1/blocklist',
-    '/api/v2/blocklist', 
+    '/api/v2/blocklist',
     '/api/labor-actions',
     '/api/actions',
     '/blocklist'
   ];
-  
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  for (const endpoint of endpoints) {</span>
 <span class="cstat-no" title="statement not covered" >    try {</span>
 <span class="cstat-no" title="statement not covered" >      console.log(`Testing ${endpoint}...`);</span>
@@ -270,14 +275,15 @@ async function <span class="fstat-no" title="function not covered" >testAlternat
 &nbsp;
 // Run tests
 <span class="cstat-no" title="statement not covered" >testCurrentAPI();</span>
-// testAlternativeEndpoints(); // Uncomment to test alternative endpoints</pre></td></tr></table></pre>
+// testAlternativeEndpoints(); // Uncomment to test alternative endpoints
+&nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-29T18:39:49.091Z
+                at 2025-12-30T21:05:05.529Z
             </div>
         <script src="prettify.js"></script>
         <script>

@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/64</span>
+                <span class='fraction'>0/66</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/36</span>
+                <span class='fraction'>0/40</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/64</span>
+                <span class='fraction'>0/66</span>
             </div>
         
             
@@ -182,7 +182,11 @@
 <a name='L117'></a><a href='#L117'>117</a>
 <a name='L118'></a><a href='#L118'>118</a>
 <a name='L119'></a><a href='#L119'>119</a>
-<a name='L120'></a><a href='#L120'>120</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L120'></a><a href='#L120'>120</a>
+<a name='L121'></a><a href='#L121'>121</a>
+<a name='L122'></a><a href='#L122'>122</a>
+<a name='L123'></a><a href='#L123'>123</a>
+<a name='L124'></a><a href='#L124'>124</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -294,6 +298,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -316,7 +324,7 @@
 <span class="cstat-no" title="statement not covered" >  chrome.runtime.sendMessage({ action: 'getBlockedState' }, <span class="fstat-no" title="function not covered" >(r</span>esponse) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    if (response) {</span>
 <span class="cstat-no" title="statement not covered" >      updateUI(response.action, response.url);</span>
-      
+&nbsp;
       // Store original URL for proceed button
 <span class="cstat-no" title="statement not covered" >      window.originalUrl = response.url;</span>
     } else {
@@ -338,13 +346,13 @@
 &nbsp;
       // Update UI with action data
 <span class="cstat-no" title="statement not covered" >      actionTitle.textContent = action.title || 'Labor Action in Progress';</span>
-<span class="cstat-no" title="statement not covered" >      actionDescription.textContent = action.description || </span>
+<span class="cstat-no" title="statement not covered" >      actionDescription.textContent = action.description ||</span>
         'This company is currently subject to a labor action. We encourage you to learn more and support workers.';
-      
+&nbsp;
 <span class="cstat-no" title="statement not covered" >      if (action.type) {</span>
 <span class="cstat-no" title="statement not covered" >        actionType.textContent = action.type.toUpperCase();</span>
       }
-      
+&nbsp;
 <span class="cstat-no" title="statement not covered" >      if (action.url || action.more_info) {</span>
 <span class="cstat-no" title="statement not covered" >        learnMoreBtn.href = action.url || action.more_info;</span>
 <span class="cstat-no" title="statement not covered" >        learnMoreBtn.style.display = 'inline-block';</span>
@@ -393,7 +401,7 @@
 <span class="cstat-no" title="statement not covered" >      try {</span>
         const url = <span class="cstat-no" title="statement not covered" >new URL(originalUrl);</span>
 <span class="cstat-no" title="statement not covered" >        blockedUrl.textContent = url.hostname;</span>
-      } catch (e) {
+      } catch (_e) {
 <span class="cstat-no" title="statement not covered" >        blockedUrl.textContent = originalUrl;</span>
       }
     }
@@ -412,8 +420,12 @@
 &nbsp;
   // Handle go back button
 <span class="cstat-no" title="statement not covered" >  goBackBtn.addEventListener('click', <span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-    // Go back or close
-<span class="cstat-no" title="statement not covered" >    if (window.history.length &gt; 1) {</span>
+    // Check if we have a meaningful history to go back to
+    // If we came directly from a new tab (like test mode), redirect to onlinepicketline.com
+<span class="cstat-no" title="statement not covered" >    if (window.history.length &lt;= 2 &amp;&amp; window.originalUrl) {</span>
+      // History is too short (just the blocked page), go to onlinepicketline.com
+<span class="cstat-no" title="statement not covered" >      window.location.href = 'https://onlinepicketline.com';</span>
+    } else <span class="cstat-no" title="statement not covered" >if (window.history.length &gt; 1) {</span>
 <span class="cstat-no" title="statement not covered" >      window.history.back();</span>
     } else {
 <span class="cstat-no" title="statement not covered" >      window.close();</span>
@@ -427,7 +439,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-29T18:39:49.091Z
+                at 2025-12-30T21:05:05.529Z
             </div>
         <script src="prettify.js"></script>
         <script>

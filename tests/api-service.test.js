@@ -73,16 +73,20 @@ describe('ApiService', () => {
       expect(result).toHaveLength(2);
       expect(result[0]).toMatchObject({
         company: 'Wirecutter',
+        title: 'Wirecutter Union',
         type: 'strike',
         status: 'active',
         description: 'Workers striking for fair wages and benefits',
+        demands: '15% wage increase, healthcare coverage',
         logoUrl: 'https://example.com/logos/wirecutter-union.png'
       });
       expect(result[1]).toMatchObject({
         company: 'Example Corp',
+        title: 'Workers United Local 789',
         type: 'boycott',
         status: 'active',
         description: 'Consumer boycott for worker rights',
+        demands: 'Union recognition, fair wages',
         logoUrl: 'https://example.com/logos/workers-united.png'
       });
     });
@@ -108,6 +112,129 @@ describe('ApiService', () => {
         company: 'Test Org',
         logoUrl: ''
       });
+    });
+
+    it('should use learnMoreUrl from actionDetails when moreInfoUrl is missing', () => {
+      const dataWithLearnMoreUrl = {
+        "Test Org": {
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "Test Org",
+            "actionType": "strike",
+            "status": "active",
+            "learnMoreUrl": "https://union.org/learn-more"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithLearnMoreUrl);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].more_info).toBe("https://union.org/learn-more");
+    });
+
+    it('should prefer moreInfoUrl over learnMoreUrl', () => {
+      const dataWithBothUrls = {
+        "Test Org": {
+          "moreInfoUrl": "https://primary.org/info",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "Test Org",
+            "actionType": "strike",
+            "status": "active",
+            "learnMoreUrl": "https://secondary.org/learn-more"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithBothUrls);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].more_info).toBe("https://primary.org/info");
+    });
+
+    it('should extract demands from actionDetails', () => {
+      const dataWithDemands = {
+        "Test Org": {
+          "moreInfoUrl": "https://test.com",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "Test Org",
+            "actionType": "strike",
+            "status": "active",
+            "demands": "Higher wages, better benefits, safe working conditions"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithDemands);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].demands).toBe("Higher wages, better benefits, safe working conditions");
+    });
+
+    it('should handle missing demands gracefully', () => {
+      const dataWithoutDemands = {
+        "Test Org": {
+          "moreInfoUrl": "https://test.com",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "Test Org",
+            "actionType": "strike",
+            "status": "active"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithoutDemands);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].demands).toBe("");
+    });
+
+    it('should use organization name as title (without action type prefix)', () => {
+      const dataWithOrg = {
+        "Employer Name": {
+          "moreInfoUrl": "https://test.com",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "UAW Local 456",
+            "actionType": "strike",
+            "status": "active"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithOrg);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].title).toBe("UAW Local 456");
+      expect(result[0].company).toBe("Employer Name");
+    });
+
+    it('should fallback to orgName when organization is missing', () => {
+      const dataWithoutOrg = {
+        "Fallback Name": {
+          "moreInfoUrl": "https://test.com",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "actionType": "strike",
+            "status": "active"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithoutOrg);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].title).toBe("Fallback Name");
+      expect(result[0].company).toBe("Fallback Name");
     });
 
     it('should handle empty or invalid data', () => {

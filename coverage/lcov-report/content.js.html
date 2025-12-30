@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/65</span>
+                <span class='fraction'>0/68</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/63</span>
+                <span class='fraction'>0/67</span>
             </div>
         
             
@@ -231,7 +231,15 @@
 <a name='L166'></a><a href='#L166'>166</a>
 <a name='L167'></a><a href='#L167'>167</a>
 <a name='L168'></a><a href='#L168'>168</a>
-<a name='L169'></a><a href='#L169'>169</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L169'></a><a href='#L169'>169</a>
+<a name='L170'></a><a href='#L170'>170</a>
+<a name='L171'></a><a href='#L171'>171</a>
+<a name='L172'></a><a href='#L172'>172</a>
+<a name='L173'></a><a href='#L173'>173</a>
+<a name='L174'></a><a href='#L174'>174</a>
+<a name='L175'></a><a href='#L175'>175</a>
+<a name='L176'></a><a href='#L176'>176</a>
+<a name='L177'></a><a href='#L177'>177</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -285,7 +293,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -293,6 +301,14 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -450,17 +466,25 @@
     const banner = <span class="cstat-no" title="statement not covered" >document.createElement('div');</span>
 <span class="cstat-no" title="statement not covered" >    banner.id = 'opl-labor-banner';</span>
 <span class="cstat-no" title="statement not covered" >    banner.className = 'opl-banner';</span>
-    
+&nbsp;
     const title = <span class="cstat-no" title="statement not covered" >action.title || 'Labor Action in Progress';</span>
     const description = <span class="cstat-no" title="statement not covered" >action.description || 'This company is currently subject to a labor action.';</span>
-    const actionType = <span class="cstat-no" title="statement not covered" >action.type || 'strike';</span>
+    // const actionType = action.type || 'strike';  // Currently unused
     const moreInfoUrl = <span class="cstat-no" title="statement not covered" >action.url || action.more_info || '';</span>
     const logoUrl = <span class="cstat-no" title="statement not covered" >action.logoUrl || '';</span>
-    
+&nbsp;
     // Construct details string
     let details = <span class="cstat-no" title="statement not covered" >[];</span>
 <span class="cstat-no" title="statement not covered" >    if (action.locations &amp;&amp; action.locations.length &gt; 0) <span class="cstat-no" title="statement not covered" >details.push(action.locations[0]);</span></span>
-<span class="cstat-no" title="statement not covered" >    if (action.startDate) <span class="cstat-no" title="statement not covered" >details.push(`Since ${new Date(action.startDate).toLocaleDateString()}`);</span></span>
+<span class="cstat-no" title="statement not covered" >    if (action.startDate) {</span>
+      let dateText = <span class="cstat-no" title="statement not covered" >new Date(action.startDate).toLocaleDateString();</span>
+<span class="cstat-no" title="statement not covered" >      if (action.endDate) {</span>
+<span class="cstat-no" title="statement not covered" >        dateText += ' - ' + new Date(action.endDate).toLocaleDateString();</span>
+      } else {
+<span class="cstat-no" title="statement not covered" >        dateText += ' - Present';</span>
+      }
+<span class="cstat-no" title="statement not covered" >      details.push(dateText);</span>
+    }
     const detailsHtml = <span class="cstat-no" title="statement not covered" >details.length &gt; 0 ? `&lt;p class="opl-banner-details" style="font-size: 0.8em; opacity: 0.9; margin-top: 2px;"&gt;${details.join(' • ')}&lt;/p&gt;` : '';</span>
 &nbsp;
     // Build logo HTML if available
@@ -538,7 +562,7 @@
   // Listen for URL changes in SPAs using a more efficient approach
   // Only monitor for history state changes rather than all DOM mutations
   let lastUrl = <span class="cstat-no" title="statement not covered" >window.location.href;</span>
-  
+&nbsp;
   // Modern approach: use popstate for history changes
 <span class="cstat-no" title="statement not covered" >  window.addEventListener('popstate', <span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >    if (window.location.href !== lastUrl) {</span>
@@ -546,11 +570,11 @@
 <span class="cstat-no" title="statement not covered" >      checkCurrentPage();</span>
     }
   });
-  
+&nbsp;
   // Also monitor pushState and replaceState for SPAs
   const originalPushState = <span class="cstat-no" title="statement not covered" >history.pushState;</span>
   const originalReplaceState = <span class="cstat-no" title="statement not covered" >history.replaceState;</span>
-  
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  history.pushState = <span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
 <span class="cstat-no" title="statement not covered" >    originalPushState.apply(this, arguments);</span>
 <span class="cstat-no" title="statement not covered" >    if (window.location.href !== lastUrl) {</span>
@@ -558,7 +582,7 @@
 <span class="cstat-no" title="statement not covered" >      checkCurrentPage();</span>
     }
   };
-  
+&nbsp;
 <span class="cstat-no" title="statement not covered" >  history.replaceState = <span class="fstat-no" title="function not covered" >fu</span>nction() {</span>
 <span class="cstat-no" title="statement not covered" >    originalReplaceState.apply(this, arguments);</span>
 <span class="cstat-no" title="statement not covered" >    if (window.location.href !== lastUrl) {</span>
@@ -574,7 +598,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-29T18:39:49.091Z
+                at 2025-12-30T21:05:05.529Z
             </div>
         <script src="prettify.js"></script>
         <script>
