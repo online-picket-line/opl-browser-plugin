@@ -7,9 +7,42 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        # Super linter needs the full git history
+        fetch-depth: 0
+        
+    - name: Super Linter
+      uses: github/super-linter/slim@v5
+      env:
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Enable specific linters for browser extension project
+        VALIDATE_CSS: true
+        VALIDATE_HTML: true
+        VALIDATE_JAVASCRIPT_ES: true
+        VALIDATE_JSON: true
+        VALIDATE_MARKDOWN: true
+        VALIDATE_YAML: true
+        # Disable linters we don't need
+        VALIDATE_DOCKERFILE: false
+        VALIDATE_PYTHON: false
+        VALIDATE_TYPESCRIPT_ES: false
+        VALIDATE_XML: false
+        # Configure linter behavior
+        SUPPRESS_POSSUM: true
+        FILTER_REGEX_EXCLUDE: '(node_modules/|coverage/|dist/|\.zip$)'
+
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    needs: lint
     
     steps:
     - name: Checkout code
@@ -40,7 +73,7 @@ jobs:
   build:
     name: Build Extensions
     runs-on: ubuntu-latest
-    needs: test
+    needs: [lint, test]
     
     steps:
     - name: Checkout code
