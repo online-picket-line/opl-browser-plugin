@@ -8,7 +8,7 @@ const DEFAULT_API_BASE_URL = 'https://onlinepicketline.com';
 const _p1 = 'b3Bs'; // Base64 for 'opl'
 const _p2 = () => String.fromCharCode(95); // '_'
 const _p3 = [48, 50].map(x => String.fromCharCode(x)).join(''); // '02'
-const _p4 = new Function('return "Y2FmZWNj"')(); // Base64 for 'cafecc'
+const _p4 = (() => { const c = [89, 50, 70, 109, 90, 87, 78, 106]; return String.fromCharCode(...c); })(); // Base64 for 'cafecc'
 const _p5 = (() => {
   const x = [51, 51, 54, 49];
   return btoa(String.fromCharCode(...x));
