@@ -23,11 +23,10 @@
     "coverage/**",
     "generate-icons.js",
     "test-import.js",
-    "tests/**",
     "eslint.config.js"
   ],
   "rules": {
-    "no-unused-vars": "off",
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_|^e$|^e2$|^data$|^error$|^response$|^result$|^timestamp$|^changes$|^actionType$|^urlToTest$|^actions$|^blockMode$|^manyActions$|^testButton$" }],
     "no-console": "off",
     "no-debugger": "off",
     "no-undef": "error",
@@ -51,5 +50,37 @@
     "no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1 }],
     "no-mixed-spaces-and-tabs": "error",
     "no-irregular-whitespace": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.js"],
+      "env": {
+        "jest": true,
+        "browser": true,
+        "es2022": true,
+        "webextensions": true
+      },
+      "globals": {
+        "chrome": "readonly",
+        "browser": "readonly",
+        "describe": "readonly",
+        "it": "readonly",
+        "beforeEach": "readonly",
+        "afterEach": "readonly",
+        "expect": "readonly",
+        "jest": "readonly",
+        "matchUrlToAction": "readonly",
+        "importScripts": "readonly",
+        "ApiService": "readonly",
+        "module": "readonly",
+        "exports": "readonly"
+      },
+      "rules": {
+        "no-unused-vars": "off",
+        "no-console": "off",
+        "no-debugger": "off",
+        "no-undef": "warn"
+      }
+    }
+  ]
 }
