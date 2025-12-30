@@ -26,13 +26,13 @@ describe('Banner Styling', () => {
     });
 
     it('should use destructive color matching website', () => {
-      // Banner should use destructive color: oklch(45% .22 15)
-      expect(contentCSS).toMatch(/\.opl-banner[\s\S]*background:\s*oklch\(45%\s*\.22\s*15\)/);
+      // Banner should use destructive color: oklch(45% .22 15deg)
+      expect(contentCSS).toMatch(/\.opl-banner[\s\S]*background:\s*oklch\(45%\s*\.22\s*15(deg)?\)/);
     });
 
     it('should use correct text color', () => {
-      // Text should be light: oklch(99% .005 140)
-      expect(contentCSS).toMatch(/\.opl-banner[\s\S]*color:\s*oklch\(99%\s*\.005\s*140\)/);
+      // Text should be light: oklch(99% .005 140deg)
+      expect(contentCSS).toMatch(/\.opl-banner[\s\S]*color:\s*oklch\(99%\s*\.005\s*140(deg)?\)/);
     });
 
     it('should use IBM Plex Sans font', () => {
