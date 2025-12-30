@@ -235,10 +235,56 @@ jobs:
         path: coverage/
         retention-days: 30
 
+  mutation-test:
+    name: Mutation Testing
+    runs-on: ubuntu-latest
+    needs: [security, lint, test]
+    permissions:
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run mutation tests
+      run: npm run test:mutation
+      
+    - name: Upload mutation report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: mutation-report
+        path: reports/mutation/
+        retention-days: 30
+        
+    - name: Display mutation summary
+      if: always()
+      run: |
+        echo "### Mutation Testing Results 🧬" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Mutation testing completed. See the mutation report artifact for detailed results." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Files tested:**" >> $GITHUB_STEP_SUMMARY
+        echo "- background.js" >> $GITHUB_STEP_SUMMARY
+        echo "- block.js" >> $GITHUB_STEP_SUMMARY
+        echo "- content.js" >> $GITHUB_STEP_SUMMARY
+        echo "- popup.js" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "📊 Download the mutation report artifact to view detailed results." >> $GITHUB_STEP_SUMMARY
+
   build:
     name: Build Extensions
     runs-on: ubuntu-latest
-    needs: [security, lint, test]
+    needs: [security, lint, test, mutation-test]
     
     steps:
     - name: Checkout code

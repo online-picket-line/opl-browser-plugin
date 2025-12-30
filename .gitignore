@@ -30,3 +30,11 @@ yarn-error.log*
 
 # Backup files
 *-backup.json
+
+# Stryker mutation testing
+.stryker-tmp/
+reports/
+stryker.log
+
+# Coverage reports
+coverage/
