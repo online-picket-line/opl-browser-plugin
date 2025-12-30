@@ -38,6 +38,7 @@ async function testCurrentAPI() {
 }
 
 // Test alternative endpoints
+// eslint-disable-next-line no-unused-vars
 async function testAlternativeEndpoints() {
   const baseUrl = 'YOUR_INSTANCE_URL'; // Replace with actual URL
   const endpoints = [

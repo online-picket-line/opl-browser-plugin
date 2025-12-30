@@ -38,7 +38,7 @@ global.fetch = jest.fn();
 // Mock URL constructor for browser compatibility
 global.URL = URL || class URL {
   constructor(url) {
-    const match = url.match(/^https?:\/\/([^\/]+)/);
+    const match = url.match(/^https?:\/\/([^/]+)/);
     this.hostname = match ? match[1] : url;
     this.href = url;
   }

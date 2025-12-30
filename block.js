@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const url = new URL(originalUrl);
         blockedUrl.textContent = url.hostname;
-      } catch (e) {
+      } catch (_e) {
         blockedUrl.textContent = originalUrl;
       }
     }

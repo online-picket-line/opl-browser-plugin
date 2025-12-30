@@ -14,13 +14,12 @@ const _p5 = (() => {
   return btoa(String.fromCharCode(...x));
 })(); // Base64 for '3361'
 const _p6 = ((a, b) => btoa(a + b))('fb5e', 'e303'); // Base64 for 'fb5ee303'
-const _p7 = btoa; // Base64 encoding function
 const _p8 = 'ODMyZGRlMjZlM2M2N2Y0N2I5NDQ3NmI1NWYxMGI0NjRiYTIwYmZlYzRmMWM='; // Final part
 
 // Runtime key assembly with anti-tampering
 function _assembleKey() {
-  const timestamp = Date.now();
-  const checksum = timestamp.toString(16).slice(-4);
+  // const timestamp = Date.now();
+  // const checksum = timestamp.toString(16).slice(-4);
 
   // Decode and combine parts
   const parts = [
@@ -62,7 +61,7 @@ const _getObfuscatedKey = (() => {
       _cachedKey = _assembleKey();
       _lastCheck = now;
       return _cachedKey;
-    } catch (e) {
+    } catch (_e) {
       // Fallback to simpler obfuscation if assembly fails
       const fallback = 'b3BsXzAyY2FmZWNjMzM2MWZiNWVlMzAzODMyZGRlMjZlM2M2N2Y0N2I5NDQ3NmI1NWYxMGI0NjRiYTIwYmZlYzRmMWM=';
       console.warn('Using fallback key assembly');
@@ -74,9 +73,8 @@ const _getObfuscatedKey = (() => {
 // Anti-debugging: Add timing variations
 const _validateEnvironment = () => {
   const start = performance.now();
-  let sum = 0;
   for (let i = 0; i < 1000; i++) {
-    sum += Math.random();
+    Math.random();
   }
   const duration = performance.now() - start;
 
@@ -339,11 +337,11 @@ class ApiService {
   parseUrl(urlString) {
     try {
       return new URL(urlString);
-    } catch (e) {
+    } catch (_e) {
       // If URL doesn't have protocol, try adding https://
       try {
         return new URL('https://' + urlString);
-      } catch (e2) {
+      } catch (_e2) {
         console.warn('Failed to parse URL:', urlString);
         return null;
       }
@@ -432,7 +430,7 @@ class ApiService {
   const _antiDebug = {
     checkDevTools: function() {
       const start = Date.now();
-      debugger; // This will cause delay if dev tools are open
+      // debugger; // This will cause delay if dev tools are open
       const duration = Date.now() - start;
       return duration < 100;
     },
@@ -478,18 +476,18 @@ class ApiService {
   };
 
   // Dynamic key rotation (theoretical - would need backend support)
-  const _keyRotation = {
-    lastRotation: Date.now(),
-    rotationInterval: 24 * 60 * 60 * 1000, // 24 hours
-
-    shouldRotate: function() {
-      return (Date.now() - this.lastRotation) > this.rotationInterval;
-    },
-
-    // Placeholder for future key rotation implementation
-    rotateKey: function() {
-      if (this.shouldRotate()) {
-        console.log('Key rotation would occur here');
+  // const _keyRotation = {
+  //   lastRotation: Date.now(),
+  //   rotationInterval: 24 * 60 * 60 * 1000, // 24 hours
+  //
+  //   shouldRotate: function() {
+  //     return (Date.now() - this.lastRotation) > this.rotationInterval;
+  //   },
+  //
+  //   // Placeholder for future key rotation implementation
+  //   rotateKey: function() {
+  //     if (this.shouldRotate()) {
+  //       console.log('Key rotation would occur here');
         this.lastRotation = Date.now();
       }
     }

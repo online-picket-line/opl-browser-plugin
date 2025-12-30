@@ -134,7 +134,7 @@ class ApiMigrationHelper {
   /**
    * Generate migration recommendations
    */
-  generateMigrationPlan(changes) {
+  generateMigrationPlan(_changes) {
     console.log('\n📝 Migration Plan:');
     console.log('==================');
 

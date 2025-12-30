@@ -101,7 +101,7 @@ function matchUrlToAction(url, actions) {
             if (regex.test(urlToTest)) {
               return action;
             }
-          } catch (e) {
+          } catch (_e) {
             console.warn('Invalid regex pattern:', pattern);
             continue;
           }

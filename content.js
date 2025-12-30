@@ -52,7 +52,7 @@
 
     const title = action.title || 'Labor Action in Progress';
     const description = action.description || 'This company is currently subject to a labor action.';
-    const actionType = action.type || 'strike';
+    // const actionType = action.type || 'strike';  // Currently unused
     const moreInfoUrl = action.url || action.more_info || '';
     const logoUrl = action.logoUrl || '';
 

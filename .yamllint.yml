@@ -1,3 +1,4 @@
+---
 extends: default
 
 rules:
@@ -6,6 +7,6 @@ rules:
   indentation:
     spaces: 2
   document-start:
-    present: false
+    present: true
   truthy:
     allowed-values: ['true', 'false', 'on', 'off']

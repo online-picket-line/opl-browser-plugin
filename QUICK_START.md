@@ -54,7 +54,7 @@
 
 When you visit a website associated with an active labor action:
 
-### Banner Mode Display:
+### Banner Mode Display
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Your webpage content                                         │
@@ -68,7 +68,7 @@ When you visit a website associated with an active labor action:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Block Mode Display:
+### Block Mode Display
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                          ⚠️                                  │
