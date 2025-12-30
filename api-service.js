@@ -488,10 +488,10 @@ class ApiService {
   //   rotateKey: function() {
   //     if (this.shouldRotate()) {
   //       console.log('Key rotation would occur here');
-        this.lastRotation = Date.now();
-      }
-    }
-  };
+  //       this.lastRotation = Date.now();
+  //     }
+  //   }
+  // };
 
   // Obfuscate global access
   if (typeof window !== 'undefined') {
