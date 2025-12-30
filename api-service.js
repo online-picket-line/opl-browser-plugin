@@ -423,42 +423,27 @@ class ApiService {
 }
 
 // Additional obfuscation layers and anti-tampering measures
+// Service worker compatible - no DOM APIs
 (function() {
   'use strict';
 
-  // Detect common debugging techniques
+  // Detect common debugging techniques (service worker compatible)
   const _antiDebug = {
     checkDevTools: function() {
       const start = Date.now();
-      // debugger; // This will cause delay if dev tools are open
       const duration = Date.now() - start;
       return duration < 100;
     },
 
-    checkConsole: function() {
-      let devtools = false;
-      const _console = console;
-      Object.defineProperty(console, '_commandLineAPI', {
-        get: function() {
-          devtools = true;
-          return _console;
-        }
-      });
-      return () => devtools;
-    },
-
-    detectVM: function() {
-      // Simple VM detection
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl');
-      const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
-
-      if (debugInfo) {
-        const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
-        const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-        return !vendor.includes('VMware') && !renderer.includes('VMware');
+    // Timing-based detection (works in service workers)
+    checkTiming: function() {
+      const start = performance.now();
+      let sum = 0;
+      for (let i = 0; i < 1000; i++) {
+        sum += Math.random();
       }
-      return true;
+      const duration = performance.now() - start;
+      return duration < 50 && sum > 0;
     }
   };
 
@@ -475,37 +460,23 @@ class ApiService {
     return true;
   };
 
-  // Dynamic key rotation (theoretical - would need backend support)
-  // const _keyRotation = {
-  //   lastRotation: Date.now(),
-  //   rotationInterval: 24 * 60 * 60 * 1000, // 24 hours
-  //
-  //   shouldRotate: function() {
-  //     return (Date.now() - this.lastRotation) > this.rotationInterval;
-  //   },
-  //
-  //   // Placeholder for future key rotation implementation
-  //   rotateKey: function() {
-  //     if (this.shouldRotate()) {
-  //       console.log('Key rotation would occur here');
-  //       this.lastRotation = Date.now();
-  //     }
-  //   }
-  // };
-
-  // Obfuscate global access
+  // Obfuscate global access (only in window context, skip in service worker)
   if (typeof window !== 'undefined') {
-    Object.defineProperty(window, '_oplObfuscated', {
-      value: true,
-      writable: false,
-      enumerable: false,
-      configurable: false
-    });
+    try {
+      Object.defineProperty(window, '_oplObfuscated', {
+        value: true,
+        writable: false,
+        enumerable: false,
+        configurable: false
+      });
+    } catch (_e) {
+      // Property may already exist
+    }
   }
 
-  // Self-verification on load
+  // Self-verification on load (service worker compatible)
   setTimeout(() => {
-    if (!_verifyIntegrity() || !_antiDebug.detectVM()) {
+    if (!_verifyIntegrity() || !_antiDebug.checkTiming()) {
       console.warn('Security verification failed - functionality may be limited');
     }
   }, Math.random() * 1000);
