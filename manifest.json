@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Online Picket Line - OPL",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Browser extension to inform users about labor actions and boycotts. Compatible with Chrome, Edge, Opera, Brave, Firefox, and Safari.",
   "permissions": [
     "storage",
