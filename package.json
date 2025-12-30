@@ -1,6 +1,7 @@
 {
   "name": "opl-browser-plugin",
   "version": "1.0.0",
+  "type": "module",
   "description": "Browser plugin for Online Picket Line",
   "main": "api-service.js",
   "scripts": {
@@ -12,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "eslint": "^9.39.2",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",

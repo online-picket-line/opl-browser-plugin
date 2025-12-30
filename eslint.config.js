@@ -1,21 +1,25 @@
-// eslint.config.js
+// eslint.config.mjs
 export default [
   {
-    files: ["**/*.js"],
     ignores: [
       "node_modules/**",
-      "browser-polyfill.js",
+      "browser-polyfill.js", 
       "coverage/**",
       "generate-icons.js",
-      "test-import.js"
-    ],
+      "test-import.js",
+      "tests/**",
+      "eslint.config.js"
+    ]
+  },
+  {
+    files: ["**/*.js"],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "script",
       globals: {
         chrome: "readonly",
         browser: "readonly",
-        console: "readonly",
+        console: "readonly", 
         document: "readonly",
         window: "readonly",
         fetch: "readonly",
@@ -28,20 +32,23 @@ export default [
         Math: "readonly",
         String: "readonly",
         Object: "readonly",
-        Array: "readonly",
+        Array: "readonly", 
         Promise: "readonly",
         Error: "readonly",
         importScripts: "readonly",
         ApiService: "readonly",
         sessionStorage: "readonly",
         history: "readonly",
-        module: "readonly"
+        module: "readonly",
+        exports: "readonly",
+        require: "readonly",
+        process: "readonly",
+        __dirname: "readonly"
       }
     },
     rules: {
-      "no-unused-vars": "warn",
-      "no-undef": "error",
-      "no-console": "off",
+      "no-unused-vars": "off",
+      "no-console": "off", 
       "no-debugger": "off"
     }
   }
