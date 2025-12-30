@@ -138,7 +138,7 @@ describe('Banner Styling', () => {
 
   describe('Responsive Design', () => {
     it('should have mobile breakpoint', () => {
-      expect(contentCSS).toMatch(/@media.*max-width:\s*768px/);
+      expect(contentCSS).toMatch(/@media.*width\s*<=?\s*768px|@media.*max-width:\s*768px/);
     });
 
     it('should adjust logo size on mobile', () => {
