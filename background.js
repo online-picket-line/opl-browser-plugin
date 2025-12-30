@@ -3,6 +3,7 @@ importScripts('browser-polyfill.js');
 importScripts('api-service.js');
 
 const apiService = new ApiService();
+
 const allowedBypasses = new Map(); // tabId -> url
 // We use chrome.storage.local for blocked states to persist across service worker restarts
 // Key format: blocked_tab_${tabId}
