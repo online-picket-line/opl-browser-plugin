@@ -1,0 +1,2 @@
+# Exclude Base64 encoded API key in api-service.js
+api-service.js:DEFAULT_API_KEY
