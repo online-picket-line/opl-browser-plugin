@@ -19,14 +19,13 @@
   },
   "ignorePatterns": [
     "node_modules/**",
-    "browser-polyfill.js",
     "coverage/**",
     "generate-icons.js",
     "test-import.js",
     "eslint.config.js"
   ],
   "rules": {
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_|^e$|^e2$|^data$|^error$|^response$|^result$|^timestamp$|^changes$|^actionType$|^urlToTest$|^actions$|^blockMode$|^manyActions$|^testButton$" }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_.*$", "caughtErrorsIgnorePattern": "^_.*$" }],
     "no-console": "off",
     "no-debugger": "off",
     "no-undef": "error",
