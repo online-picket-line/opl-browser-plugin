@@ -23,18 +23,13 @@ jobs:
       env:
         DEFAULT_BRANCH: main
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # Enable specific linters for browser extension project
+        # Only validate specific file types for browser extension project
         VALIDATE_CSS: true
         VALIDATE_HTML: true
         VALIDATE_JAVASCRIPT_ES: true
         VALIDATE_JSON: true
         VALIDATE_MARKDOWN: true
         VALIDATE_YAML: true
-        # Disable linters we don't need
-        VALIDATE_DOCKERFILE: false
-        VALIDATE_PYTHON: false
-        VALIDATE_TYPESCRIPT_ES: false
-        VALIDATE_XML: false
         # Configure linter behavior
         SUPPRESS_POSSUM: true
         FILTER_REGEX_EXCLUDE: '(node_modules/|coverage/|dist/|\.zip$)'
