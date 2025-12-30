@@ -1,0 +1,16 @@
+{
+  "ignore": [
+    "browser-polyfill.js",
+    "generate-icons.js", 
+    "test-import.js",
+    "tests/**",
+    "node_modules/**",
+    "coverage/**"
+  ],
+  "globals": [
+    "chrome",
+    "browser",
+    "importScripts",
+    "ApiService"
+  ]
+}

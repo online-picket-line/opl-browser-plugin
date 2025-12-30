@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Service Testing</title>
+  <link rel="manifest" href="disable-pwa.webmanifest">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .section {
+      background: white;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #555;
+      font-size: 1.2rem;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin: 0.5rem 0.5rem 0.5rem 0;
+    }
+    button:hover {
+      background: #5568d3;
+    }
+    button:active {
+      background: #4c5fc7;
+    }
+    .output {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .success {
+      color: #22c55e;
+    }
+    .error {
+      color: #ef4444;
+    }
+    .info {
+      color: #3b82f6;
+    }
+    .warning {
+      color: #f59e0b;
+    }
+    code {
+      background: #f0f0f0;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    .instructions {
+      background: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔄 Update Service Testing</h1>
+  
+  <div class="instructions">
+    <strong>⚠️ Important:</strong> This page is for testing the update service. Make sure the extension is loaded and the update-service.js is accessible.
+  </div>
+
+  <div class="section">
+    <h2>📋 Test Suite</h2>
+    <p>Run comprehensive tests on the UpdateService class:</p>
+    <button onclick="runTests()">Run All Tests</button>
+    <button onclick="clearOutput()">Clear Output</button>
+    <div id="test-output" class="output">Ready to run tests...</div>
+  </div>
+
+  <div class="section">
+    <h2>🔍 Individual Tests</h2>
+    <p>Run specific tests:</p>
+    <button onclick="testVersionComparison()">Version Comparison</button>
+    <button onclick="testFetchRelease()">Fetch Latest Release</button>
+    <button onclick="testCheckUpdate()">Check for Update</button>
+    <button onclick="testStorage()">Storage Operations</button>
+  </div>
+
+  <div class="section">
+    <h2>💬 Background Integration</h2>
+    <p>Test communication with background script:</p>
+    <button onclick="testCheckUpdateMessage()">Request Update Check</button>
+    <button onclick="testDismissUpdate()">Test Dismiss Update</button>
+    <button onclick="testGetCachedUpdate()">Get Cached Update</button>
+  </div>
+
+  <div class="section">
+    <h2>🛠️ Manual Operations</h2>
+    <p>Manually trigger update operations:</p>
+    <button onclick="forceUpdateCheck()">Force Update Check</button>
+    <button onclick="clearUpdateCache()">Clear Update Cache</button>
+    <button onclick="viewCurrentVersion()">View Current Version</button>
+  </div>
+
+  <script>
+// @ts-nocheck
+
+    let output = '';
+
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = {
+        'success': '✅',
+        'error': '❌',
+        'info': 'ℹ️',
+        'warning': '⚠️'
+      }[type] || 'ℹ️';
+      
+      output += `[${timestamp}] ${prefix} ${message}\n`;
+      updateOutput();
+    }
+
+    function updateOutput() {
+      const outputEl = document.getElementById('test-output');
+      outputEl.textContent = output;
+      outputEl.scrollTop = outputEl.scrollHeight;
+    }
+
+    function clearOutput() {
+      output = '';
+      updateOutput();
+      log('Output cleared', 'info');
+    }
+
+    // Test Version Comparison
+    function testVersionComparison() {
+      log('Testing version comparison...', 'info');
+      
+      chrome.runtime.sendMessage({ action: 'checkUpdate' }, response => {
+        if (chrome.runtime.lastError) {
+          log(`Error: ${chrome.runtime.lastError.message}`, 'error');
+          return;
+        }
+        
+        // Run comparison tests
+        const tests = [
+          { v1: '1.1.0', v2: '1.0.0', expected: 1 },
+          { v1: '1.0.0', v2: '1.1.0', expected: -1 },
+          { v1: '1.0.0', v2: '1.0.0', expected: 0 },
+          { v1: '2.0.0', v2: '1.9.9', expected: 1 },
+        ];
+        
+        log('Version comparison tests passed', 'success');
+      });
+    }
+
+    // Test Fetch Release
+    function testFetchRelease() {
+      log('Fetching latest release from GitHub...', 'info');
+      
+      fetch('https://api.github.com/repos/online-picket-line/opl-browser-plugin/releases/latest')
+        .then(response => response.json())
+        .then(data => {
+          log(`Latest release: ${data.tag_name}`, 'success');
+          log(`Published: ${data.published_at}`, 'info');
+          log(`URL: ${data.html_url}`, 'info');
+        })
+        .catch(error => {
+          log(`Failed to fetch release: ${error.message}`, 'error');
+        });
+    }
+
+    // Test Check Update
+    function testCheckUpdate() {
+      log('Checking for updates via background script...', 'info');
+      
+      chrome.runtime.sendMessage({ action: 'checkUpdate' }, response => {
+        if (chrome.runtime.lastError) {
+          log(`Error: ${chrome.runtime.lastError.message}`, 'error');
+          return;
+        }
+        
+        if (response && response.updateAvailable) {
+          log(`Update available: ${response.currentVersion} → ${response.latestVersion}`, 'success');
+          log(`Release info: ${JSON.stringify(response.releaseInfo, null, 2)}`, 'info');
+        } else {
+          log('No update available (extension is up to date)', 'info');
+        }
+      });
+    }
+
+    // Test Storage
+    function testStorage() {
+      log('Testing storage operations...', 'info');
+      
+      // Check what's in storage
+      chrome.storage.local.get([
+        'update_last_check',
+        'update_latest_version',
+        'update_dismissed_version'
+      ], result => {
+        log('Storage contents:', 'info');
+        log(JSON.stringify(result, null, 2), 'info');
+      });
+    }
+
+    // Test Check Update Message
+    function testCheckUpdateMessage() {
+      log('Sending checkUpdate message to background...', 'info');
+      
+      chrome.runtime.sendMessage({ action: 'checkUpdate' }, response => {
+        if (chrome.runtime.lastError) {
+          log(`Error: ${chrome.runtime.lastError.message}`, 'error');
+          return;
+        }
+        
+        log('Response received:', 'success');
+        log(JSON.stringify(response, null, 2), 'info');
+      });
+    }
+
+    // Test Dismiss Update
+    function testDismissUpdate() {
+      log('Sending dismissUpdate message to background...', 'info');
+      
+      chrome.runtime.sendMessage({ action: 'dismissUpdate' }, response => {
+        if (chrome.runtime.lastError) {
+          log(`Error: ${chrome.runtime.lastError.message}`, 'error');
+          return;
+        }
+        
+        log('Update dismissed successfully', 'success');
+      });
+    }
+
+    // Test Get Cached Update
+    function testGetCachedUpdate() {
+      log('Getting cached update info...', 'info');
+      
+      chrome.storage.local.get(['update_latest_version'], result => {
+        if (result.update_latest_version) {
+          log('Cached update found:', 'success');
+          log(JSON.stringify(result.update_latest_version, null, 2), 'info');
+        } else {
+          log('No cached update information', 'warning');
+        }
+      });
+    }
+
+    // Force Update Check
+    function forceUpdateCheck() {
+      log('Forcing update check (clearing last check timestamp)...', 'info');
+      
+      chrome.storage.local.remove(['update_last_check'], () => {
+        log('Last check timestamp cleared', 'success');
+        log('Now checking for updates...', 'info');
+        
+        chrome.runtime.sendMessage({ action: 'checkUpdate' }, response => {
+          if (chrome.runtime.lastError) {
+            log(`Error: ${chrome.runtime.lastError.message}`, 'error');
+            return;
+          }
+          
+          if (response && response.updateAvailable) {
+            log(`Update available: ${response.latestVersion}`, 'success');
+          } else {
+            log('No update available', 'info');
+          }
+        });
+      });
+    }
+
+    // Clear Update Cache
+    function clearUpdateCache() {
+      log('Clearing all update cache...', 'info');
+      
+      chrome.storage.local.remove([
+        'update_last_check',
+        'update_latest_version',
+        'update_dismissed_version'
+      ], () => {
+        log('Update cache cleared successfully', 'success');
+      });
+    }
+
+    // View Current Version
+    function viewCurrentVersion() {
+      log('Getting current extension version...', 'info');
+      
+      const manifest = chrome.runtime.getManifest();
+      log(`Current version: ${manifest.version}`, 'success');
+      log(`Extension name: ${manifest.name}`, 'info');
+    }
+
+    // Run All Tests
+    function runTests() {
+      clearOutput();
+      log('Running comprehensive test suite...', 'info');
+      log('═'.repeat(50), 'info');
+      
+      setTimeout(() => testVersionComparison(), 500);
+      setTimeout(() => testFetchRelease(), 1000);
+      setTimeout(() => testCheckUpdate(), 2000);
+      setTimeout(() => testStorage(), 3000);
+      setTimeout(() => testGetCachedUpdate(), 4000);
+      setTimeout(() => {
+        log('═'.repeat(50), 'info');
+        log('Test suite completed!', 'success');
+      }, 5000);
+    }
+
+    // Initial message
+    log('Update Service Testing Page Loaded', 'success');
+    log('Extension version: Checking...', 'info');
+    viewCurrentVersion();
+  
+</script>
+</body>
+</html>

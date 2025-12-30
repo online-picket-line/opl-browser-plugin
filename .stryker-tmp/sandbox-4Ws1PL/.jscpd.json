@@ -1,0 +1,13 @@
+{
+  "threshold": 10,
+  "reporters": ["console"],
+  "ignore": [
+    "node_modules/**",
+    "coverage/**",
+    "tests/**",
+    "browser-polyfill.js"
+  ],
+  "minLines": 10,
+  "minTokens": 50,
+  "skipComments": true
+}

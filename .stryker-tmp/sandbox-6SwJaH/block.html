@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Blocked - Online Picket Line - OPL</title>
+  <link rel="manifest" href="disable-pwa.webmanifest">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background-color: var(--background);
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+      color: var(--destructive);
+      font-family: var(--font-serif);
+    }
+
+    .subtitle {
+      font-size: 1.25rem;
+      margin-bottom: 2rem;
+      color: var(--muted-foreground);
+      font-family: var(--font-sans);
+    }
+
+    .card {
+      text-align: left;
+      margin-bottom: 2rem;
+      border-color: var(--destructive);
+      box-shadow: 4px 4px 0px 0px var(--destructive);
+    }
+
+    .union-logo {
+      max-width: 200px;
+      max-height: 100px;
+      margin-bottom: 1rem;
+      display: block;
+      border-radius: var(--radius);
+    }
+
+    .card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+      color: var(--foreground);
+      font-family: var(--font-serif);
+      font-weight: 600;
+    }
+
+    .card p {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--foreground);
+    }
+
+    .action-type {
+      display: inline-block;
+      background-color: var(--destructive);
+      color: var(--destructive-foreground);
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .footer {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+      margin-top: 2rem;
+    }
+
+    .blocked-url {
+      background-color: var(--muted);
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      margin-top: 1rem;
+      word-break: break-all;
+      color: var(--muted-foreground);
+    }
+    
+    /* Override btn-primary for this page to be red/destructive */
+    .btn-danger {
+      background-color: var(--destructive);
+      color: var(--destructive-foreground);
+      box-shadow: 2px 2px 0px 0px var(--destructive);
+      border: 1px solid var(--destructive);
+    }
+    .btn-danger:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0px 0px var(--destructive);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">🛑</div>
+    <h1>Access Blocked</h1>
+    <p class="subtitle">This page is currently subject to a labor action</p>
+
+    <div class="card">
+      <img id="union-logo" class="union-logo" style="display: none;" alt="Union logo" />
+      <span id="action-type" class="action-type">Labor Action</span>
+      <h2 id="action-title">Loading...</h2>
+      <p id="action-description">Please wait...</p>
+      
+      <div id="action-details" style="margin-top: 1.5rem; display: none; border-top: 1px solid var(--border); padding-top: 1rem;">
+        <div id="action-demands-container" style="margin-bottom: 1rem;">
+          <strong>Demands:</strong>
+          <p id="action-demands" style="margin-top: 0.25rem; font-size: 0.95rem;"></p>
+        </div>
+        
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.9rem;">
+          <div id="action-location-container">
+            <strong>Location:</strong>
+            <span id="action-location"></span>
+          </div>
+          <div id="action-dates-container">
+            <strong>Dates:</strong>
+            <span id="action-dates"></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="blocked-url" class="blocked-url"></div>
+    </div>
+
+    <div class="buttons">
+      <a id="learn-more-btn" href="#" class="btn btn-primary" style="display: none;">Learn More</a>
+      <button id="go-back-btn" class="btn btn-secondary">Go Back</button>
+      <button id="proceed-btn" class="btn btn-outline">Proceed Anyway</button>
+    </div>
+
+    <div class="footer">
+      <p>This block can be disabled in OPL extension settings.</p>
+      <p style="margin-top: 0.5rem;">Powered by <a href="https://onlinepicketline.com" target="_blank" style="color: inherit; text-decoration: underline;">Online Picket Line - OPL</a></p>
+    </div>
+  </div>
+
+  <script src="browser-polyfill.js"></script>
+  <script src="block.js"></script>
+</body>
+</html>

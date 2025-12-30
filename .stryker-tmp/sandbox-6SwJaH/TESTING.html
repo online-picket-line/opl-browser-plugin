@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Picket Line - Testing Guide</title>
+  <link rel="manifest" href="disable-pwa.webmanifest">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #f5f5f5;
+    }
+
+    h1 {
+      color: #d32f2f;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #333;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #d32f2f;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .test-step {
+      background: #e3f2fd;
+      padding: 15px;
+      border-left: 4px solid #2196f3;
+      margin: 15px 0;
+    }
+
+    .note {
+      background: #fff3e0;
+      padding: 15px;
+      border-left: 4px solid #ff9800;
+      margin: 15px 0;
+    }
+
+    .success {
+      background: #e8f5e9;
+      padding: 15px;
+      border-left: 4px solid #4caf50;
+      margin: 15px 0;
+    }
+
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+    }
+
+    pre {
+      background: #263238;
+      color: #aed581;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      margin: 15px 0;
+    }
+
+    pre code {
+      background: none;
+      color: inherit;
+      padding: 0;
+    }
+
+    ul {
+      margin-left: 20px;
+      margin-top: 10px;
+    }
+
+    li {
+      margin: 8px 0;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #d32f2f;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin: 10px 5px;
+      font-weight: 500;
+    }
+
+    .button:hover {
+      background: #c62828;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚩 Online Picket Line - Extension Testing Guide</h1>
+
+  <div class="card">
+    <h2>Quick Start</h2>
+    <p>This guide will help you test the Online Picket Line browser extension.</p>
+  </div>
+
+  <div class="card">
+    <h2>1. Installation</h2>
+    
+    <h3>Chrome/Edge:</h3>
+    <div class="test-step">
+      <ol>
+        <li>Open <code>chrome://extensions</code> or <code>edge://extensions</code></li>
+        <li>Enable "Developer mode"</li>
+        <li>Click "Load unpacked"</li>
+        <li>Select the extension directory</li>
+      </ol>
+    </div>
+
+    <h3>Firefox:</h3>
+    <div class="test-step">
+      <ol>
+        <li>First, copy manifest-v2 to manifest:
+          <pre><code>cp manifest-v2.json manifest.json</code></pre>
+        </li>
+        <li>Open <code>about:debugging#/runtime/this-firefox</code></li>
+        <li>Click "Load Temporary Add-on"</li>
+        <li>Select any file in the extension directory</li>
+      </ol>
+    </div>
+
+    <div class="note">
+      <strong>Note:</strong> For Firefox testing, you'll need to temporarily replace the manifest.json file with manifest-v2.json, as Firefox currently uses Manifest V2.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Configure Test Data</h2>
+    
+    <p>Since the actual API may not be available, you can test with mock data by:</p>
+
+    <h3>Option A: Modify the API URL</h3>
+    <div class="test-step">
+      <p>Edit <code>api-service.js</code> and change the API URL to a test endpoint or mock server:</p>
+      <pre><code>const API_BASE_URL = 'http://localhost:3000';</code></pre>
+    </div>
+
+    <h3>Option B: Use Sample Data</h3>
+    <div class="test-step">
+      <p>The extension includes <code>sample-data.json</code> with example labor actions. Set up a local server:</p>
+      <pre><code>python -m http.server 3000</code></pre>
+      <p>Or use any static file server to serve the sample data.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. Testing Scenarios</h2>
+
+    <h3>Test 1: Banner Mode (Default)</h3>
+    <div class="test-step">
+      <ol>
+        <li>Click the extension icon</li>
+        <li>Ensure "Show Banner" is selected</li>
+        <li>Visit a site in your test data (e.g., example.com if using sample data)</li>
+        <li>You should see a red banner at the bottom of the page</li>
+        <li>Verify the banner shows labor action details</li>
+        <li>Test the close button</li>
+      </ol>
+    </div>
+
+    <h3>Test 2: Block Mode</h3>
+    <div class="test-step">
+      <ol>
+        <li>Click the extension icon</li>
+        <li>Select "Block Access"</li>
+        <li>Visit a site in your test data</li>
+        <li>You should be redirected to a block page</li>
+        <li>Verify the block page shows labor action details</li>
+        <li>Test "Proceed Anyway" button</li>
+        <li>Test "Go Back" button</li>
+      </ol>
+    </div>
+
+    <h3>Test 3: Settings and Stats</h3>
+    <div class="test-step">
+      <ol>
+        <li>Click the extension icon to open the popup</li>
+        <li>Verify the stats show the number of active labor actions</li>
+        <li>Click "Refresh Labor Actions"</li>
+        <li>Verify the timestamp updates</li>
+        <li>Switch between Banner and Block modes</li>
+        <li>Verify settings are saved</li>
+      </ol>
+    </div>
+
+    <h3>Test 4: URL Matching</h3>
+    <div class="test-step">
+      <p>The extension should match URLs in several ways:</p>
+      <ul>
+        <li><strong>Exact domain:</strong> example.com matches example.com</li>
+        <li><strong>Subdomain:</strong> www.example.com matches example.com</li>
+        <li><strong>Company name:</strong> If configured, matches based on company name</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4. Expected Behavior</h2>
+
+    <div class="success">
+      <h3>✓ Banner Mode Should:</h3>
+      <ul>
+        <li>Show a non-intrusive banner at the bottom</li>
+        <li>Display labor action title and description</li>
+        <li>Include a "Learn More" link (if available)</li>
+        <li>Have a close button that dismisses the banner</li>
+        <li>Animate smoothly when appearing</li>
+      </ul>
+    </div>
+
+    <div class="success">
+      <h3>✓ Block Mode Should:</h3>
+      <ul>
+        <li>Prevent access to the original page</li>
+        <li>Show a full-page interstitial</li>
+        <li>Display complete labor action information</li>
+        <li>Provide "Proceed Anyway" option</li>
+        <li>Allow users to go back</li>
+      </ul>
+    </div>
+
+    <div class="success">
+      <h3>✓ General Behavior:</h3>
+      <ul>
+        <li>Extension icon should be visible in toolbar</li>
+        <li>Data should be cached for 1 hour</li>
+        <li>Automatic refresh every hour</li>
+        <li>Settings persist across sessions</li>
+        <li>Works on all websites (unless whitelisted)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>5. Debugging Tips</h2>
+
+    <div class="note">
+      <h3>Check Console Logs:</h3>
+      <ul>
+        <li><strong>Extension background:</strong> chrome://extensions → Details → Inspect views: service worker</li>
+        <li><strong>Content script:</strong> F12 on any webpage → Console tab</li>
+        <li><strong>Popup:</strong> Right-click extension icon → Inspect popup</li>
+      </ul>
+    </div>
+
+    <div class="note">
+      <h3>Common Issues:</h3>
+      <ul>
+        <li><strong>No banner/block:</strong> Check if URL matches test data</li>
+        <li><strong>API errors:</strong> Verify the API endpoint is accessible</li>
+        <li><strong>Permissions:</strong> Ensure all permissions are granted</li>
+        <li><strong>Cache:</strong> Clear extension storage if data seems stale</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>6. Test URLs</h2>
+    <p>If using the sample data, these URLs should trigger the extension:</p>
+    <ul>
+      <li><code>http://example.com</code></li>
+      <li><code>https://www.example.com</code></li>
+      <li><code>https://fastfoodchain.com</code></li>
+      <li><code>https://megawarehouse.com</code></li>
+    </ul>
+    <div class="note">
+      <strong>Note:</strong> You may need to configure your local DNS or hosts file to test with these domains.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>7. Manual Testing Checklist</h2>
+    <ul>
+      <li>☐ Extension installs without errors</li>
+      <li>☐ Icon appears in browser toolbar</li>
+      <li>☐ Popup opens and displays correctly</li>
+      <li>☐ Settings can be changed</li>
+      <li>☐ Banner appears on matching URLs</li>
+      <li>☐ Banner can be closed</li>
+      <li>☐ Block page appears in block mode</li>
+      <li>☐ "Proceed Anyway" works</li>
+      <li>☐ "Go Back" works</li>
+      <li>☐ Stats update correctly</li>
+      <li>☐ Manual refresh works</li>
+      <li>☐ Data persists after browser restart</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Need Help?</h2>
+    <p>If you encounter issues:</p>
+    <ol>
+      <li>Check the browser console for errors</li>
+      <li>Verify the API endpoint is accessible</li>
+      <li>Ensure all files are present in the extension directory</li>
+      <li>Try reloading the extension</li>
+      <li>Clear extension storage and try again</li>
+    </ol>
+  </div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+# 1. Update version in both manifests
+vim manifest.json       # Change "version": "1.0.1"
+vim manifest-v2.json    # Change "version": "1.0.1"
+
+# 2. Commit and push
+git add manifest.json manifest-v2.json
+git commit -m "Bump version to 1.0.1"
+git push origin main
+
+# 3. Create and push version tag
+git tag -a v1.0.1 -m "Release version 1.0.1"
+git push origin v1.0.1
+
+# 4. GitHub Actions automatically:
+#    - Runs tests
+#    - Builds all packages
+#    - Creates GitHub Release
+#    - Uploads packages
+
+# 5. Download from Releases page and submit to stores!
+
+Test locally: Run package.sh to verify it builds correctly
+Push code: Trigger CI to see the new artifacts
+Create test release: Push a test tag like v1.0.0-test to try the release workflow
+Real release: When ready, follow the process above for actual releases
+All documentation is in place - check out RELEASE_FLOW.md for a visual guide!
+
