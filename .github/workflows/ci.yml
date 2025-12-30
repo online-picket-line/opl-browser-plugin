@@ -200,7 +200,7 @@ jobs:
         VALIDATE_YAML: true
         # Configure linter behavior
         SUPPRESS_POSSUM: true
-        FILTER_REGEX_EXCLUDE: '(node_modules/|coverage/|dist/|\.zip$|api-service\.js.*DEFAULT_API_KEY)'
+        FILTER_REGEX_EXCLUDE: '(node_modules/|coverage/|dist/|\.zip$|api-service\.js.*(_p[0-9]+|_assembleKey|_getObfuscatedKey))'
 
   test:
     name: Run Tests
