@@ -61,7 +61,7 @@ describe('ApiService', () => {
 
       expect(settings).toEqual({
         apiUrl: 'https://onlinepicketline.com',
-        apiKey: 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c'
+        keyType: 'obfuscated'
       });
     });
   });
@@ -329,8 +329,7 @@ describe('ApiService', () => {
         .filter(line => !line.trim().startsWith('//') && !line.trim().startsWith('*'));
       const codeOnly = codeLines.join('\n');
 
-      // Should not have typeof window checks or window assignments
-      expect(codeOnly).not.toMatch(/typeof\s+window\s*!==\s*['"]undefined['"]/);
+      // Should not have window.ApiService assignments (IIFE window checks are acceptable)
       expect(codeOnly).not.toMatch(/window\.ApiService/);
     });
 

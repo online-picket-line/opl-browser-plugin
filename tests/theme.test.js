@@ -43,23 +43,23 @@ describe('Theme Configuration', () => {
     });
 
     it('should use oklch color format matching onlinepicketline.com', () => {
-      // Verify oklch format is used
-      expect(themeCSS).toMatch(/oklch\(\d+%\s+[\d.]+\s+\d+\)/);
+      // Verify oklch format is used (with optional deg suffix)
+      expect(themeCSS).toMatch(/oklch\(\d+%\s+[\d.]+\s+\d+(deg)?\)/);
     });
 
     it('should define primary color matching website', () => {
-      // Primary color should be dark green: oklch(28% .2 140)
-      expect(themeCSS).toContain('oklch(28% .2 140)');
+      // Primary color should be dark green: oklch(28% .2 140deg)
+      expect(themeCSS).toMatch(/oklch\(28%\s*\.2\s*140(deg)?\)/);
     });
 
     it('should define destructive color matching website', () => {
-      // Destructive color should be warm red: oklch(45% .22 15)
-      expect(themeCSS).toContain('oklch(45% .22 15)');
+      // Destructive color should be warm red: oklch(45% .22 15deg)
+      expect(themeCSS).toMatch(/oklch\(45%\s*\.22\s*15(deg)?\)/);
     });
 
     it('should define background color matching website', () => {
-      // Background should be very light: oklch(98% .005 140)
-      expect(themeCSS).toContain('oklch(98% .005 140)');
+      // Background should be very light: oklch(98% .005 140deg)
+      expect(themeCSS).toMatch(/oklch\(98%\s*\.005\s*140(deg)?\)/);
     });
   });
 
@@ -112,7 +112,7 @@ describe('Theme Configuration', () => {
 
     it('should define hard shadow helper', () => {
       expect(themeCSS).toContain('--shadow-hard');
-      expect(themeCSS).toMatch(/--shadow-hard:.*2px 2px 0px 0px/);
+      expect(themeCSS).toMatch(/--shadow-hard:.*2px 2px 0(px)? 0(px)?/);
     });
   });
 
