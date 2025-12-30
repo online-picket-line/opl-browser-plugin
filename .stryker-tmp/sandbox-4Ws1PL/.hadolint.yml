@@ -1,6 +1,0 @@
-# Hadolint configuration
-ignored:
-  - DL3008
-  - DL3009
-  - DL3015
-  - DL3025

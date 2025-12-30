@@ -1,4 +1,0 @@
-[sqlfluff]
-dialect = ansi
-templater = jinja
-rules = all

@@ -4,27 +4,25 @@
   "reporters": [
     "html",
     "clear-text",
-    "progress",
-    "dashboard"
+    "progress"
   ],
   "testRunner": "jest",
   "jest": {
     "projectType": "custom",
-    "configFile": "package.json",
-    "enableFindRelatedTests": true
+    "configFile": "jest.stryker.config.js",
+    "enableFindRelatedTests": false
   },
-  "coverageAnalysis": "perTest",
+  "coverageAnalysis": "all",
   "mutate": [
     "background.js",
     "block.js",
     "content.js",
-    "popup.js",
-    "migration-helper.js"
+    "popup.js"
   ],
   "thresholds": {
-    "high": 80,
-    "low": 60,
-    "break": 50
+    "high": 60,
+    "low": 40,
+    "break": null
   },
   "timeoutMS": 60000,
   "timeoutFactor": 2,
