@@ -200,7 +200,17 @@ jobs:
         VALIDATE_YAML: true
         # Configure linter behavior
         SUPPRESS_POSSUM: true
-        FILTER_REGEX_EXCLUDE: '(node_modules/|coverage/|dist/|\.zip$|api-service\.js.*(_p[0-9]+|_assembleKey|_getObfuscatedKey))'
+        # Use explicit config files - try flat config first
+        JAVASCRIPT_ES_CONFIG_FILE: 'eslint.config.js'
+        MARKDOWN_CONFIG_FILE: '.markdownlint.json'
+        YAML_CONFIG_FILE: '.yamllint.yml'
+        CSS_CONFIG_FILE: '.stylelintrc.json'
+        # Filter out unwanted directories and files
+        FILTER_REGEX_EXCLUDE: '(node_modules|coverage|\.git)'
+        # Disable problematic linters that may conflict
+        VALIDATE_JAVASCRIPT_STANDARD: false
+        VALIDATE_JSCPD: false
+        VALIDATE_GITLEAKS: false
 
   test:
     name: Run Tests

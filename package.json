@@ -1,7 +1,6 @@
 {
   "name": "opl-browser-plugin",
   "version": "1.0.0",
-  "type": "module",
   "description": "Browser plugin for Online Picket Line",
   "main": "api-service.js",
   "scripts": {

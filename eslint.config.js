@@ -1,5 +1,4 @@
-// eslint.config.mjs
-export default [
+module.exports = [
   {
     ignores: [
       "node_modules/**",

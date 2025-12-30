@@ -1,0 +1,18 @@
+{
+  "esversion": 6,
+  "node": true,
+  "browser": true,
+  "webextensions": true,
+  "strict": false,
+  "globalstrict": false,
+  "undef": true,
+  "unused": "vars",
+  "predef": [
+    "chrome",
+    "browser",
+    "fetch",
+    "console",
+    "document",
+    "window"
+  ]
+}
