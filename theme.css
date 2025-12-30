@@ -3,25 +3,25 @@
 
 :root {
   /* Match onlinepicketline.com color scheme */
-  --background: oklch(98% .005 140);
-  --foreground: oklch(12% .15 140);
-  --card: oklch(96% .008 140);
-  --card-foreground: oklch(12% .15 140);
-  --popover: oklch(99% .003 140);
-  --popover-foreground: oklch(12% .15 140);
-  --primary: oklch(28% .2 140);
-  --primary-foreground: oklch(99% .005 140);
-  --secondary: oklch(88% .08 140);
-  --secondary-foreground: oklch(15% .15 140);
-  --muted: oklch(92% .02 140);
-  --muted-foreground: oklch(35% .1 140);
-  --accent: oklch(38% .18 120);
-  --accent-foreground: oklch(99% .005 140);
-  --destructive: oklch(45% .22 15);
-  --destructive-foreground: oklch(99% .005 140);
-  --border: oklch(75% .08 140);
-  --input: oklch(75% .08 140);
-  --ring: oklch(28% .2 140);
+  --background: oklch(98% .005 140deg);
+  --foreground: oklch(12% .15 140deg);
+  --card: oklch(96% .008 140deg);
+  --card-foreground: oklch(12% .15 140deg);
+  --popover: oklch(99% .003 140deg);
+  --popover-foreground: oklch(12% .15 140deg);
+  --primary: oklch(28% .2 140deg);
+  --primary-foreground: oklch(99% .005 140deg);
+  --secondary: oklch(88% .08 140deg);
+  --secondary-foreground: oklch(15% .15 140deg);
+  --muted: oklch(92% .02 140deg);
+  --muted-foreground: oklch(35% .1 140deg);
+  --accent: oklch(38% .18 120deg);
+  --accent-foreground: oklch(99% .005 140deg);
+  --destructive: oklch(45% .22 15deg);
+  --destructive-foreground: oklch(99% .005 140deg);
+  --border: oklch(75% .08 140deg);
+  --input: oklch(75% .08 140deg);
+  --ring: oklch(28% .2 140deg);
   --radius: 0rem;
   
   /* Match website fonts */
@@ -30,7 +30,7 @@
   --font-mono: 'Fira Code', 'Courier New', monospace;
 
   /* Shadow system from website */
-  --shadow-color: oklch(28% .2 140);
+  --shadow-color: oklch(28% .2 140deg);
   --shadow-opacity: 0.4;
   --shadow-blur: 0;
   --shadow-spread: 0;
@@ -90,7 +90,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-secondary:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px 0px var(--border);
+  box-shadow: 4px 4px 0 0 var(--border);
 }
 
 .btn-outline {
