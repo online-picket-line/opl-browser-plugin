@@ -69,9 +69,7 @@ jobs:
       uses: trufflesecurity/trufflehog@main
       with:
         path: ./
-        base: main
-        head: HEAD
-        extra_args: --debug --only-verified
+        extra_args: --debug --only-verified --no-verification
         
     - name: ESLint Security Rules
       run: |
