@@ -200,6 +200,7 @@ jobs:
         VALIDATE_YAML: true
         # Configure linter behavior
         SUPPRESS_POSSUM: true
+        LINTER_RULES_PATH: .github/linters
         # Filter out unwanted directories and files
         FILTER_REGEX_EXCLUDE: '(node_modules|coverage|\.git)'
 
