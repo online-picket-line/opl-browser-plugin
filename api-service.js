@@ -275,9 +275,7 @@ class ApiService {
 
       const action = {
         id: actionDetails.id || `org-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        title: actionDetails.organization
-          ? `${actionDetails.actionType || 'Labor Action'}: ${actionDetails.organization}`
-          : `Labor Action: ${orgName}`,
+        title: actionDetails.organization || orgName,
         description: actionDetails.description || 'Active labor action',
         company: orgName,
         type: actionDetails.actionType || this.extractActionType('labor action'),

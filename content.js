@@ -59,7 +59,15 @@
     // Construct details string
     let details = [];
     if (action.locations && action.locations.length > 0) details.push(action.locations[0]);
-    if (action.startDate) details.push(`Since ${new Date(action.startDate).toLocaleDateString()}`);
+    if (action.startDate) {
+      let dateText = new Date(action.startDate).toLocaleDateString();
+      if (action.endDate) {
+        dateText += ' - ' + new Date(action.endDate).toLocaleDateString();
+      } else {
+        dateText += ' - Present';
+      }
+      details.push(dateText);
+    }
     const detailsHtml = details.length > 0 ? `<p class="opl-banner-details" style="font-size: 0.8em; opacity: 0.9; margin-top: 2px;">${details.join(' • ')}</p>` : '';
 
     // Build logo HTML if available
