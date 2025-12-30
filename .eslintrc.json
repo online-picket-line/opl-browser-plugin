@@ -19,6 +19,7 @@
   },
   "ignorePatterns": [
     "node_modules/**",
+    "browser-polyfill.js",
     "coverage/**",
     "generate-icons.js",
     "test-import.js",

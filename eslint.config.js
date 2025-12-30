@@ -47,7 +47,7 @@ module.exports = [
     rules: {
       "no-console": "off",
       "no-debugger": "warn",
-      "no-unused-vars": ["error", { "argsIgnorePattern": "^_|^e$|^e2$|^data$|^error$|^response$|^result$|^timestamp$|^changes$|^actionType$|^urlToTest$|^actions$|^blockMode$|^manyActions$|^testButton$" }],
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_.*$", "caughtErrorsIgnorePattern": "^_.*$" }],
       "no-undef": "error",
       "no-useless-escape": "warn"
     }
