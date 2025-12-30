@@ -23,7 +23,7 @@ The fastest way to test the extension in Safari during development:
    ```bash
    xcrun safari-web-extension-converter . --app-name "Online Picket Line"
    ```
-   
+
    This creates a new directory called "Online Picket Line" with an Xcode project.
 
 4. **Open the Xcode project**:

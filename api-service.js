@@ -1,8 +1,9 @@
 
 // API service to fetch labor actions from Online Picketline External API (v3.0)
 // Requires API key authentication (public or private)
+// Note: Replace DEFAULT_API_KEY with your actual Base64-encoded API key
 const DEFAULT_API_BASE_URL = 'https://onlinepicketline.com';
-const DEFAULT_API_KEY = 'b3BsXzAyY2FmZWNjMzM2MWZiNWVlMzAzODMyZGRlMjZlM2M2N2Y0N2I5NDQ3NmI1NWYxMGI0NjRiYTIwYmZlYzRmMWM=';
+const DEFAULT_API_KEY = 'b3BsX3BsYWNlaG9sZGVyX2tleQ==';
 const CACHE_KEY = 'labor_actions_cache';
 const CACHE_DURATION = 300000; // 5 minutes in milliseconds
 const CACHE_HASH_KEY = 'content_hash';

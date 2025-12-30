@@ -54,7 +54,7 @@ The project uses **GitHub Actions** for continuous integration and automated rel
 
 **Jobs:**
 
-#### Test Job
+#### Release Test Job
 - Same as CI workflow
 - Ensures all tests pass before creating release
 

@@ -35,7 +35,7 @@ Modern browsers automatically update extensions without any custom code required
    ```
 
 2. **Upload to Chrome Web Store**
-   - Go to [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
+   - Go to [Chrome Web Store Developer Dashboard](<https://chrome.google.com/webstore/devconsole>)
    - Select your extension
    - Click "Upload new package"
    - Upload the `.zip` file
@@ -62,7 +62,7 @@ Modern browsers automatically update extensions without any custom code required
    ```
 
 2. **Upload to Firefox Add-ons**
-   - Go to [Firefox Add-on Developer Hub](https://addons.mozilla.org/developers/)
+   - Go to [Firefox Add-on Developer Hub](<https://addons.mozilla.org/developers/>)
    - Select your add-on
    - Click "Upload New Version"
    - Upload the `.zip` file
@@ -94,7 +94,7 @@ Modern browsers automatically update extensions without any custom code required
 
 ## Version Numbering
 
-Use [Semantic Versioning (SemVer)](https://semver.org/):
+Use [Semantic Versioning (SemVer)](<https://semver.org/>):
 
 ```
 MAJOR.MINOR.PATCH
@@ -198,30 +198,30 @@ Before publishing an update:
 
 ## Benefits of Store Updates
 
-### Advantages over custom update mechanisms:
+### Advantages over custom update mechanisms
 
-1. **Security**: 
+1. **Security**
    - Stores review updates for malicious code
    - Signed by the browser vendor
    - No custom download/install code required
 
-2. **Reliability**:
+2. **Reliability**
    - Built into the browser
    - Well-tested infrastructure
    - Handles edge cases automatically
 
-3. **User Trust**:
+3. **User Trust**
    - Users expect updates from the store
    - No security warnings
    - Consistent with other extensions
 
-4. **Simplicity**:
+4. **Simplicity**
    - No update code to maintain
    - No API calls or caching
    - No UI for update notifications
    - Smaller extension size
 
-5. **Compatibility**:
+5. **Compatibility**
    - Works consistently across browsers
    - Follows platform conventions
    - Future-proof
@@ -287,17 +287,17 @@ The following files were removed as they're no longer needed:
 ## Support Resources
 
 ### Chrome Web Store
-- [Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-- [Extension Guidelines](https://developer.chrome.com/docs/webstore/program-policies/)
-- [Publishing Guide](https://developer.chrome.com/docs/webstore/publish/)
+- [Developer Dashboard](<https://chrome.google.com/webstore/devconsole>)
+- [Extension Guidelines](<https://developer.chrome.com/docs/webstore/program-policies/>)
+- [Publishing Guide](<https://developer.chrome.com/docs/webstore/publish/>)
 
 ### Firefox Add-ons
-- [Developer Hub](https://addons.mozilla.org/developers/)
-- [Add-on Policies](https://extensionworkshop.com/documentation/publish/add-on-policies/)
-- [Submission Guide](https://extensionworkshop.com/documentation/publish/submitting-an-add-on/)
+- [Developer Hub](<https://addons.mozilla.org/developers/>)
+- [Add-on Policies](<https://extensionworkshop.com/documentation/publish/add-on-policies/>)
+- [Submission Guide](<https://extensionworkshop.com/documentation/publish/submitting-an-add-on/>)
 
 ### Safari Extensions
-- [App Store Connect](https://appstoreconnect.apple.com/)
+- [App Store Connect](<https://appstoreconnect.apple.com/>)
 - [Safari Extension Guidelines](https://developer.apple.com/safari/extensions/)
 - [App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
 

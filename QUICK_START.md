@@ -26,11 +26,11 @@
 
 1. Click the extension icon in your browser toolbar
 2. Enter your Online Picketline instance URL:
-   ```
+   ```text
    https://your-instance.com
    ```
 3. Enter your API key (get from your instance administrator):
-   ```
+   ```text
    opl_your_key_here
    ```
 4. Click **Save Configuration**

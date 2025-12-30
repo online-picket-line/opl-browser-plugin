@@ -14,8 +14,8 @@ Edit [manifest.json](manifest.json) and [manifest-v2.json](manifest-v2.json):
 ```
 
 ### 3. Upload to Store(s)
-- **Chrome Web Store:** https://chrome.google.com/webstore/devconsole
-- **Firefox Add-ons:** https://addons.mozilla.org/developers/
+- **Chrome Web Store:** <https://chrome.google.com/webstore/devconsole>
+- **Firefox Add-ons:** <https://addons.mozilla.org/developers/>
 - **Safari:** Via Xcode/App Store Connect
 
 ---

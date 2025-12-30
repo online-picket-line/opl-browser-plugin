@@ -319,7 +319,7 @@ The test suite is successful if:
 
 **Node.js not installed**
 ```bash
-# Install from https://nodejs.org/
+# Install from <https://nodejs.org/>
 # Or use version manager:
 nvm install 18
 nvm use 18
@@ -346,8 +346,8 @@ beforeEach(() => {
 - **TESTING_GUIDE.md** - Comprehensive testing guide
 - **tests/README.md** - Test suite documentation
 - **run-tests.sh** - Automated test runner
-- **Jest Docs**: https://jestjs.io/
-- **Chrome Extension Testing**: https://developer.chrome.com/docs/extensions/mv3/tut_testing/
+- **Jest Docs**: <https://jestjs.io/>
+- **Chrome Extension Testing**: <https://developer.chrome.com/docs/extensions/mv3/tut_testing/>
 
 ---
 

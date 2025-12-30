@@ -250,7 +250,7 @@ Add to `.vscode/launch.json`:
 ### Tests Won't Run
 
 **Problem**: `npm: command not found`
-**Solution**: Install Node.js from https://nodejs.org/
+**Solution**: Install Node.js from <https://nodejs.org/>
 
 **Problem**: `Cannot find module 'jest'`
 **Solution**: Run `npm install`
@@ -335,9 +335,9 @@ When adding new features:
 
 ## Resources
 
-- [Jest Documentation](https://jestjs.io/)
-- [Testing Chrome Extensions](https://developer.chrome.com/docs/extensions/mv3/tut_testing/)
-- [Testing Best Practices](https://github.com/goldbergyoni/javascript-testing-best-practices)
+- [Jest Documentation](<https://jestjs.io/>)
+- [Testing Chrome Extensions](<https://developer.chrome.com/docs/extensions/mv3/tut_testing/>)
+- [Testing Best Practices](<https://github.com/goldbergyoni/javascript-testing-best-practices>)
 
 ## Quick Reference
 

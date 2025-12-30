@@ -55,7 +55,7 @@ A fully functional in-app upgrade mechanism for the Online Picket Line browser e
 ## Technical Details
 
 ### GitHub API Integration
-```javascript
+```http
 Repository: online-picket-line/opl-browser-plugin
 Endpoint: https://api.github.com/repos/online-picket-line/opl-browser-plugin/releases/latest
 Method: GET

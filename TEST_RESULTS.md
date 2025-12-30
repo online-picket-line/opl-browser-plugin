@@ -63,7 +63,7 @@ All unit and integration tests for the update mechanism are now passing successf
 ### Silverblue/Flatpak Configuration
 The test suite successfully runs in the following environment:
 
-```
+```text
 OS: Fedora Silverblue (immutable)
 VS Code: flatpak (com.visualstudio.code)
 Toolbox: opl-dev
@@ -97,7 +97,7 @@ Tests are executed using the custom `run-tests.sh` script which:
 ## Test Coverage Details
 
 ### update-service.js Coverage
-```
+```text
 Statements: 93.82%
 Branches: 86.84%
 Functions: 100%

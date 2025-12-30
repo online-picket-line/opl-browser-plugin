@@ -1,24 +1,24 @@
 # API Documentation Sources to Check
 
-## Primary Documentation URLs to Try:
-1. https://github.com/online-picket-line/online-picketline/blob/main/API.md
-2. https://github.com/online-picket-line/online-picketline/blob/main/docs/API.md  
-3. https://github.com/online-picket-line/online-picketline/blob/main/api/README.md
-4. https://github.com/online-picket-line/online-picketline/blob/main/README.md (check for API section)
+## Primary Documentation URLs to Try
+1. <https://github.com/online-picket-line/online-picketline/blob/main/API.md>
+2. <https://github.com/online-picket-line/online-picketline/blob/main/docs/API.md>
+3. <https://github.com/online-picket-line/online-picketline/blob/main/api/README.md>
+4. <https://github.com/online-picket-line/online-picketline/blob/main/README.md> (check for API section)
 
-## Instance Documentation:
+## Instance Documentation
 - YOUR_INSTANCE_URL/api/docs
 - YOUR_INSTANCE_URL/docs
 - YOUR_INSTANCE_URL/swagger
 - YOUR_INSTANCE_URL/api
 
-## API Discovery Endpoints to Test:
+## API Discovery Endpoints to Test
 - GET YOUR_INSTANCE_URL/api/ (may return available endpoints)
 - GET YOUR_INSTANCE_URL/api/version
 - GET YOUR_INSTANCE_URL/health
 - GET YOUR_INSTANCE_URL/.well-known/api
 
-## Changes to Look For:
+## Changes to Look For
 
 ### Authentication
 - New API key requirement
@@ -43,7 +43,7 @@
 - CORS policy changes
 - Content-Type requirements
 
-## Browser Plugin Update Areas:
+## Browser Plugin Update Areas
 
 ### 1. api-service.js
 ```javascript

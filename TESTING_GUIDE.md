@@ -357,10 +357,10 @@ describe('FeatureName', () => {
 
 ## Resources
 
-- **Jest Documentation**: https://jestjs.io/docs/getting-started
-- **Jest Matchers**: https://jestjs.io/docs/expect
-- **Chrome Extension Testing**: https://developer.chrome.com/docs/extensions/mv3/tut_testing/
-- **Test Coverage**: https://jestjs.io/docs/configuration#collectcoverage-boolean
+- **Jest Documentation**: <https://jestjs.io/docs/getting-started>
+- **Jest Matchers**: <https://jestjs.io/docs/expect>
+- **Chrome Extension Testing**: <https://developer.chrome.com/docs/extensions/mv3/tut_testing/>
+- **Test Coverage**: <https://jestjs.io/docs/configuration#collectcoverage-boolean>
 
 ## Quick Reference
 
