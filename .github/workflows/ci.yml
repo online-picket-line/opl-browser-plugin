@@ -200,9 +200,6 @@ jobs:
         VALIDATE_YAML: true
         # Configure linter behavior
         SUPPRESS_POSSUM: true
-        # Use explicit config files
-        MARKDOWN_CONFIG_FILE: '.markdownlint.json'
-        YAML_CONFIG_FILE: '.yamllint.yml'
         # Filter out unwanted directories and files
         FILTER_REGEX_EXCLUDE: '(node_modules|coverage|\.git)'
 
