@@ -8,7 +8,7 @@ const path = require('path');
 
 describe('Banner Styling', () => {
   let contentCSS;
-  
+
   beforeAll(() => {
     // Read content.css file
     const contentPath = path.join(__dirname, '..', 'content.css');

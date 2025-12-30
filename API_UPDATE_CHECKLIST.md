@@ -22,7 +22,7 @@
 
 ### Authentication
 - New API key requirement
-- OAuth implementation  
+- OAuth implementation
 - JWT tokens
 - Rate limiting changes
 
@@ -48,7 +48,7 @@
 ### 1. api-service.js
 ```javascript
 // Check these areas for updates:
-- DEFAULT_API_BASE_URL 
+- DEFAULT_API_BASE_URL
 - CACHE_DURATION
 - fetch() headers
 - response parsing

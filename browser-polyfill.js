@@ -1,6 +1,6 @@
 /**
  * Browser API Polyfill for Cross-Browser Compatibility
- * 
+ *
  * Ensures consistent API access across Chrome, Edge, Firefox, and Safari.
  * Safari and Firefox prefer the `browser` namespace, while Chrome uses `chrome`.
  * This polyfill ensures both work seamlessly.

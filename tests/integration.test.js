@@ -103,7 +103,7 @@ describe.skip('End-to-End Integration', () => {
       // Mock URL matching function
       const matchUrlToAction = (url, actions) => {
         const testActions = mockTransformedActions;
-        
+
         for (const action of testActions) {
           if (action._extensionData && action._extensionData.matchingUrlRegexes) {
             for (const pattern of action._extensionData.matchingUrlRegexes) {
@@ -149,10 +149,10 @@ describe.skip('End-to-End Integration', () => {
         // Store action data
         const actionData = JSON.stringify(action);
         const blockedUrl = currentUrl;
-        
+
         // Get block page URL
         const blockPageUrl = chrome.runtime.getURL('block.html');
-        
+
         return {
           actionData,
           blockedUrl,
@@ -296,7 +296,7 @@ describe.skip('End-to-End Integration', () => {
       // Create large mock dataset
       const largeDataset = {};
       const manyActions = [];
-      
+
       for (let i = 0; i < 100; i++) {
         largeDataset[`Company ${i}`] = {
           matchingUrlRegexes: [`company${i}\\.com`, `www\\.company${i}\\.com`],

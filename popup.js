@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Enable test mode and inject test data
         await enableTestMode();
         showStatus('Test mode enabled! Opening example.com...', 'success');
-        
+
         // Open example.com in a new tab
         chrome.tabs.create({ url: 'https://example.com' });
       } catch (error) {
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function showStatus(message, type) {
     statusDiv.textContent = message;
     statusDiv.className = `status ${type}`;
-    
+
     if (type !== 'warning') {
       setTimeout(() => {
         statusDiv.className = 'status';
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(['labor_actions', 'cache_timestamp', 'connection_status'], (result) => {
       const actions = result.labor_actions || [];
       const timestamp = result.cache_timestamp;
-      
+
       // Update connection indicator
       const status = result.connection_status || 'online';
       if (connectionIndicator && connectionText) {
@@ -111,9 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (activeActions === 0) {
         statsHtml = 'No data loaded yet<br>Configure API and refresh';
       }
-      
+
       statsHtml += `<br><a href="https://onlinepicketline.com" target="_blank" style="color: inherit; text-decoration: underline; margin-top: 0.5rem; display: inline-block;">More Info at OnlinePicketLine.com</a>`;
-      
+
       statsContent.innerHTML = statsHtml;
     });
   }
@@ -126,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Get current labor actions
       chrome.storage.local.get(['labor_actions'], (result) => {
         const currentActions = result.labor_actions || [];
-        
+
         // Create test action for example.com
         const testAction = {
           id: 'test-example-com',
@@ -175,11 +175,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
         };
-        
+
         // Remove any existing test action and add new one
         const filteredActions = currentActions.filter(a => !a._isTestAction);
         const updatedActions = [...filteredActions, testAction];
-        
+
         // Save updated actions
         chrome.storage.local.set({
           labor_actions: updatedActions,

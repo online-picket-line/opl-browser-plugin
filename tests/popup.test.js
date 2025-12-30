@@ -83,11 +83,11 @@ describe('Popup Functionality', () => {
       const updateIndicator = (status) => {
         const indicator = { style: {}, className: '' };
         const text = { textContent: '' };
-        
+
         indicator.style.display = 'inline-flex';
         indicator.className = `connection-status status-${status}`;
         text.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-        
+
         return { indicator, text };
       };
 
@@ -112,28 +112,28 @@ describe('Popup Functionality', () => {
       const loadStats = (actions, timestamp) => {
         const activeActions = actions.filter(a => (!a.status || a.status === 'active') && !a._isTestAction).length;
         const totalUrls = actions.reduce((sum, a) => sum + (a.target_urls?.length || 0), 0);
-        
+
         let statsHtml = `<strong>${activeActions}</strong> active labor action${activeActions !== 1 ? 's' : ''}`;
         if (totalUrls > 0) {
           statsHtml += `<br><strong>${totalUrls}</strong> URL${totalUrls !== 1 ? 's' : ''} monitored`;
         }
-        
+
         if (timestamp) {
           const age = Date.now() - timestamp;
           const minutes = Math.floor(age / 60000);
           const timeStr = minutes > 0 ? `${minutes} minute${minutes !== 1 ? 's' : ''} ago` : 'just now';
           statsHtml += `<br>Last updated ${timeStr}`;
         }
-        
+
         statsHtml += `<br><a href="https://onlinepicketline.com" target="_blank" style="color: inherit; text-decoration: underline; margin-top: 0.5rem; display: inline-block;">More Info at OnlinePicketLine.com</a>`;
-        
+
         return statsHtml;
       };
 
       const currentTime = Date.now();
       const oneMinuteAgo = currentTime - 60000;
       const stats = loadStats(mockActions, oneMinuteAgo);
-      
+
       expect(stats).toContain('<strong>2</strong> active labor actions');
       expect(stats).toContain('<strong>4</strong> URLs monitored');
       expect(stats).toContain('1 minute ago');
@@ -150,17 +150,17 @@ describe('Popup Functionality', () => {
       const loadStats = (actions, timestamp) => {
         const activeActions = actions.filter(a => (!a.status || a.status === 'active') && !a._isTestAction).length;
         const totalUrls = actions.reduce((sum, a) => sum + (a.target_urls?.length || 0), 0);
-        
+
         let statsHtml = `<strong>${activeActions}</strong> active labor action${activeActions !== 1 ? 's' : ''}`;
         if (totalUrls > 0) {
           statsHtml += `<br><strong>${totalUrls}</strong> URL${totalUrls !== 1 ? 's' : ''} monitored`;
         }
-        
+
         return statsHtml;
       };
 
       const stats = loadStats(mockActions);
-      
+
       // Should show 2 active actions (excluding the test action)
       expect(stats).toContain('<strong>2</strong> active labor actions');
       // Should still count all URLs including test action URLs
@@ -193,7 +193,7 @@ describe('Popup Functionality', () => {
         return new Promise((resolve, reject) => {
           mockChrome.storage.local.get(['labor_actions'], (result) => {
             const currentActions = result.labor_actions || [];
-            
+
             const testAction = {
               id: 'test-example-com',
               title: 'TEST MODE: Example Company Workers Strike',
@@ -241,10 +241,10 @@ describe('Popup Functionality', () => {
                 }
               }
             };
-            
+
             const filteredActions = currentActions.filter(a => !a._isTestAction);
             const updatedActions = [...filteredActions, testAction];
-            
+
             mockChrome.storage.local.set({
               labor_actions: updatedActions,
               cache_timestamp: Date.now(),
@@ -261,11 +261,11 @@ describe('Popup Functionality', () => {
       };
 
       const result = await enableTestMode();
-      
+
       // Verify the test action was added
       expect(result).toHaveLength(2);
       const testAction = result.find(a => a.id === 'test-example-com');
-      
+
       // Verify required fields
       expect(testAction).toBeDefined();
       expect(testAction.id).toBe('test-example-com');
@@ -275,7 +275,7 @@ describe('Popup Functionality', () => {
       expect(testAction.status).toBe('active');
       expect(testAction.target_urls).toEqual(['example.com', 'www.example.com']);
       expect(testAction._isTestAction).toBe(true);
-      
+
       // Verify storage was called correctly
       expect(mockChrome.storage.local.set).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -318,7 +318,7 @@ describe('Popup Functionality', () => {
               ],
               _isTestAction: true
             };
-            
+
             mockChrome.storage.local.set({
               labor_actions: [testAction],
               cache_timestamp: Date.now(),
@@ -329,7 +329,7 @@ describe('Popup Functionality', () => {
       };
 
       const testAction = await enableTestMode();
-      
+
       // Verify all comprehensive fields
       expect(testAction.description).toContain('demonstrate the Online Picket Line');
       expect(testAction.locations).toEqual(['Worldwide']);
@@ -378,7 +378,7 @@ describe('Popup Functionality', () => {
                 }
               }
             };
-            
+
             mockChrome.storage.local.set({
               labor_actions: [testAction]
             }, () => resolve(testAction));
@@ -387,7 +387,7 @@ describe('Popup Functionality', () => {
       };
 
       const testAction = await enableTestMode();
-      
+
       // Verify extension data structure
       expect(testAction._extensionData).toBeDefined();
       expect(testAction._extensionData.matchingUrlRegexes).toEqual(['^https?://(?:www\\.)?example\\.com']);
@@ -403,7 +403,7 @@ describe('Popup Functionality', () => {
         company: 'Old Test',
         _isTestAction: true
       };
-      
+
       const regularAction = {
         id: 'regular-1',
         company: 'Regular Company'
@@ -426,10 +426,10 @@ describe('Popup Functionality', () => {
               company: 'Example Company',
               _isTestAction: true
             };
-            
+
             const filteredActions = currentActions.filter(a => !a._isTestAction);
             const updatedActions = [...filteredActions, testAction];
-            
+
             mockChrome.storage.local.set({
               labor_actions: updatedActions
             }, () => resolve(updatedActions));
@@ -438,7 +438,7 @@ describe('Popup Functionality', () => {
       };
 
       const result = await enableTestMode();
-      
+
       // Should have only 2 actions: the regular one and the new test one
       expect(result).toHaveLength(2);
       expect(result.find(a => a.id === 'regular-1')).toBeDefined();
@@ -448,7 +448,7 @@ describe('Popup Functionality', () => {
 
     it('should open example.com in new tab when test button is clicked', async () => {
       const testButton = mockDocument.getElementById('test-mode-btn');
-      
+
       // Simulate button click handler
       mockChrome.storage.local.get.mockImplementation((keys, callback) => {
         callback({ labor_actions: [] });
@@ -467,7 +467,7 @@ describe('Popup Functionality', () => {
               target_urls: ['example.com', 'www.example.com'],
               _isTestAction: true
             };
-            
+
             mockChrome.storage.local.set({
               labor_actions: [testAction],
               test_mode_enabled: true
@@ -480,7 +480,7 @@ describe('Popup Functionality', () => {
       };
 
       await handleTestButtonClick();
-      
+
       // Verify tab was created with correct URL
       expect(mockChrome.tabs.create).toHaveBeenCalledWith({ url: 'https://example.com' });
       expect(mockChrome.storage.local.set).toHaveBeenCalledWith(
@@ -509,7 +509,7 @@ describe('Popup Functionality', () => {
               id: 'test-example-com',
               _isTestAction: true
             };
-            
+
             mockChrome.storage.local.set({
               labor_actions: [testAction],
               cache_timestamp: Date.now(),
@@ -520,7 +520,7 @@ describe('Popup Functionality', () => {
       };
 
       await enableTestMode();
-      
+
       expect(savedData.test_mode_enabled).toBe(true);
       expect(savedData.cache_timestamp).toBeDefined();
       expect(typeof savedData.cache_timestamp).toBe('number');

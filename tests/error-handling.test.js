@@ -21,7 +21,7 @@ describe.skip('Error Handling and Edge Cases', () => {
     };
     global.chrome = mockChrome;
     global.fetch = jest.fn();
-    
+
     ApiService = require('../api-service.js');
   });
 
@@ -123,7 +123,7 @@ describe.skip('Error Handling and Edge Cases', () => {
       });
 
       const apiService = new ApiService();
-      
+
       // This might throw due to invalid URL, handle gracefully
       try {
         const result = await apiService.getLaborActions();
@@ -171,7 +171,7 @@ describe.skip('Error Handling and Edge Cases', () => {
       const result = await apiService.getLaborActions();
 
       expect(result).toEqual([]);
-      
+
       // Clean up
       delete chrome.runtime.lastError;
     });
@@ -201,7 +201,7 @@ describe.skip('Error Handling and Edge Cases', () => {
 
       // Should still work despite cache error
       expect(Array.isArray(result)).toBe(true);
-      
+
       delete chrome.runtime.lastError;
     });
 
@@ -247,7 +247,7 @@ describe.skip('Error Handling and Edge Cases', () => {
       // Should still return results despite cache save error
       expect(Array.isArray(result)).toBe(true);
       expect(result.length).toBe(1);
-      
+
       delete chrome.runtime.lastError;
     });
   });
@@ -395,7 +395,7 @@ describe.skip('Error Handling and Edge Cases', () => {
   describe('Memory and Performance Edge Cases', () => {
     it('should handle extremely large company names', async () => {
       const largeCompanyName = 'A'.repeat(10000); // 10KB company name
-      
+
       mockChrome.storage.sync.get.mockImplementation((keys, callback) => {
         callback({
           apiUrl: 'https://test-instance.com',
@@ -545,7 +545,7 @@ describe.skip('Error Handling and Edge Cases', () => {
 
   describe('URL Matching Edge Cases', () => {
     it('should handle invalid URLs gracefully', () => {
-      const matchUrlToAction = require('../background.js').matchUrlToAction || 
+      const matchUrlToAction = require('../background.js').matchUrlToAction ||
         ((url, actions) => {
           try {
             // Simulate URL matching logic

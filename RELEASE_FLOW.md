@@ -161,7 +161,7 @@ unzip -l dist/opl-chrome-edge.zip
 Before pushing version tag:
 
 [ ] manifest.json version updated
-[ ] manifest-v2.json version updated  
+[ ] manifest-v2.json version updated
 [ ] Both versions match
 [ ] All tests passing locally (npm test)
 [ ] Extension tested in Chrome

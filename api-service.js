@@ -10,7 +10,7 @@ const _p2 = () => String.fromCharCode(95); // '_'
 const _p3 = [48, 50].map(x => String.fromCharCode(x)).join(''); // '02'
 const _p4 = new Function('return "Y2FmZWNj"')(); // Base64 for 'cafecc'
 const _p5 = (() => {
-  const x = [51, 51, 54, 49]; 
+  const x = [51, 51, 54, 49];
   return btoa(String.fromCharCode(...x));
 })(); // Base64 for '3361'
 const _p6 = ((a, b) => btoa(a + b))('fb5e', 'e303'); // Base64 for 'fb5ee303'
@@ -21,7 +21,7 @@ const _p8 = 'ODMyZGRlMjZlM2M2N2Y0N2I5NDQ3NmI1NWYxMGI0NjRiYTIwYmZlYzRmMWM='; // F
 function _assembleKey() {
   const timestamp = Date.now();
   const checksum = timestamp.toString(16).slice(-4);
-  
+
   // Decode and combine parts
   const parts = [
     atob(_p1),
@@ -32,15 +32,15 @@ function _assembleKey() {
     atob(_p6),
     atob(_p8)
   ];
-  
+
   // Add runtime verification
   const assembled = parts.join('');
   const expected_length = 68; // Expected API key length
-  
+
   if (assembled.length !== expected_length) {
     throw new Error('Key assembly verification failed');
   }
-  
+
   // Encode the final key
   return btoa(assembled);
 }
@@ -49,15 +49,15 @@ function _assembleKey() {
 const _getObfuscatedKey = (() => {
   let _cachedKey = null;
   let _lastCheck = 0;
-  
+
   return function() {
     const now = Date.now();
-    
+
     // Cache key for 5 minutes to avoid repeated computation
     if (_cachedKey && (now - _lastCheck) < 300000) {
       return _cachedKey;
     }
-    
+
     try {
       _cachedKey = _assembleKey();
       _lastCheck = now;
@@ -79,7 +79,7 @@ const _validateEnvironment = () => {
     sum += Math.random();
   }
   const duration = performance.now() - start;
-  
+
   // If execution is suspiciously slow, might be debugged
   return duration < 100;
 };
@@ -124,16 +124,16 @@ class ApiService {
     if (!this._environmentValid) {
       throw new Error('Invalid execution environment detected');
     }
-    
+
     try {
       const obfuscatedKey = this.keyResolver();
       const decodedKey = atob(obfuscatedKey);
-      
+
       // Validate key format
       if (!decodedKey.startsWith('opl_') || decodedKey.length < 60) {
         throw new Error('Key validation failed');
       }
-      
+
       return decodedKey;
     } catch (error) {
       console.error('Key decryption failed:', error.message);
@@ -177,22 +177,22 @@ class ApiService {
 
       // Get cached hash for efficient caching
       const cachedHash = await this.getCachedHash();
-      
+
       // Fetch from Online Picketline External API with obfuscated API key
       let url = `${this.baseUrl}/api/blocklist.json?format=extension&includeInactive=false`;
       if (cachedHash) {
         url += `&hash=${cachedHash}`;
       }
-      
+
       // Get API key through obfuscated resolver
       const apiKey = this.getApiKey();
-      
+
       const headers = {
         'Accept': 'application/json',
         'X-API-Key': apiKey,
         'User-Agent': `OPL-Extension/${chrome.runtime.getManifest().version}`
       };
-      
+
       const response = await fetch(url, {
         method: 'GET',
         headers
@@ -207,22 +207,22 @@ class ApiService {
         }
         // Fall through to fetch fresh if no cache
       }
-      
+
       if (response.status === 429) {
         const retryAfter = response.headers.get('Retry-After') || '120';
         throw new Error(`Rate limited. Retry after ${retryAfter} seconds`);
       }
-      
+
       if (response.status === 401) {
         throw new Error('Invalid or missing API key. Please check your API key in settings.');
       }
-      
+
       if (!response.ok) {
         throw new Error(`API request failed: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-      
+
       // Store content hash for future requests
       const contentHash = response.headers.get('X-Content-Hash');
       if (contentHash) {
@@ -274,11 +274,11 @@ class ApiService {
 
       // Extract action details with fallbacks
       const actionDetails = orgData.actionDetails || {};
-      
+
       const action = {
         id: actionDetails.id || `org-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        title: actionDetails.organization 
-          ? `${actionDetails.actionType || 'Labor Action'}: ${actionDetails.organization}` 
+        title: actionDetails.organization
+          ? `${actionDetails.actionType || 'Labor Action'}: ${actionDetails.organization}`
           : `Labor Action: ${orgName}`,
         description: actionDetails.description || 'Active labor action',
         company: orgName,
@@ -321,13 +321,13 @@ class ApiService {
    */
   extractActionType(reason) {
     if (!reason) return 'labor_action';
-    
+
     const lowerReason = reason.toLowerCase();
     if (lowerReason.includes('strike')) return 'strike';
     if (lowerReason.includes('boycott')) return 'boycott';
     if (lowerReason.includes('picket')) return 'picket';
     if (lowerReason.includes('protest')) return 'protest';
-    
+
     return 'labor_action';
   }
 
@@ -427,7 +427,7 @@ class ApiService {
 // Additional obfuscation layers and anti-tampering measures
 (function() {
   'use strict';
-  
+
   // Detect common debugging techniques
   const _antiDebug = {
     checkDevTools: function() {
@@ -436,7 +436,7 @@ class ApiService {
       const duration = Date.now() - start;
       return duration < 100;
     },
-    
+
     checkConsole: function() {
       let devtools = false;
       const _console = console;
@@ -448,13 +448,13 @@ class ApiService {
       });
       return () => devtools;
     },
-    
+
     detectVM: function() {
       // Simple VM detection
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl');
       const debugInfo = gl ? gl.getExtension('WEBGL_debug_renderer_info') : null;
-      
+
       if (debugInfo) {
         const vendor = gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL);
         const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
@@ -463,11 +463,11 @@ class ApiService {
       return true;
     }
   };
-  
+
   // Integrity verification for critical functions
   const _verifyIntegrity = function() {
     const criticalFunctions = [_assembleKey, _getObfuscatedKey, _validateEnvironment];
-    
+
     for (const func of criticalFunctions) {
       const funcStr = func.toString();
       if (funcStr.includes('debugger') || funcStr.includes('console.log')) {
@@ -476,16 +476,16 @@ class ApiService {
     }
     return true;
   };
-  
+
   // Dynamic key rotation (theoretical - would need backend support)
   const _keyRotation = {
     lastRotation: Date.now(),
     rotationInterval: 24 * 60 * 60 * 1000, // 24 hours
-    
+
     shouldRotate: function() {
       return (Date.now() - this.lastRotation) > this.rotationInterval;
     },
-    
+
     // Placeholder for future key rotation implementation
     rotateKey: function() {
       if (this.shouldRotate()) {
@@ -494,7 +494,7 @@ class ApiService {
       }
     }
   };
-  
+
   // Obfuscate global access
   if (typeof window !== 'undefined') {
     Object.defineProperty(window, '_oplObfuscated', {
@@ -504,14 +504,14 @@ class ApiService {
       configurable: false
     });
   }
-  
+
   // Self-verification on load
   setTimeout(() => {
     if (!_verifyIntegrity() || !_antiDebug.detectVM()) {
       console.warn('Security verification failed - functionality may be limited');
     }
   }, Math.random() * 1000);
-  
+
 })();
 
 // Export for use in other scripts

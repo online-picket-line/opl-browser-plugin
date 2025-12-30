@@ -39,15 +39,15 @@ class UpdateService {
   compareVersions(v1, v2) {
     const parts1 = this.parseVersion(v1);
     const parts2 = this.parseVersion(v2);
-    
+
     for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
       const num1 = parts1[i] || 0;
       const num2 = parts2[i] || 0;
-      
+
       if (num1 > num2) return 1;
       if (num1 < num2) return -1;
     }
-    
+
     return 0;
   }
 
@@ -59,12 +59,12 @@ class UpdateService {
     return new Promise((resolve) => {
       chrome.storage.local.get([this.STORAGE_KEY_LAST_CHECK], (result) => {
         const lastCheck = result[this.STORAGE_KEY_LAST_CHECK];
-        
+
         if (!lastCheck) {
           resolve(true);
           return;
         }
-        
+
         const hoursSinceCheck = (Date.now() - lastCheck) / (1000 * 60 * 60);
         resolve(hoursSinceCheck >= this.CHECK_INTERVAL_HOURS);
       });
@@ -89,7 +89,7 @@ class UpdateService {
       }
 
       const data = await response.json();
-      
+
       return {
         version: data.tag_name.replace(/^v/, ''), // Remove 'v' prefix if present
         name: data.name,
@@ -124,7 +124,7 @@ class UpdateService {
 
       // Fetch latest release
       const release = await this.fetchLatestRelease();
-      
+
       if (!release) {
         return null;
       }
@@ -140,10 +140,10 @@ class UpdateService {
       // Check if there's a newer version
       if (comparison > 0) {
         console.log(`Update available: ${currentVersion} -> ${release.version}`);
-        
+
         // Check if user dismissed this version
         const dismissed = await this.isDismissed(release.version);
-        
+
         if (!dismissed) {
           return {
             currentVersion,
@@ -206,7 +206,7 @@ class UpdateService {
     return new Promise((resolve) => {
       chrome.storage.local.get([this.STORAGE_KEY_LATEST_VERSION], (result) => {
         const release = result[this.STORAGE_KEY_LATEST_VERSION];
-        
+
         if (!release) {
           resolve(null);
           return;

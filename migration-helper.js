@@ -12,15 +12,15 @@ class ApiMigrationHelper {
    */
   async compareApiResponses() {
     console.log('🔍 Comparing API responses...');
-    
+
     try {
       // Test old API endpoint
       const oldResponse = await this.testEndpoint(this.oldApiUrl, '/api/blocklist?format=json');
-      
+
       // Test potential new endpoints
       const newEndpoints = [
         '/api/blocklist?format=json',
-        '/api/v1/blocklist?format=json', 
+        '/api/v1/blocklist?format=json',
         '/api/v2/blocklist?format=json',
         '/api/labor-actions',
         '/api/actions'
@@ -29,7 +29,7 @@ class ApiMigrationHelper {
       for (const endpoint of newEndpoints) {
         console.log(`\n📡 Testing ${endpoint}...`);
         const newResponse = await this.testEndpoint(this.newApiUrl, endpoint);
-        
+
         if (newResponse.success && oldResponse.success) {
           this.compareDataStructures(oldResponse.data, newResponse.data, endpoint);
         }
@@ -49,10 +49,10 @@ class ApiMigrationHelper {
       });
 
       if (!response.ok) {
-        return { 
-          success: false, 
-          status: response.status, 
-          error: `HTTP ${response.status}` 
+        return {
+          success: false,
+          status: response.status,
+          error: `HTTP ${response.status}`
         };
       }
 
@@ -68,11 +68,11 @@ class ApiMigrationHelper {
    */
   compareDataStructures(oldData, newData, endpoint) {
     console.log(`\n🔄 Comparing data structure for ${endpoint}:`);
-    
+
     // Check top-level structure
     const oldKeys = Object.keys(oldData);
     const newKeys = Object.keys(newData);
-    
+
     const addedKeys = newKeys.filter(key => !oldKeys.includes(key));
     const removedKeys = oldKeys.filter(key => !newKeys.includes(key));
     const commonKeys = oldKeys.filter(key => newKeys.includes(key));
@@ -80,14 +80,14 @@ class ApiMigrationHelper {
     if (addedKeys.length > 0) {
       console.log('➕ Added fields:', addedKeys);
     }
-    
+
     if (removedKeys.length > 0) {
       console.log('❌ Removed fields:', removedKeys);
     }
 
     if (commonKeys.length > 0) {
       console.log('✅ Common fields:', commonKeys);
-      
+
       // Check blocklist structure specifically
       if (oldData.blocklist && newData.blocklist) {
         this.compareBlocklistStructure(oldData.blocklist, newData.blocklist);
@@ -105,20 +105,20 @@ class ApiMigrationHelper {
     }
 
     console.log('\n📋 Comparing blocklist item structure:');
-    
+
     const oldItem = oldBlocklist[0];
     const newItem = newBlocklist[0];
-    
+
     const oldItemKeys = Object.keys(oldItem);
     const newItemKeys = Object.keys(newItem);
-    
+
     const addedFields = newItemKeys.filter(key => !oldItemKeys.includes(key));
     const removedFields = oldItemKeys.filter(key => !newItemKeys.includes(key));
-    
+
     if (addedFields.length > 0) {
       console.log('➕ New blocklist fields:', addedFields);
     }
-    
+
     if (removedFields.length > 0) {
       console.log('❌ Removed blocklist fields:', removedFields);
     }
@@ -137,9 +137,9 @@ class ApiMigrationHelper {
   generateMigrationPlan(changes) {
     console.log('\n📝 Migration Plan:');
     console.log('==================');
-    
+
     const updates = [];
-    
+
     // Add specific recommendations based on common changes
     updates.push({
       file: 'api-service.js',
@@ -151,7 +151,7 @@ class ApiMigrationHelper {
     });
 
     updates.push({
-      file: 'popup.js', 
+      file: 'popup.js',
       changes: [
         'Add API key input field if authentication added',
         'Update connection test logic',

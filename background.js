@@ -12,7 +12,7 @@ const allowedBypasses = new Map(); // tabId -> url
 chrome.runtime.onInstalled.addListener(async () => {
   console.log('Extension installed, fetching labor actions...');
   await refreshLaborActions();
-  
+
   // Set default settings
   chrome.storage.sync.get(['blockMode'], (result) => {
     if (result.blockMode === undefined) {
@@ -36,44 +36,44 @@ async function refreshLaborActions() {
   try {
     const actions = await apiService.getLaborActions();
     console.log(`Fetched ${actions.length} labor actions`);
-    
+
     // Store in local storage for quick access
-    await chrome.storage.local.set({ 
+    await chrome.storage.local.set({
       labor_actions: actions,
       connection_status: 'online',
       failure_count: 0
     });
-    
+
     return actions.length > 0 || true; // Return true even if empty (successful fetch)
   } catch (error) {
     console.error('Failed to refresh labor actions:', error);
-    
+
     // Get current failure count
     const result = await chrome.storage.local.get(['failure_count']);
     const currentFailures = (result.failure_count || 0) + 1;
-    
+
     const updates = {
       failure_count: currentFailures
     };
-    
+
     if (currentFailures >= 3) {
       updates.connection_status = 'offline';
     }
-    
+
     await chrome.storage.local.set(updates);
-    
+
     return false;
   }
 }
 
 /**
  * Check if a URL matches any labor actions using optimized extension format
- * 
+ *
  * Uses the optimized pattern matching from API v3.0 extension format:
  * 1. Tests against optimized combined patterns first (fast)
  * 2. Falls back to individual pattern matching for accuracy
  * 3. Returns full action details for rich notifications
- * 
+ *
  * @param {string} url - URL to check
  * @param {Array} actions - List of labor actions with _extensionData
  * @returns {Object|null} Matching action object or null if no match found
@@ -85,7 +85,7 @@ function matchUrlToAction(url, actions) {
 
   try {
     const urlToTest = url.toLowerCase();
-    
+
     // Check each action using extension format data if available
     for (const action of actions) {
       // Skip inactive actions
@@ -110,16 +110,16 @@ function matchUrlToAction(url, actions) {
         // Fallback to legacy target_urls matching
         const hostname = new URL(url).hostname.toLowerCase();
         const targets = action.target_urls || action.targets || action.domains || [];
-        
+
         for (const target of targets) {
           const targetLower = target.toLowerCase();
-          
+
           // Match exact domain or subdomain
           if (hostname === targetLower || hostname.endsWith('.' + targetLower)) {
             return action;
           }
         }
-        
+
         // Fallback: check company name
         if (action.company) {
           const companyLower = action.company.toLowerCase().replace(/\s+/g, '');
@@ -152,7 +152,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     chrome.storage.local.get(['labor_actions'], (result) => {
       const actions = result.labor_actions || [];
       const match = matchUrlToAction(request.url, actions);
-      
+
       chrome.storage.sync.get(['blockMode'], (settings) => {
         sendResponse({
           match: match,
@@ -160,7 +160,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
       });
     });
-    
+
     // Return true to indicate async response
     return true;
   } else if (request.action === 'allowBypass') {

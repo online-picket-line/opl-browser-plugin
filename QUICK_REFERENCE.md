@@ -60,21 +60,21 @@ Edit [manifest.json](manifest.json) and [manifest-v2.json](manifest-v2.json):
 
 ## Common Questions
 
-**Q: Do I need special update code?**  
+**Q: Do I need special update code?**
 A: No! Browsers handle updates automatically.
 
-**Q: How do users get updates?**  
+**Q: How do users get updates?**
 A: Automatically, within 24 hours of approval.
 
-**Q: Can I force an update for testing?**  
+**Q: Can I force an update for testing?**
 A: Yes:
 - Chrome: `chrome://extensions` → Update button
 - Firefox: `about:addons` → Gear icon → Check for Updates
 
-**Q: What if review is rejected?**  
+**Q: What if review is rejected?**
 A: Fix the issues mentioned, increment version, and resubmit.
 
-**Q: How long until approved?**  
+**Q: How long until approved?**
 A: Usually hours to 3 days. Updates are typically faster than initial submissions.
 
 ---

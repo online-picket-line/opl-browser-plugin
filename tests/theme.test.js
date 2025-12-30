@@ -8,7 +8,7 @@ const path = require('path');
 
 describe('Theme Configuration', () => {
   let themeCSS;
-  
+
   beforeAll(() => {
     // Read theme.css file
     const themePath = path.join(__dirname, '..', 'theme.css');

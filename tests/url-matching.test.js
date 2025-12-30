@@ -11,7 +11,7 @@ global.matchUrlToAction = (url, actions) => {
 
   try {
     const urlToTest = url.toLowerCase();
-    
+
     for (const action of actions) {
       if (action.status && action.status !== 'active') {
         continue;
@@ -48,7 +48,7 @@ describe('URL Matching (Background Script)', () => {
 
     it('should match exact domain patterns', () => {
       const result = matchUrlToAction('https://wirecutter.com/article', testActions);
-      
+
       expect(result).toBeTruthy();
       expect(result.company).toBe('Wirecutter');
       expect(result.type).toBe('strike');
@@ -56,7 +56,7 @@ describe('URL Matching (Background Script)', () => {
 
     it('should match subdomain patterns', () => {
       const result = matchUrlToAction('https://www.example.com/page', testActions);
-      
+
       expect(result).toBeTruthy();
       expect(result.company).toBe('Example Corp');
       expect(result.type).toBe('boycott');
@@ -64,27 +64,27 @@ describe('URL Matching (Background Script)', () => {
 
     it('should match social media patterns', () => {
       const result = matchUrlToAction('https://facebook.com/thewirecutter/posts/123', testActions);
-      
+
       expect(result).toBeTruthy();
       expect(result.company).toBe('Wirecutter');
     });
 
     it('should be case insensitive', () => {
       const result = matchUrlToAction('HTTPS://WIRECUTTER.COM/TEST', testActions);
-      
+
       expect(result).toBeTruthy();
       expect(result.company).toBe('Wirecutter');
     });
 
     it('should not match unrelated URLs', () => {
       const result = matchUrlToAction('https://google.com', testActions);
-      
+
       expect(result).toBeNull();
     });
 
     it('should handle invalid URLs gracefully', () => {
       const result = matchUrlToAction('not-a-url', testActions);
-      
+
       expect(result).toBeNull();
     });
 

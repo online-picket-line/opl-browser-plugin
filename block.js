@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.runtime.sendMessage({ action: 'getBlockedState' }, (response) => {
     if (response) {
       updateUI(response.action, response.url);
-      
+
       // Store original URL for proceed button
       window.originalUrl = response.url;
     } else {
@@ -35,13 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Update UI with action data
       actionTitle.textContent = action.title || 'Labor Action in Progress';
-      actionDescription.textContent = action.description || 
+      actionDescription.textContent = action.description ||
         'This company is currently subject to a labor action. We encourage you to learn more and support workers.';
-      
+
       if (action.type) {
         actionType.textContent = action.type.toUpperCase();
       }
-      
+
       if (action.url || action.more_info) {
         learnMoreBtn.href = action.url || action.more_info;
         learnMoreBtn.style.display = 'inline-block';

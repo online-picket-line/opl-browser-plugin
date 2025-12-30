@@ -7,21 +7,21 @@
 describe('Background Script', () => {
   let mockChrome;
   let mockApiService;
-  
+
   beforeEach(() => {
     // Mock Chrome API
     mockChrome = {
       runtime: {
-        onInstalled: { 
+        onInstalled: {
           addListener: jest.fn()
         },
-        onMessage: { 
+        onMessage: {
           addListener: jest.fn()
         }
       },
       alarms: {
         create: jest.fn(),
-        onAlarm: { 
+        onAlarm: {
           addListener: jest.fn()
         }
       },
@@ -44,13 +44,13 @@ describe('Background Script', () => {
         }
       }
     };
-    
+
     // Mock ApiService
     mockApiService = {
       getLaborActions: jest.fn().mockResolvedValue([]),
       clearCache: jest.fn().mockResolvedValue(undefined)
     };
-    
+
     global.chrome = mockChrome;
     global.ApiService = jest.fn(() => mockApiService);
     global.importScripts = jest.fn();
@@ -65,21 +65,21 @@ describe('Background Script', () => {
         }
         return null;
       };
-      
+
       expect(matchUrlToAction(null, [])).toBeNull();
       expect(matchUrlToAction('', [])).toBeNull();
       expect(matchUrlToAction('https://example.com', null)).toBeNull();
       expect(matchUrlToAction('https://example.com', [])).toBeNull();
     });
-    
+
     it('should match URL using extension data regex patterns', () => {
       const matchUrlToAction = (url, actions) => {
         if (!url || !actions || actions.length === 0) return null;
-        
+
         const urlToTest = url.toLowerCase();
         for (const action of actions) {
           if (action.status && action.status !== 'active') continue;
-          
+
           if (action._extensionData && action._extensionData.matchingUrlRegexes) {
             for (const pattern of action._extensionData.matchingUrlRegexes) {
               try {
@@ -93,7 +93,7 @@ describe('Background Script', () => {
         }
         return null;
       };
-      
+
       const actions = [{
         id: 1,
         status: 'active',
@@ -102,20 +102,20 @@ describe('Background Script', () => {
           matchingUrlRegexes: ['^https?://([^/]*\\.)?example\\.com']
         }
       }];
-      
+
       const match = matchUrlToAction('https://example.com/page', actions);
       expect(match).not.toBeNull();
       expect(match.id).toBe(1);
     });
-    
+
     it('should skip inactive actions', () => {
       const matchUrlToAction = (url, actions) => {
         if (!url || !actions || actions.length === 0) return null;
-        
+
         const urlToTest = url.toLowerCase();
         for (const action of actions) {
           if (action.status && action.status !== 'active') continue;
-          
+
           if (action._extensionData && action._extensionData.matchingUrlRegexes) {
             for (const pattern of action._extensionData.matchingUrlRegexes) {
               try {
@@ -129,7 +129,7 @@ describe('Background Script', () => {
         }
         return null;
       };
-      
+
       const actions = [{
         id: 1,
         status: 'inactive',
@@ -137,18 +137,18 @@ describe('Background Script', () => {
           matchingUrlRegexes: ['^https?://([^/]*\\.)?example\\.com']
         }
       }];
-      
+
       expect(matchUrlToAction('https://example.com', actions)).toBeNull();
     });
-    
+
     it('should handle regex errors gracefully', () => {
       const matchUrlToAction = (url, actions) => {
         if (!url || !actions || actions.length === 0) return null;
-        
+
         const urlToTest = url.toLowerCase();
         for (const action of actions) {
           if (action.status && action.status !== 'active') continue;
-          
+
           if (action._extensionData && action._extensionData.matchingUrlRegexes) {
             for (const pattern of action._extensionData.matchingUrlRegexes) {
               try {
@@ -163,7 +163,7 @@ describe('Background Script', () => {
         }
         return null;
       };
-      
+
       const actions = [{
         id: 1,
         status: 'active',
@@ -171,23 +171,23 @@ describe('Background Script', () => {
           matchingUrlRegexes: ['[invalid(regex']
         }
       }];
-      
+
       expect(matchUrlToAction('https://example.com', actions)).toBeNull();
     });
 
     it('should fallback to legacy target_urls matching', () => {
       const matchUrlToAction = (url, actions) => {
         if (!url || !actions || actions.length === 0) return null;
-        
+
         try {
           const urlToTest = url.toLowerCase();
           for (const action of actions) {
             if (action.status && action.status !== 'active') continue;
-            
+
             if (!action._extensionData) {
               const hostname = new URL(url).hostname.toLowerCase();
               const targets = action.target_urls || action.targets || action.domains || [];
-              
+
               for (const target of targets) {
                 const targetLower = target.toLowerCase();
                 if (hostname === targetLower || hostname.endsWith('.' + targetLower)) {
@@ -201,13 +201,13 @@ describe('Background Script', () => {
         }
         return null;
       };
-      
+
       const actions = [{
         id: 1,
         status: 'active',
         target_urls: ['example.com']
       }];
-      
+
       expect(matchUrlToAction('https://example.com', actions)).not.toBeNull();
       expect(matchUrlToAction('https://subdomain.example.com', actions)).not.toBeNull();
     });
@@ -229,7 +229,7 @@ describe('Background Script', () => {
           return true;
         }
       };
-      
+
       const mockSender = { tab: { id: 1 } };
       const mockResponse = jest.fn((response) => {
         expect(response).toHaveProperty('match');
@@ -237,13 +237,13 @@ describe('Background Script', () => {
         expect(response.blockMode).toBe(false);
         done();
       });
-      
+
       handler({ action: 'checkUrl', url: 'https://example.com' }, mockSender, mockResponse);
     });
-    
+
     it('should handle allowBypass messages', (done) => {
       const allowedBypasses = new Map();
-      
+
       const handler = (request, sender, sendResponse) => {
         if (request.action === 'allowBypass') {
           if (sender.tab) {
@@ -254,17 +254,17 @@ describe('Background Script', () => {
           return true;
         }
       };
-      
+
       const mockSender = { tab: { id: 1 } };
       const mockResponse = jest.fn((response) => {
         expect(response.success).toBe(true);
         expect(allowedBypasses.has(1)).toBe(true);
         done();
       });
-      
+
       handler({ action: 'allowBypass', url: 'https://example.com' }, mockSender, mockResponse);
     });
-    
+
     it('should handle setBlockedState messages', (done) => {
       const handler = (request, sender, sendResponse) => {
         if (request.action === 'setBlockedState') {
@@ -281,7 +281,7 @@ describe('Background Script', () => {
           return true;
         }
       };
-      
+
       const mockSender = { tab: { id: 1 } };
       const mockData = { title: 'Test Action' };
       const mockResponse = jest.fn((response) => {
@@ -289,25 +289,25 @@ describe('Background Script', () => {
         expect(mockChrome.storage.local.set).toHaveBeenCalled();
         done();
       });
-      
-      handler({ 
-        action: 'setBlockedState', 
-        data: mockData, 
-        url: 'https://example.com' 
+
+      handler({
+        action: 'setBlockedState',
+        data: mockData,
+        url: 'https://example.com'
       }, mockSender, mockResponse);
     });
-    
+
     it('should handle refreshActions messages', (done) => {
       const refreshLaborActions = async () => {
         const actions = await mockApiService.getLaborActions();
-        await mockChrome.storage.local.set({ 
+        await mockChrome.storage.local.set({
           labor_actions: actions,
           connection_status: 'online',
           failure_count: 0
         });
         return true;
       };
-      
+
       const handler = (request, sender, sendResponse) => {
         if (request.action === 'refreshActions') {
           refreshLaborActions().then((success) => {
@@ -316,15 +316,15 @@ describe('Background Script', () => {
           return true;
         }
       };
-      
+
       const mockResponse = jest.fn((response) => {
         expect(response.success).toBe(true);
         done();
       });
-      
+
       handler({ action: 'refreshActions' }, {}, mockResponse);
     });
-    
+
     it('should handle clearCache messages', (done) => {
       const handler = (request, sender, sendResponse) => {
         if (request.action === 'clearCache') {
@@ -334,13 +334,13 @@ describe('Background Script', () => {
           return true;
         }
       };
-      
+
       const mockResponse = jest.fn((response) => {
         expect(response.success).toBe(true);
         expect(mockApiService.clearCache).toHaveBeenCalled();
         done();
       });
-      
+
       handler({ action: 'clearCache' }, {}, mockResponse);
     });
   });
@@ -349,11 +349,11 @@ describe('Background Script', () => {
     it('should fetch and store labor actions successfully', async () => {
       const mockActions = [{ id: 1, title: 'Test Action', status: 'active' }];
       mockApiService.getLaborActions.mockResolvedValue(mockActions);
-      
+
       const refreshLaborActions = async () => {
         try {
           const actions = await mockApiService.getLaborActions();
-          await mockChrome.storage.local.set({ 
+          await mockChrome.storage.local.set({
             labor_actions: actions,
             connection_status: 'online',
             failure_count: 0
@@ -363,9 +363,9 @@ describe('Background Script', () => {
           return false;
         }
       };
-      
+
       const result = await refreshLaborActions();
-      
+
       expect(result).toBe(true);
       expect(mockApiService.getLaborActions).toHaveBeenCalled();
       expect(mockChrome.storage.local.set).toHaveBeenCalledWith({
@@ -374,18 +374,18 @@ describe('Background Script', () => {
         failure_count: 0
       });
     });
-    
+
     it('should handle fetch errors and update failure count', async () => {
       mockApiService.getLaborActions.mockRejectedValue(new Error('Network error'));
       mockChrome.storage.local.get = jest.fn((keys, callback) => {
         if (callback) callback({ failure_count: 2 });
         return Promise.resolve({ failure_count: 2 });
       });
-      
+
       const refreshLaborActions = async () => {
         try {
           const actions = await mockApiService.getLaborActions();
-          await mockChrome.storage.local.set({ 
+          await mockChrome.storage.local.set({
             labor_actions: actions,
             connection_status: 'online',
             failure_count: 0
@@ -402,9 +402,9 @@ describe('Background Script', () => {
           return false;
         }
       };
-      
+
       const result = await refreshLaborActions();
-      
+
       expect(result).toBe(false);
       expect(mockChrome.storage.local.set).toHaveBeenCalledWith({
         failure_count: 3,

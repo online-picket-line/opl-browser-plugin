@@ -29,7 +29,7 @@ Modern browsers automatically update extensions without any custom code required
    ```bash
    # Update version in manifest.json
    # Example: "version": "1.0.0" → "version": "1.0.1"
-   
+
    # Package the extension
    ./package.sh
    ```
@@ -158,13 +158,13 @@ Your manifest.json should have:
    ```bash
    # Package extension
    ./package.sh
-   
+
    # Load unpacked in Chrome/Edge
    # - Go to chrome://extensions
    # - Enable "Developer mode"
    # - Click "Load unpacked"
    # - Select extension directory
-   
+
    # Load temporarily in Firefox
    # - Go to about:debugging#/runtime/this-firefox
    # - Click "Load Temporary Add-on"

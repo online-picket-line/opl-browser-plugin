@@ -49,13 +49,13 @@
     const banner = document.createElement('div');
     banner.id = 'opl-labor-banner';
     banner.className = 'opl-banner';
-    
+
     const title = action.title || 'Labor Action in Progress';
     const description = action.description || 'This company is currently subject to a labor action.';
     const actionType = action.type || 'strike';
     const moreInfoUrl = action.url || action.more_info || '';
     const logoUrl = action.logoUrl || '';
-    
+
     // Construct details string
     let details = [];
     if (action.locations && action.locations.length > 0) details.push(action.locations[0]);
@@ -137,7 +137,7 @@
   // Listen for URL changes in SPAs using a more efficient approach
   // Only monitor for history state changes rather than all DOM mutations
   let lastUrl = window.location.href;
-  
+
   // Modern approach: use popstate for history changes
   window.addEventListener('popstate', () => {
     if (window.location.href !== lastUrl) {
@@ -145,11 +145,11 @@
       checkCurrentPage();
     }
   });
-  
+
   // Also monitor pushState and replaceState for SPAs
   const originalPushState = history.pushState;
   const originalReplaceState = history.replaceState;
-  
+
   history.pushState = function() {
     originalPushState.apply(this, arguments);
     if (window.location.href !== lastUrl) {
@@ -157,7 +157,7 @@
       checkCurrentPage();
     }
   };
-  
+
   history.replaceState = function() {
     originalReplaceState.apply(this, arguments);
     if (window.location.href !== lastUrl) {

@@ -173,7 +173,7 @@ PASS  tests/update-service.test.js
     ✓ parseVersion (1 ms)
     ✓ compareVersions - major version (1 ms)
     ...
-  
+
 PASS  tests/background-update-integration.test.js
   Background Script - Update Integration
     ✓ should handle checkUpdate message (3 ms)

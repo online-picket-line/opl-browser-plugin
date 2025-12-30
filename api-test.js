@@ -3,9 +3,9 @@
 
 async function testCurrentAPI() {
   const baseUrl = 'YOUR_INSTANCE_URL'; // Replace with actual URL
-  
+
   console.log('Testing current API endpoint...');
-  
+
   try {
     const response = await fetch(`${baseUrl}/api/blocklist?format=json`, {
       method: 'GET',
@@ -13,16 +13,16 @@ async function testCurrentAPI() {
         'Accept': 'application/json'
       }
     });
-    
+
     console.log('Response status:', response.status);
     console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-    
+
     if (response.ok) {
       const data = await response.json();
       console.log('Response data structure:', data);
       console.log('Blocklist entries:', data.blocklist?.length || 0);
       console.log('Employers:', data.employers?.length || 0);
-      
+
       // Test data structure
       if (data.blocklist && data.blocklist.length > 0) {
         console.log('Sample blocklist entry:', data.blocklist[0]);
@@ -42,12 +42,12 @@ async function testAlternativeEndpoints() {
   const baseUrl = 'YOUR_INSTANCE_URL'; // Replace with actual URL
   const endpoints = [
     '/api/v1/blocklist',
-    '/api/v2/blocklist', 
+    '/api/v2/blocklist',
     '/api/labor-actions',
     '/api/actions',
     '/blocklist'
   ];
-  
+
   for (const endpoint of endpoints) {
     try {
       console.log(`Testing ${endpoint}...`);

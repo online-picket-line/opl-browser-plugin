@@ -1,10 +1,10 @@
-const { 
-  mockExtensionData, 
-  mockTransformedActions, 
+const {
+  mockExtensionData,
+  mockTransformedActions,
   mockApiResponse200,
   mockApiResponse304,
   mockApiResponse401,
-  mockApiResponse429 
+  mockApiResponse429
 } = require('./fixtures.js');
 
 // Import the module under test
@@ -21,7 +21,7 @@ describe('ApiService', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
     apiService = new ApiService();
-    
+
     // Setup Chrome storage mocks
     mockChromeStorage = {
       sync: {
@@ -51,14 +51,14 @@ describe('ApiService', () => {
         remove: jest.fn((keys, callback) => callback && callback())
       }
     };
-    
+
     global.chrome.storage = mockChromeStorage;
   });
 
   describe('getSettings', () => {
     it('should return hardcoded API settings', async () => {
       const settings = await apiService.getSettings();
-      
+
       expect(settings).toEqual({
         apiUrl: 'https://onlinepicketline.com',
         apiKey: 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c'
@@ -69,7 +69,7 @@ describe('ApiService', () => {
   describe('transformExtensionApiResponse', () => {
     it('should transform extension format to internal format', () => {
       const result = apiService.transformExtensionApiResponse(mockExtensionData);
-      
+
       expect(result).toHaveLength(2);
       expect(result[0]).toMatchObject({
         company: 'Wirecutter',
@@ -100,9 +100,9 @@ describe('ApiService', () => {
           }
         }
       };
-      
+
       const result = apiService.transformExtensionApiResponse(dataWithoutLogo);
-      
+
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
         company: 'Test Org',
@@ -121,9 +121,9 @@ describe('ApiService', () => {
         ...mockExtensionData,
         "_optimizedPatterns": { "test": "pattern" }
       };
-      
+
       const result = apiService.transformExtensionApiResponse(dataWithOptimized);
-      
+
       // Should still only have 2 organizations (not 3 with _optimizedPatterns)
       expect(result).toHaveLength(2);
       expect(result.find(action => action.company === "_optimizedPatterns")).toBeUndefined();
@@ -162,7 +162,7 @@ describe('ApiService', () => {
       });
 
       const result = await apiService.getLaborActions();
-      
+
       expect(result).toEqual(mockTransformedActions);
       expect(fetch).not.toHaveBeenCalled();
     });
@@ -180,7 +180,7 @@ describe('ApiService', () => {
       global.fetch.mockResolvedValue(mockApiResponse200);
 
       const result = await apiService.getLaborActions();
-      
+
       expect(fetch).toHaveBeenCalledWith(
         'https://onlinepicketline.com/api/blocklist.json?format=extension&includeInactive=false',
         expect.objectContaining({
@@ -210,7 +210,7 @@ describe('ApiService', () => {
       global.fetch.mockResolvedValue(mockApiResponse304);
 
       const result = await apiService.getLaborActions();
-      
+
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining('hash=abc123hash'),
         expect.any(Object)
@@ -226,7 +226,7 @@ describe('ApiService', () => {
       global.fetch.mockResolvedValue(mockApiResponse401);
 
       const result = await apiService.getLaborActions();
-      
+
       expect(result).toEqual([]);
       expect(console.error).toHaveBeenCalledWith(
         'Error fetching labor actions:',
@@ -242,7 +242,7 @@ describe('ApiService', () => {
       global.fetch.mockResolvedValue(mockApiResponse429);
 
       const result = await apiService.getLaborActions();
-      
+
       expect(result).toEqual([]);
     });
   });
@@ -250,7 +250,7 @@ describe('ApiService', () => {
   describe('caching methods', () => {
     it('should cache and retrieve content hash', async () => {
       await apiService.setCachedHash('test-hash-123');
-      
+
       expect(mockChromeStorage.local.set).toHaveBeenCalledWith(
         { content_hash: 'test-hash-123' },
         expect.any(Function)
@@ -263,7 +263,7 @@ describe('ApiService', () => {
     it('should cache and retrieve data with timestamp', async () => {
       const testData = [{ id: 'test' }];
       await apiService.setCachedData(testData);
-      
+
       expect(mockChromeStorage.local.set).toHaveBeenCalledWith({
         labor_actions_cache: testData,
         cache_timestamp: expect.any(Number)
@@ -272,7 +272,7 @@ describe('ApiService', () => {
 
     it('should clear all cache data', async () => {
       await apiService.clearCache();
-      
+
       expect(mockChromeStorage.local.remove).toHaveBeenCalledWith(
         ['labor_actions_cache', 'cache_timestamp', 'content_hash'],
         expect.any(Function)
@@ -319,16 +319,16 @@ describe('ApiService', () => {
     test('should not reference window object (service worker compatibility)', () => {
       const fs = require('fs');
       const path = require('path');
-      
+
       // Read the api-service.js file
       const filePath = path.join(__dirname, '..', 'api-service.js');
       const fileContent = fs.readFileSync(filePath, 'utf8');
-      
+
       // Check that the file doesn't contain problematic window references
       const codeLines = fileContent.split('\n')
         .filter(line => !line.trim().startsWith('//') && !line.trim().startsWith('*'));
       const codeOnly = codeLines.join('\n');
-      
+
       // Should not have typeof window checks or window assignments
       expect(codeOnly).not.toMatch(/typeof\s+window\s*!==\s*['"]undefined['"]/);
       expect(codeOnly).not.toMatch(/window\.ApiService/);
@@ -338,12 +338,12 @@ describe('ApiService', () => {
       // Simulate service worker global scope (no window object)
       const originalWindow = global.window;
       delete global.window;
-      
+
       try {
         // Try to require/reload the module
         delete require.cache[require.resolve('../api-service.js')];
         const ApiServiceReloaded = require('../api-service.js');
-        
+
         // Should successfully create an instance
         const instance = new ApiServiceReloaded();
         expect(instance).toBeDefined();

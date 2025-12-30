@@ -90,15 +90,15 @@ describe('FeatureName', () => {
     // Setup mocks and state
     jest.clearAllMocks();
   });
-  
+
   describe('methodName', () => {
     test('should do something when condition', () => {
       // Arrange
       const input = 'test';
-      
+
       // Act
       const result = functionUnderTest(input);
-      
+
       // Assert
       expect(result).toBe('expected');
     });
@@ -181,9 +181,9 @@ test('should fetch release data', async () => {
     ok: true,
     json: async () => ({ tag_name: 'v1.2.0' })
   });
-  
+
   const release = await service.fetchLatestRelease();
-  
+
   expect(release.version).toBe('1.2.0');
 });
 ```
@@ -192,7 +192,7 @@ test('should fetch release data', async () => {
 ```javascript
 test('should store dismissed version', async () => {
   await service.dismissUpdate('1.2.0');
-  
+
   expect(chrome.storage.local.set).toHaveBeenCalledWith({
     update_dismissed_version: '1.2.0'
   });
@@ -203,10 +203,10 @@ test('should store dismissed version', async () => {
 ```javascript
 test('should hide notification when dismissed', () => {
   const notification = document.getElementById('update-notification');
-  
+
   // Simulate dismiss
   notification.style.display = 'none';
-  
+
   expect(notification.style.display).toBe('none');
 });
 ```
@@ -358,6 +358,6 @@ npm test -- --testNamePattern="version"   # Run matching tests
 
 ---
 
-**Last Updated**: December 28, 2025  
-**Test Coverage**: 85%+  
+**Last Updated**: December 28, 2025
+**Test Coverage**: 85%+
 **Total Tests**: 95+

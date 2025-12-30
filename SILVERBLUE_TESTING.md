@@ -229,5 +229,5 @@ The VS Code flatpak doesn't include Node.js, and you can't install system packag
 
 ---
 
-**Last Updated**: December 28, 2025  
+**Last Updated**: December 28, 2025
 **Tested On**: Fedora Silverblue with VS Code flatpak

@@ -2,7 +2,7 @@ module.exports = [
   {
     ignores: [
       "node_modules/**",
-      "browser-polyfill.js", 
+      "browser-polyfill.js",
       "coverage/**",
       "generate-icons.js",
       "test-import.js",
@@ -18,7 +18,7 @@ module.exports = [
       globals: {
         chrome: "readonly",
         browser: "readonly",
-        console: "readonly", 
+        console: "readonly",
         document: "readonly",
         window: "readonly",
         fetch: "readonly",
@@ -31,7 +31,7 @@ module.exports = [
         Math: "readonly",
         String: "readonly",
         Object: "readonly",
-        Array: "readonly", 
+        Array: "readonly",
         Promise: "readonly",
         Error: "readonly",
         importScripts: "readonly",
@@ -47,7 +47,7 @@ module.exports = [
     },
     rules: {
       "no-unused-vars": "off",
-      "no-console": "off", 
+      "no-console": "off",
       "no-debugger": "off"
     }
   }

@@ -117,7 +117,7 @@ The extension transforms the API's blocklist format into internal labor action o
 ### Caching Strategy
 - **Cache Duration**: 5 minutes
 - **Content Hash**: SHA-256 hash-based caching with 304 responses
-- **Refresh Interval**: 15 minutes (periodic alarm) 
+- **Refresh Interval**: 15 minutes (periodic alarm)
 - **Stale Cache**: Used as fallback when API unavailable
 - **Manual Refresh**: Available via popup button
 - **Rate Limits**: 10 req/2min (public), 100 req/15min (private)

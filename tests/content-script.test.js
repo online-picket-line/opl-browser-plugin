@@ -150,7 +150,7 @@ describe('Content Script Integration', () => {
       // Mock the div element behavior
       const mockDiv = {
         get textContent() { return this._textContent; },
-        set textContent(value) { 
+        set textContent(value) {
           this._textContent = value;
           // Simulate browser behavior - HTML tags become text
           this.innerHTML = value.replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -174,7 +174,7 @@ describe('Content Script Integration', () => {
       const blockPage = (action) => {
         mockSessionStorage.setItem('opl_blocked_action', JSON.stringify(action));
         mockSessionStorage.setItem('opl_blocked_url', window.location.href);
-        
+
         const blockPageUrl = chrome.runtime.getURL('block.html');
         return { redirectUrl: blockPageUrl };
       };
@@ -202,10 +202,10 @@ describe('Content Script Integration', () => {
   describe('Page Change Detection', () => {
     it('should detect URL changes in SPAs', () => {
       let lastUrl = 'https://example.com/page1';
-      
+
       // Create a mock location that can be safely updated
       const mockLocation = { href: 'https://example.com/page1' };
-      
+
       const checkUrlChange = () => {
         const currentUrl = mockLocation.href;
         if (currentUrl !== lastUrl) {
@@ -226,7 +226,7 @@ describe('Content Script Integration', () => {
     it('should handle history API changes', () => {
       const originalPushState = window.history.pushState;
       const originalReplaceState = window.history.replaceState;
-      
+
       let urlChangeDetected = false;
       const onUrlChange = () => { urlChangeDetected = true; };
 
@@ -406,14 +406,14 @@ describe('Content Script Integration', () => {
           if (!actionString) {
             return null;
           }
-          
+
           const action = JSON.parse(actionString);
-          
+
           // Validate required fields
           if (typeof action !== 'object') {
             return null;
           }
-          
+
           return {
             title: action.title || 'Labor Action',
             description: action.description || 'Active labor action',
