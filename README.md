@@ -15,6 +15,57 @@ A cross-browser extension that helps users stay informed about labor actions and
 - **Configurable Settings**: User-friendly popup interface for changing behavior
 - **Multi-Browser Support**: Compatible with Chrome, Edge, Opera, Brave, Firefox, and Safari
 
+## Technical Architecture
+
+### URL Matching Implementation
+
+This extension uses a **content script + message passing architecture** rather than Manifest V3's declarative net request API. This design choice provides several advantages for labor action detection:
+
+#### Content Script Architecture
+
+1. **Content Script Injection**: The extension injects `content.js` on all web pages
+2. **Runtime Message Passing**: Content scripts send the current URL to `background.js` via `chrome.runtime.sendMessage()`
+3. **Regex Pattern Matching**: The background script performs real-time regex matching against patterns from the API
+4. **Dynamic Response**: Based on matches, the extension dynamically injects banners or block screens
+
+#### Why Not Declarative Net Request?
+
+The extension **does not use** Manifest V3's `declarativeNetRequest` API because:
+
+- **Complex Pattern Support**: Labor action URLs often require sophisticated regex patterns (e.g., `facebook.com/specific-employer-page`, `twitter.com/company-handle`)
+- **Dynamic Pattern Updates**: API patterns change frequently as new labor actions emerge and existing ones evolve
+- **Flexible Matching Logic**: Content scripts allow custom URL normalization and complex matching rules
+- **Rich Context**: Content scripts can access page content for additional context (if needed in future)
+
+#### Performance Considerations
+
+While declarative net request would be more performant for simple URL blocking, the content script approach provides:
+
+- **Real-time Flexibility**: No need to update static rulesets when API patterns change
+- **Complex Regex Support**: Full JavaScript regex capabilities rather than limited declarative patterns
+- **Conditional Logic**: Ability to implement sophisticated matching rules based on multiple criteria
+- **Cross-Browser Compatibility**: Better support across different browser implementations
+
+#### Implementation Details
+
+```javascript
+// content.js - Runs on every page
+chrome.runtime.sendMessage({
+  action: 'checkUrl',
+  url: window.location.href
+});
+
+// background.js - Centralized matching logic
+function urlMatches(url, regexPatterns) {
+  return regexPatterns.some(pattern => {
+    const regex = new RegExp(pattern, 'i');
+    return regex.test(url);
+  });
+}
+```
+
+This architecture ensures that complex API patterns like `(example\.com|facebook\.com/example|twitter\.com/examplecorp)` work reliably across all supported browsers.
+
 ## Prerequisites
 
 
@@ -116,7 +167,7 @@ For detailed instructions, see Apple's [Converting a Web Extension for Safari](h
 
 **Need detailed Safari instructions?** See [SAFARI_SETUP.md](SAFARI_SETUP.md) for comprehensive setup, troubleshooting, and distribution guide.
 
-## Configuration
+## Setup
 
 After installation, you **must configure the extension** before it will work:
 
@@ -142,7 +193,7 @@ Once configured, the extension works automatically:
    - Switch between Banner and Block modes
    - Manually refresh the labor action database
 
-### Configuration
+### Settings
 
 Click the extension icon to open the popup and configure:
 
@@ -168,7 +219,7 @@ In Block Mode, you'll see:
 
 ### Project Structure
 
-```
+```text
 opl-browser-plugin/
 ├── manifest.json          # Chrome/Edge manifest (V3)
 ├── manifest-v2.json       # Firefox manifest (V2)

@@ -2,38 +2,25 @@
 // API service to fetch labor actions from Online Picketline External API (v3.0)
 // Requires API key authentication (public or private)
 const DEFAULT_API_BASE_URL = 'https://onlinepicketline.com';
-// Obfuscated API key - decoded at runtime
-const OBFUSCATED_API_KEY = 'b3BsXzAyY2FmZWNjMzM2MWZiNWVlMzAzODMyZGRlMjZlM2M2N2Y0N2I5NDQ3NmI1NWYxMGI0NjRiYTIwYmZlYzRmMWM=';
+const DEFAULT_API_KEY = 'b3BsXzAyY2FmZWNjMzM2MWZiNWVlMzAzODMyZGRlMjZlM2M2N2Y0N2I5NDQ3NmI1NWYxMGI0NjRiYTIwYmZlYzRmMWM=';
 const CACHE_KEY = 'labor_actions_cache';
 const CACHE_DURATION = 300000; // 5 minutes in milliseconds
 const CACHE_HASH_KEY = 'content_hash';
-
-/**
- * Decode the obfuscated API key
- * @returns {string} - Decoded API key
- */
-function getApiKey() {
-  try {
-    return atob(OBFUSCATED_API_KEY);
-  } catch (error) {
-    console.error('Failed to decode API key');
-    return null;
-  }
-}
 
 
 class ApiService {
   constructor() {
     this.baseUrl = DEFAULT_API_BASE_URL;
-    this.apiKey = getApiKey();
+    this.apiKey = DEFAULT_API_KEY;
   }
 
   /**
    * Initialize the API service with settings
    */
   async init() {
+    // Settings are now hardcoded
     this.baseUrl = DEFAULT_API_BASE_URL;
-    this.apiKey = getApiKey();
+    this.apiKey = DEFAULT_API_KEY;
   }
 
   /**
@@ -43,8 +30,16 @@ class ApiService {
   async getSettings() {
     return Promise.resolve({
       apiUrl: DEFAULT_API_BASE_URL,
-      apiKey: this.apiKey
+      apiKey: DEFAULT_API_KEY
     });
+  }
+
+  /**
+   * Get decoded API key
+   * @returns {string} Decoded API key
+   */
+  getApiKey() {
+    return atob(DEFAULT_API_KEY);
   }
 
   /**
@@ -86,7 +81,7 @@ class ApiService {
       
       const headers = {
         'Accept': 'application/json',
-        'X-API-Key': this.apiKey
+        'X-API-Key': this.getApiKey()
       };
       
       const response = await fetch(url, {

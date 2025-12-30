@@ -25,18 +25,18 @@
   --radius: 0rem;
   
   /* Match website fonts */
-  --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --font-serif: 'IBM Plex Serif', Georgia, serif;
+  --font-sans: 'IBM Plex Sans', -apple-system, blinkmacsystemfont, 'Segoe UI', system-ui, sans-serif;
+  --font-serif: 'IBM Plex Serif', georgia, serif;
   --font-mono: 'Fira Code', 'Courier New', monospace;
 
   /* Shadow system from website */
   --shadow-color: oklch(28% .2 140);
   --shadow-opacity: 0.4;
-  --shadow-blur: 0px;
-  --shadow-spread: 0px;
+  --shadow-blur: 0;
+  --shadow-spread: 0;
   --shadow-offset-x: 2px;
   --shadow-offset-y: 2px;
-  --shadow-hard: 2px 2px 0px 0px var(--shadow-color);
+  --shadow-hard: 2px 2px 0 0 var(--shadow-color);
 }
 
 body {
@@ -73,19 +73,19 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-primary:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0px 0px var(--primary);
+  box-shadow: 4px 4px 0 0 var(--primary);
 }
 
 .btn-primary:active {
   transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0px 0px var(--primary);
+  box-shadow: 1px 1px 0 0 var(--primary);
 }
 
 .btn-secondary {
   background-color: var(--card);
   color: var(--foreground);
   border: 1px solid var(--border);
-  box-shadow: 2px 2px 0px 0px var(--border);
+  box-shadow: 2px 2px 0 0 var(--border);
 }
 
 .btn-secondary:hover {
