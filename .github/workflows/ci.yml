@@ -239,6 +239,8 @@ jobs:
     name: Mutation Testing
     runs-on: ubuntu-latest
     needs: [security, lint, test]
+    permissions:
+      contents: read
     
     steps:
     - name: Checkout code
