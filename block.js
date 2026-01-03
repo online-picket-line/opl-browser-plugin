@@ -1,5 +1,6 @@
-// Block page script
-document.addEventListener('DOMContentLoaded', () => {
+// Block page script - DNR version
+// This page is loaded via declarativeNetRequest redirect
+document.addEventListener('DOMContentLoaded', async () => {
   const actionTitle = document.getElementById('action-title');
   const actionDescription = document.getElementById('action-description');
   const actionType = document.getElementById('action-type');
@@ -9,19 +10,81 @@ document.addEventListener('DOMContentLoaded', () => {
   const proceedBtn = document.getElementById('proceed-btn');
   const goBackBtn = document.getElementById('go-back-btn');
 
-  // Load blocked action data from background script
-  chrome.runtime.sendMessage({ action: 'getBlockedState' }, (response) => {
-    if (response) {
-      updateUI(response.action, response.url);
+  // Get the original URL from the referrer or document.referrer
+  const originalUrl = document.referrer || null;
+  
+  // Store for use in proceed button
+  window.originalUrl = originalUrl;
 
-      // Store original URL for proceed button
-      window.originalUrl = response.url;
-    } else {
-      // Fallback or error state
-      document.getElementById('action-title').textContent = 'Error Loading Data';
-      document.getElementById('action-description').textContent = 'Could not retrieve labor action details. Please try refreshing.';
+  // Load labor actions from local storage and match against referrer
+  try {
+    const result = await chrome.storage.local.get(['labor_actions']);
+    const actions = result.labor_actions || [];
+    
+    // Find matching action based on original URL
+    let matchedAction = null;
+    if (originalUrl) {
+      matchedAction = findMatchingAction(originalUrl, actions);
     }
-  });
+    
+    if (matchedAction) {
+      updateUI(matchedAction, originalUrl);
+    } else {
+      // Fallback - show generic message
+      actionTitle.textContent = 'Labor Action in Progress';
+      actionDescription.textContent = 'This website is currently subject to a labor action. Please consider supporting workers by not crossing this digital picket line.';
+      if (originalUrl) {
+        try {
+          const url = new URL(originalUrl);
+          blockedUrl.textContent = url.hostname;
+        } catch (_e) {
+          blockedUrl.textContent = originalUrl;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error loading labor action data:', error);
+    actionTitle.textContent = 'Error Loading Data';
+    actionDescription.textContent = 'Could not retrieve labor action details. Please try refreshing.';
+  }
+  
+  /**
+   * Find matching action for a URL
+   */
+  function findMatchingAction(url, actions) {
+    if (!url || !actions || actions.length === 0) {
+      return null;
+    }
+    
+    const urlToTest = url.toLowerCase();
+    
+    for (const action of actions) {
+      // Skip inactive actions
+      if (action.status && action.status !== 'active') {
+        continue;
+      }
+      
+      // Check against URL patterns
+      const patterns = action._extensionData?.matchingUrlRegexes || 
+                      action.matchingUrlRegexes || 
+                      action.target_urls || 
+                      [];
+      
+      for (const pattern of patterns) {
+        try {
+          const regex = new RegExp(pattern, 'i');
+          if (regex.test(urlToTest)) {
+            return action;
+          }
+        } catch (_e) {
+          // Invalid regex, skip
+          continue;
+        }
+      }
+    }
+    
+    return null;
+  }
 
   function updateUI(action, originalUrl) {
     if (action) {
@@ -96,14 +159,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Handle proceed button
-  proceedBtn.addEventListener('click', () => {
+  // Handle proceed button - uses DNR session rules for bypass
+  proceedBtn.addEventListener('click', async () => {
     const urlToProceed = window.originalUrl;
     if (urlToProceed) {
-      // Notify background script to allow bypass
-      chrome.runtime.sendMessage({ action: 'allowBypass', url: urlToProceed }, () => {
+      try {
+        // Extract domain from URL for DNR rule
+        const url = new URL(urlToProceed);
+        const domain = url.hostname;
+        
+        // Add temporary session rule with high priority to allow access
+        await chrome.declarativeNetRequest.updateSessionRules({
+          addRules: [{
+            id: 999999, // High ID to avoid conflicts
+            priority: 10, // Higher than block rules (which have priority 1)
+            action: { type: 'allow' },
+            condition: {
+              urlFilter: domain,
+              resourceTypes: ['main_frame']
+            }
+          }]
+        });
+        
+        // Navigate to the original URL
         window.location.href = urlToProceed;
-      });
+      } catch (error) {
+        console.error('Error adding bypass rule:', error);
+        // Fallback: try to navigate anyway
+        window.location.href = urlToProceed;
+      }
     }
   });
 

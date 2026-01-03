@@ -1,35 +1,27 @@
-// Content script - runs on all pages
+// Content script - runs on all pages (banner mode only)
+// Block mode is now handled by declarativeNetRequest for better performance
 (function() {
   'use strict';
 
   let currentBanner = null;
 
   /**
-   * Check if current page matches any labor actions
+   * Check if current page matches any labor actions (banner mode only)
+   * In block mode, DNR handles the redirect before this script runs
    */
   function checkCurrentPage() {
-    // Check if user has bypassed the block
+    // Check if user has bypassed the block (from DNR session rule)
     if (sessionStorage.getItem('opl_bypass') === 'true') {
       return;
     }
 
     chrome.runtime.sendMessage(
-      { action: 'checkUrl', url: window.location.href },
+      { action: 'checkUrlForBanner', url: window.location.href },
       (response) => {
-        if (response) {
-          if (response.bypass) {
-            // User just bypassed the block page, set session flag
-            sessionStorage.setItem('opl_bypass', 'true');
-            return;
-          }
-
-          if (response.match) {
-            if (response.blockMode) {
-              blockPage(response.match);
-            } else {
-              showBanner(response.match);
-            }
-          }
+        if (response && response.match && !response.blockMode) {
+          // Only show banner in banner mode
+          // Block mode is handled by DNR redirect
+          showBanner(response.match);
         }
       }
     );
@@ -104,24 +96,6 @@
     setTimeout(() => {
       banner.classList.add('opl-banner-visible');
     }, 100);
-  }
-
-  /**
-   * Block the page and redirect to block page
-   * @param {Object} action - Labor action data
-   */
-  function blockPage(action) {
-    // Send data to background script to store for the block page
-    // We use background storage because sessionStorage is not shared between origins
-    chrome.runtime.sendMessage({
-      action: 'setBlockedState',
-      data: action,
-      url: window.location.href
-    }, () => {
-      // Redirect to block page after data is saved
-      const blockPageUrl = chrome.runtime.getURL('block.html');
-      window.location.href = blockPageUrl;
-    });
   }
 
   /**
