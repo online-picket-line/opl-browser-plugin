@@ -1,8 +1,10 @@
 // Background service worker
 importScripts('browser-polyfill.js');
 importScripts('api-service.js');
+importScripts('dnr-service.js');
 
 const apiService = new ApiService();
+const dnrService = new DnrService();
 
 const allowedBypasses = new Map(); // tabId -> url
 // We use chrome.storage.local for blocked states to persist across service worker restarts
@@ -29,7 +31,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 /**
- * Fetch and cache labor actions
+ * Fetch and cache labor actions, then update DNR rules
  * @returns {Promise<boolean>} Success status
  */
 async function refreshLaborActions() {
@@ -43,6 +45,12 @@ async function refreshLaborActions() {
       connection_status: 'online',
       failure_count: 0
     });
+
+    // Update DNR rules based on current mode
+    const settings = await chrome.storage.sync.get(['blockMode']);
+    const blockMode = settings.blockMode || false;
+    
+    await dnrService.updateRules(actions, blockMode);
 
     return actions.length > 0 || true; // Return true even if empty (successful fetch)
   } catch (error) {
@@ -136,19 +144,10 @@ function matchUrlToAction(url, actions) {
   return null;
 }
 
-// Listen for messages from content scripts
+// Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'checkUrl') {
-    // Check for bypass
-    if (sender.tab && allowedBypasses.has(sender.tab.id)) {
-      const bypassedUrl = allowedBypasses.get(sender.tab.id);
-      if (request.url === bypassedUrl || request.url.startsWith(bypassedUrl)) {
-        allowedBypasses.delete(sender.tab.id);
-        sendResponse({ bypass: true });
-        return true;
-      }
-    }
-
+  // Banner mode: Check URL for content script
+  if (request.action === 'checkUrlForBanner') {
     chrome.storage.local.get(['labor_actions'], (result) => {
       const actions = result.labor_actions || [];
       const match = matchUrlToAction(request.url, actions);
@@ -161,37 +160,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     });
 
-    // Return true to indicate async response
-    return true;
-  } else if (request.action === 'allowBypass') {
-    if (sender.tab) {
-      allowedBypasses.set(sender.tab.id, request.url);
-      // Clear after 1 minute to prevent memory leaks
-      setTimeout(() => allowedBypasses.delete(sender.tab.id), 60000);
-    }
-    sendResponse({ success: true });
-    return true;
-  } else if (request.action === 'setBlockedState') {
-    if (sender.tab) {
-      const key = `blocked_tab_${sender.tab.id}`;
-      chrome.storage.local.set({ [key]: {
-        action: request.data,
-        url: request.url,
-        timestamp: Date.now()
-      }}).then(() => {
-        sendResponse({ success: true });
+    return true; // Async response
+  }
+  
+  // Legacy support for old checkUrl action
+  else if (request.action === 'checkUrl') {
+    // Redirect to new handler
+    chrome.storage.local.get(['labor_actions'], (result) => {
+      const actions = result.labor_actions || [];
+      const match = matchUrlToAction(request.url, actions);
+
+      chrome.storage.sync.get(['blockMode'], (settings) => {
+        sendResponse({
+          match: match,
+          blockMode: settings.blockMode || false
+        });
       });
-    }
+    });
+
     return true;
-  } else if (request.action === 'getBlockedState') {
-    if (sender.tab) {
-      const key = `blocked_tab_${sender.tab.id}`;
-      chrome.storage.local.get([key], (result) => {
-        sendResponse(result[key] || null);
-      });
-    }
-    return true;
-  } else if (request.action === 'refreshActions') {
+  }
+  
+  // Refresh labor actions and update DNR rules
+  else if (request.action === 'refreshActions') {
     refreshLaborActions().then((success) => {
       if (success) {
         sendResponse({ success: true });
@@ -200,8 +191,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
     });
     return true;
-  } else if (request.action === 'clearCache') {
+  }
+  
+  // Clear API cache
+  else if (request.action === 'clearCache') {
     apiService.clearCache().then(() => {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+  
+  // Update DNR rules when mode changes
+  else if (request.action === 'updateMode') {
+    chrome.storage.sync.get(['blockMode'], async (settings) => {
+      const blockMode = settings.blockMode || false;
+      const result = await chrome.storage.local.get(['labor_actions']);
+      const actions = result.labor_actions || [];
+      
+      await dnrService.updateRules(actions, blockMode);
       sendResponse({ success: true });
     });
     return true;

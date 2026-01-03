@@ -45,15 +45,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // Save settings when radio buttons change
   modeBannerRadio.addEventListener('change', () => {
     if (modeBannerRadio.checked) {
-      chrome.storage.sync.set({ blockMode: false });
-      showStatus('Settings saved', 'success');
+      chrome.storage.sync.set({ blockMode: false }, () => {
+        // Update DNR rules when mode changes
+        chrome.runtime.sendMessage({ action: 'updateMode' }, (response) => {
+          if (response && response.success) {
+            showStatus('Banner mode enabled', 'success');
+          } else {
+            showStatus('Settings saved (rules update pending)', 'success');
+          }
+        });
+      });
     }
   });
 
   modeBlockRadio.addEventListener('change', () => {
     if (modeBlockRadio.checked) {
-      chrome.storage.sync.set({ blockMode: true });
-      showStatus('Settings saved', 'success');
+      chrome.storage.sync.set({ blockMode: true }, () => {
+        // Update DNR rules when mode changes
+        chrome.runtime.sendMessage({ action: 'updateMode' }, (response) => {
+          if (response && response.success) {
+            showStatus('Block mode enabled', 'success');
+          } else {
+            showStatus('Settings saved (rules update pending)', 'success');
+          }
+        });
+      });
     }
   });
 
