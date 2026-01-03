@@ -35,6 +35,7 @@ module.exports = [
         Error: "readonly",
         importScripts: "readonly",
         ApiService: "readonly",
+        DnrService: "readonly",
         sessionStorage: "readonly",
         history: "readonly",
         module: "readonly",
@@ -47,7 +48,7 @@ module.exports = [
     rules: {
       "no-console": "off",
       "no-debugger": "warn",
-      "no-unused-vars": ["error", { "argsIgnorePattern": "^_.*$", "caughtErrorsIgnorePattern": "^_.*$" }],
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_.*$", "varsIgnorePattern": "^_.*$", "caughtErrorsIgnorePattern": "^_.*$" }],
       "no-undef": "error",
       "no-useless-escape": "warn"
     }
@@ -87,10 +88,14 @@ module.exports = [
         __dirname: "readonly",
         describe: "readonly",
         it: "readonly",
+        test: "readonly",
         beforeEach: "readonly",
         afterEach: "readonly",
+        beforeAll: "readonly",
+        afterAll: "readonly",
         expect: "readonly",
         jest: "readonly",
+        global: "readonly",
         matchUrlToAction: "readonly"
       }
     },

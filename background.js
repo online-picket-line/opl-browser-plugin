@@ -6,7 +6,7 @@ importScripts('dnr-service.js');
 const apiService = new ApiService();
 const dnrService = new DnrService();
 
-const allowedBypasses = new Map(); // tabId -> url
+const _allowedBypasses = new Map(); // tabId -> url (reserved for future use)
 // We use chrome.storage.local for blocked states to persist across service worker restarts
 // Key format: blocked_tab_${tabId}
 

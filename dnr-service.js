@@ -41,12 +41,12 @@ class DnrService {
       
       // Common conversions
       // Domain pattern: example\.com -> ||example.com^
-      if (pattern.match(/^[a-z0-9\\-.]+\.[a-z]{2,}$/i)) {
+      if (pattern.match(/^[a-z0-9\\.-]+\.[a-z]{2,}$/i)) {
         return `||${pattern}^`;
       }
       
       // Domain with path: example\.com/path -> ||example.com/path
-      if (pattern.match(/^[a-z0-9\\-.]+\.[a-z]{2,}\/.+$/i)) {
+      if (pattern.match(/^[a-z0-9\\.-]+\.[a-z]{2,}\/.+$/i)) {
         pattern = pattern.replace(/\\\./g, '.');
         return `||${pattern}`;
       }
@@ -74,7 +74,7 @@ class DnrService {
         .replace(/\*/g, '*');   // Normalize wildcards
       
       // If pattern looks like a domain
-      if (pattern.match(/^[a-z0-9\\-.*]+$/i)) {
+      if (pattern.match(/^[a-z0-9\\.*-]+$/i)) {
         return `||${pattern}*`;
       }
       
@@ -194,7 +194,7 @@ class DnrService {
    * @param {Array} laborActions - Array of labor action objects
    * @returns {Array} - Empty array (banner mode uses content script)
    */
-  generateBannerModeRules(laborActions) {
+  generateBannerModeRules(_laborActions) {
     // For banner mode, we don't use DNR rules
     // Content script will handle URL checking and banner display
     // This keeps the banner non-intrusive and allows the page to load normally
