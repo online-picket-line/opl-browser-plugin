@@ -41,12 +41,12 @@ class DnrService {
       
       // Common conversions
       // Domain pattern: example\.com -> ||example.com^
-      if (pattern.match(/^[a-z0-9\-\.]+\.[a-z]{2,}$/i)) {
+      if (pattern.match(/^[a-z0-9\\-.]+\.[a-z]{2,}$/i)) {
         return `||${pattern}^`;
       }
       
       // Domain with path: example\.com/path -> ||example.com/path
-      if (pattern.match(/^[a-z0-9\-\.]+\.[a-z]{2,}\/.+$/i)) {
+      if (pattern.match(/^[a-z0-9\\-.]+\.[a-z]{2,}\/.+$/i)) {
         pattern = pattern.replace(/\\\./g, '.');
         return `||${pattern}`;
       }
@@ -74,7 +74,7 @@ class DnrService {
         .replace(/\*/g, '*');   // Normalize wildcards
       
       // If pattern looks like a domain
-      if (pattern.match(/^[a-z0-9\-\.\*]+$/i)) {
+      if (pattern.match(/^[a-z0-9\\-.*]+$/i)) {
         return `||${pattern}*`;
       }
       
@@ -271,24 +271,34 @@ class DnrService {
    */
   async addBypassRule(url) {
     try {
+      // Extract domain from URL for urlFilter
+      let domain;
+      try {
+        const urlObj = new URL(url);
+        domain = urlObj.hostname;
+      } catch (_e) {
+        // If URL parsing fails, try to extract domain manually
+        domain = url.replace(/^https?:\/\//, '').split('/')[0];
+      }
+      
       // Create an allow rule with higher priority
       const bypassRule = {
-        id: this.MAX_RULES + 1000, // Use high ID to avoid conflicts
-        priority: 10, // Higher priority than block rules
+        id: this.MAX_RULES + 10000 + Math.floor(Math.random() * 1000), // Unique ID range for bypasses
+        priority: 100, // Much higher priority than block rules (which have priority 1)
         action: {
           type: 'allow'
         },
         condition: {
-          urlFilter: url,
+          urlFilter: `||${domain}`, // Match domain and subpaths
           resourceTypes: ['main_frame']
         }
       };
 
-      await chrome.declarativeNetRequest.updateDynamicRules({
+      await chrome.declarativeNetRequest.updateSessionRules({
         addRules: [bypassRule]
       });
 
-      console.log('Added bypass rule for:', url);
+      console.log('Added bypass rule for domain:', domain);
       return true;
 
     } catch (error) {

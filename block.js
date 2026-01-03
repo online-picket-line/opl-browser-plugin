@@ -168,14 +168,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         const url = new URL(urlToProceed);
         const domain = url.hostname;
         
+        // Generate unique ID for this bypass rule
+        const bypassRuleId = 990000 + Math.floor(Math.random() * 10000);
+        
         // Add temporary session rule with high priority to allow access
         await chrome.declarativeNetRequest.updateSessionRules({
           addRules: [{
-            id: 999999, // High ID to avoid conflicts
-            priority: 10, // Higher than block rules (which have priority 1)
+            id: bypassRuleId,
+            priority: 100, // Much higher than block rules (which have priority 1)
             action: { type: 'allow' },
             condition: {
-              urlFilter: domain,
+              urlFilter: `||${domain}`, // Match domain and all subpaths
               resourceTypes: ['main_frame']
             }
           }]
