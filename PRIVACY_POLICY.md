@@ -173,7 +173,7 @@ All data is stored locally in your browser using Chrome's Storage API:
 
 ## Third-Party Services
 
-### Services We Use:
+### Services We Use
 
 1. **Online Picketline API** (configurable)
    - Purpose: Fetch labor action data
@@ -185,7 +185,7 @@ All data is stored locally in your browser using Chrome's Storage API:
    - Data shared: None (public API)
    - Privacy policy: https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement
 
-### Services We DO NOT Use:
+### Services We DO NOT Use
 
 ❌ Google Analytics  
 ❌ Facebook Pixel  
