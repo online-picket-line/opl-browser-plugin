@@ -1,8 +1,10 @@
 // Background service worker
 importScripts('browser-polyfill.js');
 importScripts('api-service.js');
+importScripts('dnr-service.js');
 
 const apiService = new ApiService();
+const dnrService = new DnrService();
 
 const allowedBypasses = new Map(); // tabId -> url
 // We use chrome.storage.local for blocked states to persist across service worker restarts
@@ -29,7 +31,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 /**
- * Fetch and cache labor actions
+ * Fetch and cache labor actions, then update DNR rules
  * @returns {Promise<boolean>} Success status
  */
 async function refreshLaborActions() {
@@ -43,6 +45,12 @@ async function refreshLaborActions() {
       connection_status: 'online',
       failure_count: 0
     });
+
+    // Update DNR rules based on current mode
+    const settings = await chrome.storage.sync.get(['blockMode']);
+    const blockMode = settings.blockMode || false;
+    
+    await dnrService.updateRules(actions, blockMode);
 
     return actions.length > 0 || true; // Return true even if empty (successful fetch)
   } catch (error) {
