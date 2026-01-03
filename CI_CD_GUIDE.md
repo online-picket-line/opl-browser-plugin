@@ -12,6 +12,7 @@ The project uses **GitHub Actions** for continuous integration and automated rel
 
 **Triggers:**
 - Push to `main` or `develop` branches
+- Push of version tags (e.g., `v1.0.0`, `v1.0.1`) - for release workflow
 - Pull requests to `main` or `develop` branches
 
 **Jobs:**
@@ -61,29 +62,32 @@ The project uses **GitHub Actions** for continuous integration and automated rel
 #### Build and Release Job
 - Runs on: Ubuntu Latest
 - Requires: Test job to pass
-- Permissions: Write to repository contents
-- Node.js: v20
+- Permissions: Write to repository contents, read actions
 - Steps:
   1. Checkout code
-  2. Install dependencies
-  3. Generate icons
-  4. Build extension packages
-  5. Extract version from tag
-  6. **Verify manifest version matches tag** (fails if mismatch)
-  7. Create SHA256 checksums for all packages
-  8. Generate release notes
-  9. Create GitHub Release with:
+  2. **Wait for CI build to complete** (ensures artifacts are ready)
+  3. **Download build artifacts from CI** (reuses tested packages)
+  4. Extract version from tag
+  5. **Verify manifest version matches tag** (fails if mismatch)
+  6. Create SHA256 checksums for all packages
+  7. Generate release notes
+  8. Create GitHub Release with:
      - All browser packages (`.zip` files)
      - Checksums file
      - Automated release notes
-  10. Upload artifacts (365 days retention)
-  11. Display release summary
+  9. Upload artifacts (365 days retention)
+  10. Display release summary
 
 **Artifacts Produced:**
 - GitHub Release with downloadable packages
 - Individual `.zip` files for each browser
 - SHA256 checksums for verification
 - Release notes with submission instructions
+
+**Efficiency Note:**
+- Release workflow downloads pre-built artifacts from CI instead of rebuilding
+- This ensures the exact same packages that passed all CI tests are released
+- Eliminates duplicate build time and potential inconsistencies
 
 ## Package.sh Script
 

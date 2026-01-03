@@ -35,14 +35,23 @@
 │  STEP 4: GitHub Actions Automatically...                     │
 ├─────────────────────────────────────────────────────────────┤
 │                                                               │
+│  CI Workflow (triggered by tag):                             │
+│  ✓ Runs security scans                                       │
+│  ✓ Lints code                                                │
 │  ✓ Runs all tests                                            │
-│  ✓ Validates version matches tag                             │
+│  ✓ Runs mutation tests                                       │
 │  ✓ Builds all browser packages                               │
+│  ✓ Uploads build artifacts                                   │
+│                                                               │
+│  Release Workflow (triggered by tag):                        │
+│  ✓ Waits for CI build to complete                            │
+│  ✓ Downloads pre-built artifacts from CI                     │
+│  ✓ Validates version matches tag                             │
 │  ✓ Creates SHA256 checksums                                  │
 │  ✓ Creates GitHub Release                                    │
 │  ✓ Uploads packages to release                               │
 │                                                               │
-│  ⏱️  Takes ~5-10 minutes                                      │
+│  ⏱️  Takes ~5-10 minutes (runs in parallel)                  │
 │                                                               │
 └─────────────────────────────────────────────────────────────┘
                             ↓
