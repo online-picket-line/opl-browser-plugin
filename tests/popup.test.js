@@ -458,6 +458,10 @@ describe('Popup Functionality', () => {
         callback();
       });
 
+      mockChrome.runtime.sendMessage.mockImplementation((message, callback) => {
+        if (callback) callback();
+      });
+
       const handleTestButtonClick = async () => {
         return new Promise((resolve) => {
           mockChrome.storage.local.get(['labor_actions'], (result) => {
@@ -472,8 +476,10 @@ describe('Popup Functionality', () => {
               labor_actions: [testAction],
               test_mode_enabled: true
             }, () => {
-              mockChrome.tabs.create({ url: 'https://example.com' });
-              resolve();
+              mockChrome.runtime.sendMessage({ action: 'updateMode' }, () => {
+                mockChrome.tabs.create({ url: 'https://example.com' });
+                resolve();
+              });
             });
           });
         });
@@ -487,6 +493,10 @@ describe('Popup Functionality', () => {
         expect.objectContaining({
           test_mode_enabled: true
         }),
+        expect.any(Function)
+      );
+      expect(mockChrome.runtime.sendMessage).toHaveBeenCalledWith(
+        { action: 'updateMode' },
         expect.any(Function)
       );
     });

@@ -39,6 +39,17 @@ class DnrService {
       // Remove regex anchors and flags
       let pattern = regexPattern.replace(/^\/|\/[igm]*$/g, '');
       
+      // Handle common OPL regex pattern: ^https?://(?:www\.)?domain\.com
+      // Convert to DNR domain anchor: ||domain.com
+      if (pattern.includes('^https?://(?:www\\.)?')) {
+        pattern = pattern.replace('^https?://(?:www\\.)?', '');
+        // Remove trailing slash or end anchor if present
+        pattern = pattern.replace(/\\\/$/, '').replace(/\$$/, '');
+        // Unescape dots
+        pattern = pattern.replace(/\\\./g, '.');
+        return `||${pattern}`;
+      }
+
       // Common conversions
       // Domain pattern: example\.com -> ||example.com^
       if (pattern.match(/^[a-z0-9\\.-]+\.[a-z]{2,}$/i)) {

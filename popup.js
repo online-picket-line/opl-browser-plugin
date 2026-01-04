@@ -227,9 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
           if (chrome.runtime.lastError) {
             reject(chrome.runtime.lastError);
           } else {
-            // Reload stats to show the new test action
-            loadStats();
-            resolve();
+            // Update DNR rules to ensure blocking works immediately
+            chrome.runtime.sendMessage({ action: 'updateMode' }, () => {
+              // Reload stats to show the new test action
+              loadStats();
+              resolve();
+            });
           }
         });
       });

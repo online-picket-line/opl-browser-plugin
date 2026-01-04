@@ -3,6 +3,30 @@
 
 :root {
   /* Match onlinepicketline.com color scheme */
+
+  /* Fallback colors for browsers without oklch support */
+  --background: #fbfdfc;
+  --foreground: #052e16;
+  --card: #f4f7f5;
+  --card-foreground: #052e16;
+  --popover: #fcfdfc;
+  --popover-foreground: #052e16;
+  --primary: #166534;
+  --primary-foreground: #fff;
+  --secondary: #e2e8e4;
+  --secondary-foreground: #14532d;
+  --muted: #f0fdf4;
+  --muted-foreground: #166534;
+  --accent: #16a34a;
+  --accent-foreground: #fff;
+  --destructive: #dc2626;
+  --destructive-foreground: #fff;
+  --border: #bbf7d0;
+  --input: #bbf7d0;
+  --ring: #166534;
+
+  /* Modern color space */
+  /* stylelint-disable declaration-block-no-duplicate-custom-properties */
   --background: oklch(98% .005 140deg);
   --foreground: oklch(12% .15 140deg);
   --card: oklch(96% .008 140deg);
@@ -20,8 +44,9 @@
   --destructive: oklch(45% .22 15deg);
   --destructive-foreground: oklch(99% .005 140deg);
   --border: oklch(75% .08 140deg);
-  --input: oklch(75% .08 140deg);
+  --input: #bbf7d0; /* oklch(75% .08 140deg) causes issues in some contexts? keeping fallback for input */
   --ring: oklch(28% .2 140deg);
+  /* stylelint-enable declaration-block-no-duplicate-custom-properties */
   --radius: 0rem;
   
   /* Match website fonts */
