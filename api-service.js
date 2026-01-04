@@ -315,7 +315,7 @@ class ApiService {
         startDate: orgData.startTime || actionDetails.startDate || '',
         endDate: orgData.endTime || actionDetails.endDate || '',
         contactInfo: actionDetails.contactInfo || '',
-        logoUrl: actionDetails.logoUrl || '',
+        logoUrl: orgData.logoUrl || actionDetails.logoUrl || '',
         divisions: [],
         // Store original extension data for advanced matching
         _extensionData: orgData

@@ -155,6 +155,49 @@ describe('ApiService', () => {
       expect(result[0].more_info).toBe("https://primary.org/info");
     });
 
+    it('should use logoUrl from orgData level when available', () => {
+      const dataWithOrgLevelLogo = {
+        "Test Org": {
+          "moreInfoUrl": "https://test.com",
+          "logoUrl": "https://example.com/org-level-logo.png",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "Test Org",
+            "actionType": "strike",
+            "status": "active"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithOrgLevelLogo);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].logoUrl).toBe("https://example.com/org-level-logo.png");
+    });
+
+    it('should prefer orgData.logoUrl over actionDetails.logoUrl', () => {
+      const dataWithBothLogos = {
+        "Test Org": {
+          "moreInfoUrl": "https://test.com",
+          "logoUrl": "https://example.com/primary-logo.png",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "Test Org",
+            "actionType": "strike",
+            "status": "active",
+            "logoUrl": "https://example.com/secondary-logo.png"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithBothLogos);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].logoUrl).toBe("https://example.com/primary-logo.png");
+    });
+
     it('should extract demands from actionDetails', () => {
       const dataWithDemands = {
         "Test Org": {
