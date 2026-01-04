@@ -198,6 +198,70 @@ describe('ApiService', () => {
       expect(result[0].logoUrl).toBe("https://example.com/primary-logo.png");
     });
 
+    it('should use unionImageUrl from orgData level when logoUrl is not available', () => {
+      const dataWithUnionImageUrl = {
+        "Test Org": {
+          "moreInfoUrl": "https://test.com",
+          "unionImageUrl": "https://example.com/union-image.png",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "Test Org",
+            "actionType": "strike",
+            "status": "active"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithUnionImageUrl);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].logoUrl).toBe("https://example.com/union-image.png");
+    });
+
+    it('should use unionImageUrl from actionDetails when other options not available', () => {
+      const dataWithActionDetailsUnionImageUrl = {
+        "Test Org": {
+          "moreInfoUrl": "https://test.com",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "Test Org",
+            "actionType": "strike",
+            "status": "active",
+            "unionImageUrl": "https://example.com/action-details-union-image.png"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithActionDetailsUnionImageUrl);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].logoUrl).toBe("https://example.com/action-details-union-image.png");
+    });
+
+    it('should prefer logoUrl over unionImageUrl', () => {
+      const dataWithBothLogoTypes = {
+        "Test Org": {
+          "moreInfoUrl": "https://test.com",
+          "logoUrl": "https://example.com/logo.png",
+          "unionImageUrl": "https://example.com/union-image.png",
+          "matchingUrlRegexes": ["test.com"],
+          "actionDetails": {
+            "id": "test-123",
+            "organization": "Test Org",
+            "actionType": "strike",
+            "status": "active"
+          }
+        }
+      };
+
+      const result = apiService.transformExtensionApiResponse(dataWithBothLogoTypes);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].logoUrl).toBe("https://example.com/logo.png");
+    });
+
     it('should extract demands from actionDetails', () => {
       const dataWithDemands = {
         "Test Org": {

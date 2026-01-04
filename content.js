@@ -46,7 +46,13 @@
     const description = action.description || 'This company is currently subject to a labor action.';
     // const actionType = action.type || 'strike';  // Currently unused
     const moreInfoUrl = action.url || action.more_info || '';
-    const logoUrl = action.logoUrl || '';
+    // Check multiple locations and field names for logoUrl
+    const logoUrl = action.logoUrl || 
+                   action._extensionData?.logoUrl || 
+                   action._extensionData?.unionImageUrl ||
+                   action._extensionData?.actionDetails?.logoUrl ||
+                   action._extensionData?.actionDetails?.unionImageUrl ||
+                   '';
 
     // Construct details string
     let details = [];

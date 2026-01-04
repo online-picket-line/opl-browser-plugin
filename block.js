@@ -104,9 +104,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function updateUI(action, originalUrl) {
     if (action) {
-      // Display union logo if available
-      if (action.logoUrl) {
-        unionLogo.src = action.logoUrl;
+      // Display union logo if available - check multiple locations and field names
+      const logoUrl = action.logoUrl || 
+                     action._extensionData?.logoUrl || 
+                     action._extensionData?.unionImageUrl ||
+                     action._extensionData?.actionDetails?.logoUrl || 
+                     action._extensionData?.actionDetails?.unionImageUrl ||
+                     '';
+      if (logoUrl) {
+        unionLogo.src = logoUrl;
         unionLogo.style.display = 'block';
       } else {
         unionLogo.style.display = 'none';
