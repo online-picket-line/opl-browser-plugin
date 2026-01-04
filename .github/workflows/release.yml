@@ -38,19 +38,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Wait for CI build to complete
-        uses: lewagon/wait-on-check-action@v1.3.4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          ref: ${{ github.ref }}
-          check-name: 'Build Extensions'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 10
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate icons
+        run: node generate-icons.js
+
+      - name: Build extension packages
+        run: bash package.sh
 
       - name: Download build artifacts from CI
         uses: actions/download-artifact@v4
         with:
           name: all-browser-packages
           path: dist/
+        continue-on-error: true
 
       - name: Get version from tag
         id: get_version
