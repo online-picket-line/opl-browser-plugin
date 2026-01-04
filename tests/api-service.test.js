@@ -481,5 +481,104 @@ describe('ApiService', () => {
         }
       }
     });
+
+    test('should handle missing performance API gracefully during importScripts', () => {
+      // Simulate service worker environment where performance API might not be available
+      const originalPerformance = global.performance;
+      delete global.performance;
+
+      try {
+        // Reload the module without performance API
+        delete require.cache[require.resolve('../api-service.js')];
+        const ApiServiceReloaded = require('../api-service.js');
+
+        // Should successfully create an instance without throwing
+        const instance = new ApiServiceReloaded();
+        expect(instance).toBeDefined();
+        expect(instance.baseUrl).toBe('https://onlinepicketline.com');
+        
+        // Environment check should default to true when performance is unavailable
+        expect(instance._checkEnvironment()).toBe(true);
+      } finally {
+        // Restore performance
+        if (originalPerformance !== undefined) {
+          global.performance = originalPerformance;
+        }
+      }
+    });
+
+    test('should lazy-initialize environment validation', () => {
+      const instance = new ApiService();
+      
+      // _environmentValid should be null initially (lazy)
+      expect(instance._environmentValid).toBeNull();
+      
+      // First check should initialize it
+      const firstCheck = instance._checkEnvironment();
+      expect(firstCheck).toBe(true);
+      expect(instance._environmentValid).toBe(true);
+      
+      // Subsequent checks should use cached value
+      const secondCheck = instance._checkEnvironment();
+      expect(secondCheck).toBe(true);
+    });
+
+    test('should handle performance.now errors gracefully', () => {
+      // Mock performance.now to throw an error
+      const originalPerformance = global.performance;
+      global.performance = {
+        now: jest.fn(() => {
+          throw new Error('Performance API not available');
+        })
+      };
+
+      try {
+        // Reload module with broken performance API
+        delete require.cache[require.resolve('../api-service.js')];
+        const ApiServiceReloaded = require('../api-service.js');
+
+        const instance = new ApiServiceReloaded();
+        
+        // Should handle the error and default to true
+        expect(() => instance._checkEnvironment()).not.toThrow();
+        expect(instance._checkEnvironment()).toBe(true);
+      } finally {
+        // Restore performance
+        global.performance = originalPerformance;
+      }
+    });
+
+    test('should validate environment before getting API key', () => {
+      const instance = new ApiService();
+      
+      // Mock _checkEnvironment to return false
+      instance._checkEnvironment = jest.fn(() => false);
+      
+      // Should throw error when environment is invalid
+      expect(() => instance.getApiKey()).toThrow('Invalid execution environment detected');
+      expect(instance._checkEnvironment).toHaveBeenCalled();
+    });
+
+    test('should check environment during getLaborActions without throwing', async () => {
+      const instance = new ApiService();
+      
+      // Mock _checkEnvironment to return false
+      instance._checkEnvironment = jest.fn(() => false);
+      
+      // Mock fetch to return data
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Map([['content-type', 'application/json']]),
+        json: async () => mockExtensionData
+      });
+
+      // Should warn but not throw
+      const consoleSpy = jest.spyOn(console, 'warn');
+      await instance.getLaborActions();
+      
+      expect(consoleSpy).toHaveBeenCalledWith('Execution environment validation failed');
+      expect(instance._checkEnvironment).toHaveBeenCalled();
+    });
   });
 });
