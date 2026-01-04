@@ -480,3 +480,13 @@ class ApiService {
 
 })();
 
+// Export for Node.js/Jest testing environment only
+// Check for Node.js module system (not available in browser service workers)
+try {
+  if (typeof module !== 'undefined' && module.exports && typeof window === 'undefined') {
+    module.exports = ApiService;
+  }
+} catch (e) {
+  // Silently ignore - we're in a service worker context
+}
+
