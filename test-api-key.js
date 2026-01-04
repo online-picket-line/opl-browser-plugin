@@ -1,21 +1,21 @@
 const https = require('https');
 
 // Test the current key
-const apiKey = 'opl_8677beaeb06c599997ec46f9891036a37a81bee1c32d32cbb4398ab344b1b7cf';
+const apiKey = 'opl_1f05c345fe63a8fc6a374a176d6cea6c36fcba2ba60ed275503fe3f5629c8828';
 console.log('Key length:', apiKey.length);
 console.log('Key:', apiKey);
 
 // Also test what the obfuscated key produces
 const _p1 = 'b3Bs'; // Base64 for 'opl'
 const _p2 = () => String.fromCharCode(95); // '_'
-const _p3 = () => [56, 54, 55, 55].map(x => String.fromCharCode(x)).join(''); // '8677'
-const _p4 = () => { const c = [89, 109, 86, 104, 90, 87, 73, 119, 78, 109, 77, 61]; return String.fromCharCode(...c); }; // Base64 for 'beaeb06c'
+const _p3 = () => [49, 102, 48, 53].map(x => String.fromCharCode(x)).join(''); // '1f05'
+const _p4 = () => { const c = [89, 122, 77, 48, 89, 122, 77, 48, 78, 87, 90, 108, 78, 106, 77, 61]; return String.fromCharCode(...c); }; // Base64 for 'c345fe63'
 const _p5 = () => {
-  const x = [53, 57, 57, 57, 57, 55, 101, 99];
+  const x = [97, 56, 102, 99, 54, 97, 51, 55];
   return Buffer.from(String.fromCharCode(...x)).toString('base64');
-}; // Base64 for '599997ec'
-const _p6 = () => Buffer.from('46f9' + '8910').toString('base64'); // Base64 for '46f98910'
-const _p8 = 'MzZhMzdhODFiZWUxYzMyZDMyY2JiNDM5OGFiMzQ0YjFiN2Nm'; // Final part
+}; // Base64 for 'a8fc6a37'
+const _p6 = () => Buffer.from('4a17' + '6d6c').toString('base64'); // Base64 for '4a176d6c'
+const _p8 = 'ZWE2YzM2ZmNiYTJiYTYwZWQyNzU1MDNmZTNmNTYyOWM4ODI4'; // Final part
 
 const atob = (s) => Buffer.from(s, 'base64').toString();
 

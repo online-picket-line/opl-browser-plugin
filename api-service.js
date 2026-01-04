@@ -7,14 +7,14 @@ const DEFAULT_API_BASE_URL = 'https://onlinepicketline.com';
 // Advanced obfuscation: Split key across multiple encoded parts and functions
 const _p1 = 'b3Bs'; // Base64 for 'opl'
 const _p2 = () => String.fromCharCode(95); // '_'
-const _p3 = () => [56, 54, 55, 55].map(x => String.fromCharCode(x)).join(''); // '8677' (lazy)
-const _p4 = () => { const c = [89, 109, 86, 104, 90, 87, 73, 119, 78, 109, 77, 61]; return String.fromCharCode(...c); }; // Base64 for 'beaeb06c' (lazy)
+const _p3 = () => [49, 102, 48, 53].map(x => String.fromCharCode(x)).join(''); // '1f05' (lazy)
+const _p4 = () => { const c = [89, 122, 77, 48, 89, 122, 77, 48, 78, 87, 90, 108, 78, 106, 77, 61]; return String.fromCharCode(...c); }; // Base64 for 'c345fe63' (lazy)
 const _p5 = () => {
-  const x = [53, 57, 57, 57, 57, 55, 101, 99];
+  const x = [97, 56, 102, 99, 54, 97, 51, 55];
   return btoa(String.fromCharCode(...x));
-}; // Base64 for '599997ec' (lazy)
-const _p6 = () => btoa('46f9' + '8910'); // Base64 for '46f98910' (lazy)
-const _p8 = 'MzZhMzdhODFiZWUxYzMyZDMyY2JiNDM5OGFiMzQ0YjFiN2Nm'; // Final part
+}; // Base64 for 'a8fc6a37' (lazy)
+const _p6 = () => btoa('4a17' + '6d6c'); // Base64 for '4a176d6c' (lazy)
+const _p8 = 'ZWE2YzM2ZmNiYTJiYTYwZWQyNzU1MDNmZTNmNTYyOWM4ODI4'; // Final part
 
 // Runtime key assembly with anti-tampering
 function _assembleKey() {
