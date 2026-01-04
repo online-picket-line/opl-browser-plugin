@@ -7,13 +7,13 @@ const DEFAULT_API_BASE_URL = 'https://onlinepicketline.com';
 // Advanced obfuscation: Split key across multiple encoded parts and functions
 const _p1 = 'b3Bs'; // Base64 for 'opl'
 const _p2 = () => String.fromCharCode(95); // '_'
-const _p3 = [48, 50].map(x => String.fromCharCode(x)).join(''); // '02'
-const _p4 = (() => { const c = [89, 50, 70, 109, 90, 87, 78, 106]; return String.fromCharCode(...c); })(); // Base64 for 'cafecc'
-const _p5 = (() => {
+const _p3 = () => [48, 50].map(x => String.fromCharCode(x)).join(''); // '02' (lazy)
+const _p4 = () => { const c = [89, 50, 70, 109, 90, 87, 78, 106]; return String.fromCharCode(...c); }; // Base64 for 'cafecc' (lazy)
+const _p5 = () => {
   const x = [51, 51, 54, 49];
   return btoa(String.fromCharCode(...x));
-})(); // Base64 for '3361'
-const _p6 = ((a, b) => btoa(a + b))('fb5e', 'e303'); // Base64 for 'fb5ee303'
+}; // Base64 for '3361' (lazy)
+const _p6 = () => btoa('fb5e' + 'e303'); // Base64 for 'fb5ee303' (lazy)
 const _p8 = 'ODMyZGRlMjZlM2M2N2Y0N2I5NDQ3NmI1NWYxMGI0NjRiYTIwYmZlYzRmMWM='; // Final part
 
 // Runtime key assembly with anti-tampering
@@ -25,10 +25,10 @@ function _assembleKey() {
   const parts = [
     atob(_p1),
     _p2(),
-    _p3,
-    atob(_p4),
-    atob(_p5),
-    atob(_p6),
+    _p3(),
+    atob(_p4()),
+    atob(_p5()),
+    atob(_p6()),
     atob(_p8)
   ];
 
