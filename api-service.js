@@ -72,14 +72,19 @@ const _getObfuscatedKey = (() => {
 
 // Anti-debugging: Add timing variations
 const _validateEnvironment = () => {
-  const start = performance.now();
-  for (let i = 0; i < 1000; i++) {
-    Math.random();
-  }
-  const duration = performance.now() - start;
+  try {
+    const start = performance.now();
+    for (let i = 0; i < 1000; i++) {
+      Math.random();
+    }
+    const duration = performance.now() - start;
 
-  // If execution is suspiciously slow, might be debugged
-  return duration < 100;
+    // If execution is suspiciously slow, might be debugged
+    return duration < 100;
+  } catch (e) {
+    // performance API might not be available during importScripts
+    return true;
+  }
 };
 
 const CACHE_KEY = 'labor_actions_cache';
@@ -91,7 +96,14 @@ class ApiService {
   constructor() {
     this.baseUrl = DEFAULT_API_BASE_URL;
     this.keyResolver = _getObfuscatedKey;
-    this._environmentValid = _validateEnvironment();
+    this._environmentValid = null; // Lazy initialization
+  }
+  
+  _checkEnvironment() {
+    if (this._environmentValid === null) {
+      this._environmentValid = _validateEnvironment();
+    }
+    return this._environmentValid;
   }
 
   /**
@@ -100,7 +112,7 @@ class ApiService {
   async init() {
     // Settings are now hardcoded with obfuscated key
     this.baseUrl = DEFAULT_API_BASE_URL;
-    this._environmentValid = _validateEnvironment();
+    this._checkEnvironment();
   }
 
   /**
@@ -119,7 +131,7 @@ class ApiService {
    * @returns {string} Decoded API key
    */
   getApiKey() {
-    if (!this._environmentValid) {
+    if (!this._checkEnvironment()) {
       throw new Error('Invalid execution environment detected');
     }
 
@@ -159,7 +171,7 @@ class ApiService {
   async getLaborActions() {
     try {
       // Environment validation
-      if (!this._environmentValid) {
+      if (!this._checkEnvironment()) {
         console.warn('Execution environment validation failed');
       }
 

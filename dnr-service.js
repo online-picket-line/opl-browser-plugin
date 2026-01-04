@@ -336,6 +336,6 @@ class DnrService {
 
 // Export for Node.js/Jest testing environment only
 // Service workers don't have 'process' or 'require', so this only runs in Node.js
-if (typeof module !== 'undefined' && module.exports && typeof process !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined' && typeof process !== 'undefined') {
   module.exports = DnrService;
 }
