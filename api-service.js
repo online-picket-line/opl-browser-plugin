@@ -81,7 +81,7 @@ const _validateEnvironment = () => {
 
     // If execution is suspiciously slow, might be debugged
     return duration < 100;
-  } catch (e) {
+  } catch (_e) {
     // performance API might not be available during importScripts
     return true;
   }
