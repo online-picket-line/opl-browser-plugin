@@ -1,5 +1,9 @@
 {
   "extends": ["stylelint-config-standard"],
+  "ignoreFiles": [
+    "coverage/**",
+    "node_modules/**"
+  ],
   "rules": {
     "color-function-notation": null,
     "media-feature-range-notation": null,
