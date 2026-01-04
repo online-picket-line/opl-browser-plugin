@@ -10,35 +10,51 @@ document.addEventListener('DOMContentLoaded', async () => {
   const proceedBtn = document.getElementById('proceed-btn');
   const goBackBtn = document.getElementById('go-back-btn');
 
-  // Get the original URL from the referrer or document.referrer
-  const originalUrl = document.referrer || null;
+  // Get the original URL from query params (preferred) or referrer (fallback)
+  const urlParams = new URLSearchParams(window.location.search);
+  const domainHint = urlParams.get('domain');
+  const referrerUrl = document.referrer || null;
+  
+  // Reconstruct the original URL from domain hint
+  let originalUrl = null;
+  if (domainHint) {
+    // Build a basic URL from the domain hint
+    originalUrl = `https://${domainHint}`;
+  } else if (referrerUrl) {
+    originalUrl = referrerUrl;
+  }
   
   // Store for use in proceed button
   window.originalUrl = originalUrl;
+  window.domainHint = domainHint;
 
   // Load labor actions from local storage and match against referrer
   try {
     const result = await chrome.storage.local.get(['labor_actions']);
     const actions = result.labor_actions || [];
     
-    // Find matching action based on original URL
+    // Find matching action based on domain hint or original URL
     let matchedAction = null;
-    if (originalUrl) {
+    if (domainHint) {
+      matchedAction = findMatchingAction(`https://${domainHint}`, actions);
+    }
+    if (!matchedAction && originalUrl) {
       matchedAction = findMatchingAction(originalUrl, actions);
     }
     
     if (matchedAction) {
-      updateUI(matchedAction, originalUrl);
+      updateUI(matchedAction, originalUrl || `https://${domainHint}`);
     } else {
       // Fallback - show generic message
       actionTitle.textContent = 'Labor Action in Progress';
       actionDescription.textContent = 'This website is currently subject to a labor action. Please consider supporting workers by not crossing this digital picket line.';
-      if (originalUrl) {
+      const displayUrl = domainHint || originalUrl;
+      if (displayUrl) {
         try {
-          const url = new URL(originalUrl);
+          const url = new URL(displayUrl.startsWith('http') ? displayUrl : `https://${displayUrl}`);
           blockedUrl.textContent = url.hostname;
         } catch (_e) {
-          blockedUrl.textContent = originalUrl;
+          blockedUrl.textContent = displayUrl;
         }
       }
     }
@@ -161,12 +177,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Handle proceed button - uses DNR session rules for bypass
   proceedBtn.addEventListener('click', async () => {
-    const urlToProceed = window.originalUrl;
+    // Get the URL to proceed to - prefer domain hint, fall back to originalUrl
+    let urlToProceed = window.originalUrl;
+    const domain = window.domainHint;
+    
+    // If we only have domain hint, construct full URL
+    if (!urlToProceed && domain) {
+      urlToProceed = `https://${domain}`;
+    }
+    
     if (urlToProceed) {
       try {
         // Extract domain from URL for DNR rule
-        const url = new URL(urlToProceed);
-        const domain = url.hostname;
+        let targetDomain = domain;
+        if (!targetDomain) {
+          try {
+            const url = new URL(urlToProceed);
+            targetDomain = url.hostname;
+          } catch (_e) {
+            targetDomain = urlToProceed;
+          }
+        }
         
         // Generate unique ID for this bypass rule
         const bypassRuleId = 990000 + Math.floor(Math.random() * 10000);
@@ -178,7 +209,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             priority: 100, // Much higher than block rules (which have priority 1)
             action: { type: 'allow' },
             condition: {
-              urlFilter: `||${domain}`, // Match domain and all subpaths
+              urlFilter: `||${targetDomain}`, // Match domain and all subpaths
               resourceTypes: ['main_frame']
             }
           }]
@@ -191,6 +222,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Fallback: try to navigate anyway
         window.location.href = urlToProceed;
       }
+    } else {
+      // No URL available, show an error or redirect to home
+      console.warn('No URL to proceed to');
+      window.location.href = 'https://onlinepicketline.com';
     }
   });
 

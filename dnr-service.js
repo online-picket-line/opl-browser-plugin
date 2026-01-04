@@ -165,8 +165,12 @@ class DnrService {
           }
 
           // Create redirect rule to block page
-          // We'll pass the action ID in the redirect URL
+          // Pass the URL filter in the redirect so block page can match action
           const blockPageUrl = chrome.runtime.getURL('block.html');
+          
+          // Extract domain from urlFilter for use in block page
+          // urlFilter format: ||domain.com or ||domain.com^
+          let domainHint = urlFilter.replace(/^\|\|/, '').replace(/[\^*]+$/, '');
           
           rules.push({
             id: ruleId++,
@@ -174,9 +178,9 @@ class DnrService {
             action: {
               type: 'redirect',
               redirect: {
-                // Note: We can't pass dynamic data in redirect URL easily
-                // So we'll store action data in storage and retrieve it
-                url: blockPageUrl
+                // Use regexSubstitution to capture the original URL
+                // Note: DNR redirect can use regexFilter + regexSubstitution
+                url: `${blockPageUrl}?domain=${encodeURIComponent(domainHint)}`
               }
             },
             condition: {

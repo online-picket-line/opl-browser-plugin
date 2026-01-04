@@ -6,7 +6,8 @@ module.exports = [
       "coverage/**",
       "generate-icons.js",
       "test-import.js",
-      "eslint.config.js"
+      "eslint.config.js",
+      "test-api-key.js"
     ]
   },
   {
@@ -22,6 +23,7 @@ module.exports = [
         window: "readonly",
         fetch: "readonly",
         URL: "readonly",
+        URLSearchParams: "readonly",
         btoa: "readonly",
         atob: "readonly",
         performance: "readonly",

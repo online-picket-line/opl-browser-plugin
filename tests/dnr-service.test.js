@@ -220,11 +220,12 @@ describe('DnrService', () => {
       expect(rules.length).toBeGreaterThan(2); // Should expand OR patterns
     });
 
-    test('should use chrome.runtime.getURL for block page', () => {
+    test('should use chrome.runtime.getURL for block page with domain hint', () => {
       const rules = dnrService.generateBlockModeRules([mockActions[0]]);
       
       expect(chrome.runtime.getURL).toHaveBeenCalledWith('block.html');
-      expect(rules[0].action.redirect.url).toBe('chrome-extension://test-id/block.html');
+      // Block page URL should include domain hint as query parameter
+      expect(rules[0].action.redirect.url).toContain('chrome-extension://test-id/block.html?domain=');
     });
   });
 
