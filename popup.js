@@ -93,16 +93,38 @@ document.addEventListener('DOMContentLoaded', () => {
    * Load and display stats
    */
   function loadStats() {
-    chrome.storage.local.get(['labor_actions', 'cache_timestamp', 'connection_status'], (result) => {
+    chrome.storage.local.get(['labor_actions', 'cache_timestamp', 'connection_status', 'upgrade_needed'], (result) => {
       const actions = result.labor_actions || [];
       const timestamp = result.cache_timestamp;
+      const upgradeNeeded = result.upgrade_needed || false;
 
       // Update connection indicator
       const status = result.connection_status || 'online';
       if (connectionIndicator && connectionText) {
         connectionIndicator.style.display = 'inline-flex';
-        connectionIndicator.className = `connection-status status-${status}`;
-        connectionText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        
+        if (upgradeNeeded || status === 'upgrade_needed') {
+          connectionIndicator.className = 'connection-status status-upgrade';
+          connectionText.textContent = 'Update Available';
+        } else {
+          connectionIndicator.className = `connection-status status-${status}`;
+          connectionText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        }
+      }
+
+      // Show upgrade banner if needed
+      if (upgradeNeeded || status === 'upgrade_needed') {
+        statsContent.innerHTML = `
+          <div class="upgrade-notice">
+            <strong>⚠️ Update Required</strong><br>
+            <p>A new version of the Online Picket Line extension is available with important updates.</p>
+            <p>Please update to continue receiving labor action alerts.</p>
+            <a href="https://onlinepicketline.com/extension" target="_blank" class="upgrade-link">
+              Get the Latest Version →
+            </a>
+          </div>
+        `;
+        return;
       }
 
       const activeActions = actions.filter(a => (!a.status || a.status === 'active') && !a._isTestAction).length;

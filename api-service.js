@@ -7,14 +7,14 @@ const DEFAULT_API_BASE_URL = 'https://onlinepicketline.com';
 // Advanced obfuscation: Split key across multiple encoded parts and functions
 const _p1 = 'b3Bs'; // Base64 for 'opl'
 const _p2 = () => String.fromCharCode(95); // '_'
-const _p3 = () => [48, 50].map(x => String.fromCharCode(x)).join(''); // '02' (lazy)
-const _p4 = () => { const c = [89, 50, 70, 109, 90, 87, 78, 106]; return String.fromCharCode(...c); }; // Base64 for 'cafecc' (lazy)
+const _p3 = () => [56, 54, 55, 55].map(x => String.fromCharCode(x)).join(''); // '8677' (lazy)
+const _p4 = () => { const c = [89, 109, 86, 104, 90, 87, 73, 119, 78, 109, 77, 61]; return String.fromCharCode(...c); }; // Base64 for 'beaeb06c' (lazy)
 const _p5 = () => {
-  const x = [51, 51, 54, 49];
+  const x = [53, 57, 57, 57, 57, 55, 101, 99];
   return btoa(String.fromCharCode(...x));
-}; // Base64 for '3361' (lazy)
-const _p6 = () => btoa('fb5e' + 'e303'); // Base64 for 'fb5ee303' (lazy)
-const _p8 = 'ODMyZGRlMjZlM2M2N2Y0N2I5NDQ3NmI1NWYxMGI0NjRiYTIwYmZlYzRmMWM='; // Final part
+}; // Base64 for '599997ec' (lazy)
+const _p6 = () => btoa('46f9' + '8910'); // Base64 for '46f98910' (lazy)
+const _p8 = 'MzZhMzdhODFiZWUxYzMyZDMyY2JiNDM5OGFiMzQ0YjFiN2Nm'; // Final part
 
 // Runtime key assembly with anti-tampering
 function _assembleKey() {
@@ -63,7 +63,7 @@ const _getObfuscatedKey = (() => {
       return _cachedKey;
     } catch (_e) {
       // Fallback to simpler obfuscation if assembly fails
-      const fallback = 'b3BsXzAyY2FmZWNjMzM2MWZiNWVlMzAzODMyZGRlMjZlM2M2N2Y0N2I5NDQ3NmI1NWYxMGI0NjRiYTIwYmZlYzRmMWM=';
+      const fallback = 'b3BsXzg2NzdiZWFlYjA2YzU5OTk5N2VjNDZmOTg5MTAzNmEzN2E4MWJlZTFjMzJkMzJjYmI0Mzk4YWIzNDRiMWI3Y2Y=';
       console.warn('Using fallback key assembly');
       return fallback;
     }
@@ -224,8 +224,24 @@ class ApiService {
       }
 
       if (response.status === 401) {
-        throw new Error('Invalid or missing API key. Please check your API key in settings.');
+        // Store upgrade needed status for UI to display
+        await chrome.storage.local.set({ 
+          upgrade_needed: true,
+          upgrade_reason: 'api_key_invalid',
+          connection_status: 'upgrade_needed'
+        });
+        console.warn('API key rejected - extension upgrade may be required');
+        // Don't throw - return cached data or empty array gracefully
+        const cached = await this.getCachedData(true);
+        if (cached) {
+          console.log('Using cached data while upgrade is pending');
+          return cached;
+        }
+        return [];
       }
+
+      // Clear upgrade flag on successful response
+      await chrome.storage.local.set({ upgrade_needed: false });
 
       if (!response.ok) {
         throw new Error(`API request failed: ${response.status} ${response.statusText}`);

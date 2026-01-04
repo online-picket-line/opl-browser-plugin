@@ -133,6 +133,50 @@
     .status-offline .status-dot {
       background-color: #ef4444;
     }
+    .status-upgrade .status-dot {
+      background-color: #f59e0b;
+      animation: pulse 1.5s infinite;
+    }
+    .status-upgrade {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .upgrade-notice {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      border: 1px solid #f59e0b;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      color: #78350f;
+    }
+    .upgrade-notice strong {
+      color: #92400e;
+      font-size: 0.9rem;
+    }
+    .upgrade-notice p {
+      font-size: 0.75rem;
+      margin: 0.5rem 0;
+      line-height: 1.4;
+    }
+    .upgrade-link {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.5rem 1rem;
+      background-color: #f59e0b;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+    .upgrade-link:hover {
+      background-color: #d97706;
+    }
   </style>
 </head>
 <body>

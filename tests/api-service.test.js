@@ -312,7 +312,7 @@ describe('ApiService', () => {
         'https://onlinepicketline.com/api/blocklist.json?format=extension&includeInactive=false',
         expect.objectContaining({
           headers: expect.objectContaining({
-            'X-API-Key': 'opl_02cafecc3361fb5ee303832dde26e3c67f47b94476b55f10b464ba20bfec4f1c'
+            'X-API-Key': 'opl_8677beaeb06c599997ec46f9891036a37a81bee1c32d32cbb4398ab344b1b7cf'
           })
         })
       );
@@ -345,7 +345,7 @@ describe('ApiService', () => {
       expect(result).toEqual(mockTransformedActions);
     });
 
-    it('should handle 401 authentication error', async () => {
+    it('should handle 401 authentication error gracefully and set upgrade flag', async () => {
       mockChromeStorage.local.get.mockImplementation((keys, callback) => {
         callback({ cache_timestamp: Date.now() - 400000 }); // Stale cache
       });
@@ -354,10 +354,21 @@ describe('ApiService', () => {
 
       const result = await apiService.getLaborActions();
 
+      // Should return empty array (no cached data available)
       expect(result).toEqual([]);
-      expect(console.error).toHaveBeenCalledWith(
-        'Error fetching labor actions:',
-        expect.any(Error)
+      
+      // Should set upgrade_needed flag in storage
+      expect(mockChromeStorage.local.set).toHaveBeenCalledWith(
+        expect.objectContaining({
+          upgrade_needed: true,
+          upgrade_reason: 'api_key_invalid',
+          connection_status: 'upgrade_needed'
+        })
+      );
+      
+      // Should warn but not throw error
+      expect(console.warn).toHaveBeenCalledWith(
+        'API key rejected - extension upgrade may be required'
       );
     });
 
