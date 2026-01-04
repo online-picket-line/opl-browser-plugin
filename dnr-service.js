@@ -335,11 +335,7 @@ class DnrService {
 }
 
 // Export for Node.js/Jest testing environment only
-// Check for Node.js module system (not available in browser service workers)
-try {
-  if (typeof module !== 'undefined' && module.exports && typeof window === 'undefined') {
-    module.exports = DnrService;
-  }
-} catch (e) {
-  // Silently ignore - we're in a service worker context
+// Service workers don't have 'process' or 'require', so this only runs in Node.js
+if (typeof module !== 'undefined' && module.exports && typeof process !== 'undefined') {
+  module.exports = DnrService;
 }
