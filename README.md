@@ -219,7 +219,7 @@ For detailed instructions, see Apple's [Converting a Web Extension for Safari](h
 - Extension settings sync via iCloud if Safari sync is enabled
 - Performance is optimized for Safari's energy efficiency requirements
 
-**Need detailed Safari instructions?** See [SAFARI_SETUP.md](SAFARI_SETUP.md) for comprehensive setup, troubleshooting, and distribution guide.
+**Need detailed Safari instructions?** See [SAFARI_SETUP.md](docs/SAFARI_SETUP.md) for comprehensive setup, troubleshooting, and distribution guide.
 
 ## Setup
 
@@ -373,7 +373,7 @@ The extension includes an automatic update notification system:
 - **One-Click Updates**: Click "Update Now" to go directly to the download page
 - **Dismissible**: Dismiss update notifications for specific versions
 
-For more details about the update mechanism, see [UPDATE_MECHANISM.md](UPDATE_MECHANISM.md).
+For more details about the update mechanism, see [UPDATE_MECHANISM.md](docs/UPDATE_MECHANISM.md).
 
 ## Privacy
 
