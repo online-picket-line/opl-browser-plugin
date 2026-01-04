@@ -8,7 +8,7 @@ const DEFAULT_API_BASE_URL = 'https://onlinepicketline.com';
 const _p1 = 'b3Bs'; // Base64 for 'opl'
 const _p2 = () => String.fromCharCode(95); // '_'
 const _p3 = () => [49, 102, 48, 53].map(x => String.fromCharCode(x)).join(''); // '1f05' (lazy)
-const _p4 = () => { const c = [89, 122, 77, 48, 89, 122, 77, 48, 78, 87, 90, 108, 78, 106, 77, 61]; return String.fromCharCode(...c); }; // Base64 for 'c345fe63' (lazy)
+const _p4 = () => { const c = [89, 122, 77, 48, 78, 87, 90, 108, 78, 106, 77, 61]; return String.fromCharCode(...c); }; // Base64 for 'c345fe63' (lazy)
 const _p5 = () => {
   const x = [97, 56, 102, 99, 54, 97, 51, 55];
   return btoa(String.fromCharCode(...x));
@@ -63,7 +63,7 @@ const _getObfuscatedKey = (() => {
       return _cachedKey;
     } catch (_e) {
       // Fallback to simpler obfuscation if assembly fails
-      const fallback = 'b3BsXzg2NzdiZWFlYjA2YzU5OTk5N2VjNDZmOTg5MTAzNmEzN2E4MWJlZTFjMzJkMzJjYmI0Mzk4YWIzNDRiMWI3Y2Y=';
+      const fallback = 'b3BsXzFmMDVjMzQ1ZmU2M2E4ZmM2YTM3NGExNzZkNmNlYTZjMzZmY2JhMmJhNjBlZDI3NTUwM2ZlM2Y1NjI5Yzg4Mjg=';
       console.warn('Using fallback key assembly');
       return fallback;
     }

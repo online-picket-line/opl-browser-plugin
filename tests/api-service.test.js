@@ -312,7 +312,7 @@ describe('ApiService', () => {
         'https://onlinepicketline.com/api/blocklist.json?format=extension&includeInactive=false',
         expect.objectContaining({
           headers: expect.objectContaining({
-            'X-API-Key': 'opl_8677beaeb06c599997ec46f9891036a37a81bee1c32d32cbb4398ab344b1b7cf'
+            'X-API-Key': 'opl_1f05c345fe63a8fc6a374a176d6cea6c36fcba2ba60ed275503fe3f5629c8828'
           })
         })
       );
@@ -590,6 +590,63 @@ describe('ApiService', () => {
       
       expect(consoleSpy).toHaveBeenCalledWith('Execution environment validation failed');
       expect(instance._checkEnvironment).toHaveBeenCalled();
+    });
+  });
+
+  describe('API Key Management', () => {
+    test('should return valid obfuscated API key', () => {
+      const instance = new ApiService();
+      const key = instance.getApiKey();
+      
+      // Check key format
+      expect(key).toBeDefined();
+      expect(typeof key).toBe('string');
+      expect(key).toMatch(/^opl_[a-f0-9]{64}$/);
+      expect(key.length).toBe(68); // 'opl_' + 64 hex chars
+    });
+
+    test('should return the new API key after update', () => {
+      const instance = new ApiService();
+      const key = instance.getApiKey();
+      
+      // Verify we're using the new key
+      expect(key).toBe('opl_1f05c345fe63a8fc6a374a176d6cea6c36fcba2ba60ed275503fe3f5629c8828');
+      
+      // Verify it's not the old key
+      expect(key).not.toBe('opl_8677beaeb06c599997ec46f9891036a37a81bee1c32d32cbb4398ab344b1b7cf');
+    });
+
+    test('should validate API key format', () => {
+      const instance = new ApiService();
+      const key = instance.getApiKey();
+      
+      // Must start with 'opl_'
+      expect(key.startsWith('opl_')).toBe(true);
+      
+      // Must be at least 60 characters
+      expect(key.length).toBeGreaterThanOrEqual(60);
+      
+      // Must contain only valid hex characters after prefix
+      const keyWithoutPrefix = key.substring(4);
+      expect(keyWithoutPrefix).toMatch(/^[a-f0-9]+$/);
+    });
+
+    test('should throw error when key validation fails', () => {
+      const instance = new ApiService();
+      
+      // Mock keyResolver to return an invalid key (too short)
+      instance.keyResolver = jest.fn(() => btoa('opl_short'));
+      
+      expect(() => instance.getApiKey()).toThrow('Authentication unavailable');
+    });
+
+    test('should throw error when key cannot be decoded', () => {
+      const instance = new ApiService();
+      
+      // Mock keyResolver to return invalid base64
+      instance.keyResolver = jest.fn(() => 'not-valid-base64!!!');
+      
+      expect(() => instance.getApiKey()).toThrow('Authentication unavailable');
     });
   });
 });

@@ -9,7 +9,7 @@ console.log('Key:', apiKey);
 const _p1 = 'b3Bs'; // Base64 for 'opl'
 const _p2 = () => String.fromCharCode(95); // '_'
 const _p3 = () => [49, 102, 48, 53].map(x => String.fromCharCode(x)).join(''); // '1f05'
-const _p4 = () => { const c = [89, 122, 77, 48, 89, 122, 77, 48, 78, 87, 90, 108, 78, 106, 77, 61]; return String.fromCharCode(...c); }; // Base64 for 'c345fe63'
+const _p4 = () => { const c = [89, 122, 77, 48, 78, 87, 90, 108, 78, 106, 77, 61]; return String.fromCharCode(...c); }; // Base64 for 'c345fe63'
 const _p5 = () => {
   const x = [97, 56, 102, 99, 54, 97, 51, 55];
   return Buffer.from(String.fromCharCode(...x)).toString('base64');
