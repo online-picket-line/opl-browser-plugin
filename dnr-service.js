@@ -333,8 +333,3 @@ class DnrService {
     }
   }
 }
-
-// Export for use in background script
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = DnrService;
-}
