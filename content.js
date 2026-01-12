@@ -56,7 +56,7 @@
 
     // Construct employer and location string
     let employerLocationHtml = '';
-    const employer = action.employer || action.employerName || action.employer_name;
+    const employer = action.employer || action.employerName || action.employer_name || action.company;
     const location = (action.locations && action.locations.length > 0) ? action.locations[0] : null;
     
     if (employer || location) {
@@ -68,7 +68,7 @@
       } else {
         displayText = escapeHtml(location);
       }
-      employerLocationHtml = `<p class="opl-banner-employer-location" style="font-size: 0.85em; opacity: 0.9; margin-top: 4px;">${displayText}</p>`;
+      employerLocationHtml = `<p class="opl-banner-employer-location" style="font-size: 0.9em; font-weight: 600; margin-top: 4px;">${displayText}</p>`;
     }
     
     // Add demands if available
@@ -84,7 +84,7 @@
           <strong class="opl-banner-title">${escapeHtml(title)}</strong>
           ${employerLocationHtml}
           ${demandsHtml}
-          <p class="opl-banner-description">${escapeHtml(description)}</p>
+          <p class="opl-banner-description" style="margin-top: 4px;"><strong>Description:</strong> ${escapeHtml(description)}</p>
           <div class="opl-banner-links" style="margin-top: 4px;">
             ${moreInfoUrl ? `<a href="${escapeHtml(moreInfoUrl)}" target="_blank" class="opl-banner-link">Learn More</a><span style="margin: 0 5px; opacity: 0.5;">|</span>` : ''}
             <a href="https://onlinepicketline.com" target="_blank" class="opl-banner-link" style="font-size: 0.8em; opacity: 0.8;">Online Picket Line - OPL</a>

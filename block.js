@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       // Build employer name followed by location
-      const employer = action.employer || action.employerName || action.employer_name;
+      const employer = action.employer || action.employerName || action.employer_name || action.company;
       const location = (action.locations && action.locations.length > 0) ? action.locations.join(', ') : null;
       
       if (employer || location) {
