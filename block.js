@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const actionTitle = document.getElementById('action-title');
   const actionDescription = document.getElementById('action-description');
   const actionType = document.getElementById('action-type');
-  const blockedUrl = document.getElementById('blocked-url');
   const unionLogo = document.getElementById('union-logo');
   const learnMoreBtn = document.getElementById('learn-more-btn');
   const proceedBtn = document.getElementById('proceed-btn');
@@ -48,15 +47,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Fallback - show generic message
       actionTitle.textContent = 'Labor Action in Progress';
       actionDescription.textContent = 'This website is currently subject to a labor action. Please consider supporting workers by not crossing this digital picket line.';
-      const displayUrl = domainHint || originalUrl;
-      if (displayUrl) {
-        try {
-          const url = new URL(displayUrl.startsWith('http') ? displayUrl : `https://${displayUrl}`);
-          blockedUrl.textContent = url.hostname;
-        } catch (_e) {
-          blockedUrl.textContent = displayUrl;
-        }
-      }
     }
   } catch (error) {
     console.error('Error loading labor action data:', error);
@@ -144,34 +134,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('action-demands-container').style.display = 'none';
       }
 
-      if (action.employer || action.employerName || action.employer_name) {
-        const employer = action.employer || action.employerName || action.employer_name;
-        document.getElementById('action-employer').textContent = employer;
-        document.getElementById('action-employer-container').style.display = 'block';
+      // Build employer name followed by location
+      const employer = action.employer || action.employerName || action.employer_name;
+      const location = (action.locations && action.locations.length > 0) ? action.locations.join(', ') : null;
+      
+      if (employer || location) {
+        let displayText = '';
+        if (employer && location) {
+          displayText = `${employer} - ${location}`;
+        } else if (employer) {
+          displayText = employer;
+        } else {
+          displayText = location;
+        }
+        document.getElementById('action-employer-location').textContent = displayText;
+        document.getElementById('action-employer-location-container').style.display = 'block';
         hasDetails = true;
       } else {
-        document.getElementById('action-employer-container').style.display = 'none';
-      }
-
-      if (action.locations && action.locations.length > 0) {
-        document.getElementById('action-location').textContent = action.locations.join(', ');
-        document.getElementById('action-location-container').style.display = 'block';
-        hasDetails = true;
-      } else {
-        document.getElementById('action-location-container').style.display = 'none';
+        document.getElementById('action-employer-location-container').style.display = 'none';
       }
 
       if (hasDetails) {
         detailsContainer.style.display = 'block';
-      }
-    }
-
-    if (originalUrl) {
-      try {
-        const url = new URL(originalUrl);
-        blockedUrl.textContent = url.hostname;
-      } catch (_e) {
-        blockedUrl.textContent = originalUrl;
       }
     }
   }

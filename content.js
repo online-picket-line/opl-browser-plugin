@@ -54,17 +54,22 @@
                    action._extensionData?.actionDetails?.unionImageUrl ||
                    '';
 
-    // Construct details string
-    let details = [];
-    
-    // Add employer
+    // Construct employer and location string
+    let employerLocationHtml = '';
     const employer = action.employer || action.employerName || action.employer_name;
-    if (employer) details.push(employer);
+    const location = (action.locations && action.locations.length > 0) ? action.locations[0] : null;
     
-    // Add location
-    if (action.locations && action.locations.length > 0) details.push(action.locations[0]);
-    
-    const detailsHtml = details.length > 0 ? `<p class="opl-banner-details" style="font-size: 0.8em; opacity: 0.9; margin-top: 2px;">${details.join(' • ')}</p>` : '';
+    if (employer || location) {
+      let displayText = '';
+      if (employer && location) {
+        displayText = `${escapeHtml(employer)} - ${escapeHtml(location)}`;
+      } else if (employer) {
+        displayText = escapeHtml(employer);
+      } else {
+        displayText = escapeHtml(location);
+      }
+      employerLocationHtml = `<p class="opl-banner-employer-location" style="font-size: 0.85em; opacity: 0.9; margin-top: 4px;">${displayText}</p>`;
+    }
     
     // Add demands if available
     const demandsHtml = action.demands ? `<p class="opl-banner-demands" style="font-size: 0.85em; margin-top: 4px; opacity: 0.95;"><strong>Demands:</strong> ${escapeHtml(action.demands)}</p>` : '';
@@ -77,9 +82,9 @@
         ${logoHtml}
         <div class="opl-banner-text">
           <strong class="opl-banner-title">${escapeHtml(title)}</strong>
-          <p class="opl-banner-description">${escapeHtml(description)}</p>
-          ${detailsHtml}
+          ${employerLocationHtml}
           ${demandsHtml}
+          <p class="opl-banner-description">${escapeHtml(description)}</p>
           <div class="opl-banner-links" style="margin-top: 4px;">
             ${moreInfoUrl ? `<a href="${escapeHtml(moreInfoUrl)}" target="_blank" class="opl-banner-link">Learn More</a><span style="margin: 0 5px; opacity: 0.5;">|</span>` : ''}
             <a href="https://onlinepicketline.com" target="_blank" class="opl-banner-link" style="font-size: 0.8em; opacity: 0.8;">Online Picket Line - OPL</a>

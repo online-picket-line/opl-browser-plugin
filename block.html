@@ -137,27 +137,19 @@
       <img id="union-logo" class="union-logo" style="display: none;" alt="Union logo" />
       <span id="action-type" class="action-type">Labor Action</span>
       <h2 id="action-title">Loading...</h2>
-      <p id="action-description">Please wait...</p>
+      
+      <div id="action-demands-container" style="margin-top: 0.75rem; margin-bottom: 1rem;">
+        <strong>Demands:</strong>
+        <p id="action-demands" style="margin-top: 0.25rem; font-size: 0.95rem;"></p>
+      </div>
       
       <div id="action-details" style="margin-top: 1.5rem; display: none; border-top: 1px solid var(--border); padding-top: 1rem;">
-        <div id="action-demands-container" style="margin-bottom: 1rem;">
-          <strong>Demands:</strong>
-          <p id="action-demands" style="margin-top: 0.25rem; font-size: 0.95rem;"></p>
+        <div id="action-employer-location-container" style="font-size: 0.95rem; margin-bottom: 1rem;">
+          <span id="action-employer-location"></span>
         </div>
         
-        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.9rem;">
-          <div id="action-employer-container" style="margin-bottom: 0.75rem;">
-            <strong>Employer:</strong>
-            <span id="action-employer"></span>
-          </div>
-          <div id="action-location-container">
-            <strong>Location:</strong>
-            <span id="action-location"></span>
-          </div>
-        </div>
+        <p id="action-description">Please wait...</p>
       </div>
-
-      <div id="blocked-url" class="blocked-url"></div>
     </div>
 
     <div class="buttons">
