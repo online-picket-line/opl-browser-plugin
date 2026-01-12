@@ -56,17 +56,18 @@
 
     // Construct details string
     let details = [];
+    
+    // Add employer
+    const employer = action.employer || action.employerName || action.employer_name;
+    if (employer) details.push(employer);
+    
+    // Add location
     if (action.locations && action.locations.length > 0) details.push(action.locations[0]);
-    if (action.startDate) {
-      let dateText = new Date(action.startDate).toLocaleDateString();
-      if (action.endDate) {
-        dateText += ' - ' + new Date(action.endDate).toLocaleDateString();
-      } else {
-        dateText += ' - Present';
-      }
-      details.push(dateText);
-    }
+    
     const detailsHtml = details.length > 0 ? `<p class="opl-banner-details" style="font-size: 0.8em; opacity: 0.9; margin-top: 2px;">${details.join(' • ')}</p>` : '';
+    
+    // Add demands if available
+    const demandsHtml = action.demands ? `<p class="opl-banner-demands" style="font-size: 0.85em; margin-top: 4px; opacity: 0.95;"><strong>Demands:</strong> ${escapeHtml(action.demands)}</p>` : '';
 
     // Build logo HTML if available
     const logoHtml = logoUrl ? `<img src="${escapeHtml(logoUrl)}" alt="Union logo" class="opl-banner-logo" />` : `<div class="opl-banner-icon">⚠️</div>`;
@@ -78,6 +79,7 @@
           <strong class="opl-banner-title">${escapeHtml(title)}</strong>
           <p class="opl-banner-description">${escapeHtml(description)}</p>
           ${detailsHtml}
+          ${demandsHtml}
           <div class="opl-banner-links" style="margin-top: 4px;">
             ${moreInfoUrl ? `<a href="${escapeHtml(moreInfoUrl)}" target="_blank" class="opl-banner-link">Learn More</a><span style="margin: 0 5px; opacity: 0.5;">|</span>` : ''}
             <a href="https://onlinepicketline.com" target="_blank" class="opl-banner-link" style="font-size: 0.8em; opacity: 0.8;">Online Picket Line - OPL</a>

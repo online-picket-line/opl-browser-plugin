@@ -144,26 +144,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('action-demands-container').style.display = 'none';
       }
 
+      if (action.employer || action.employerName || action.employer_name) {
+        const employer = action.employer || action.employerName || action.employer_name;
+        document.getElementById('action-employer').textContent = employer;
+        document.getElementById('action-employer-container').style.display = 'block';
+        hasDetails = true;
+      } else {
+        document.getElementById('action-employer-container').style.display = 'none';
+      }
+
       if (action.locations && action.locations.length > 0) {
         document.getElementById('action-location').textContent = action.locations.join(', ');
         document.getElementById('action-location-container').style.display = 'block';
         hasDetails = true;
       } else {
         document.getElementById('action-location-container').style.display = 'none';
-      }
-
-      if (action.startDate) {
-        let dateText = new Date(action.startDate).toLocaleDateString();
-        if (action.endDate) {
-          dateText += ' - ' + new Date(action.endDate).toLocaleDateString();
-        } else {
-          dateText += ' - Present';
-        }
-        document.getElementById('action-dates').textContent = dateText;
-        document.getElementById('action-dates-container').style.display = 'block';
-        hasDetails = true;
-      } else {
-        document.getElementById('action-dates-container').style.display = 'none';
       }
 
       if (hasDetails) {
