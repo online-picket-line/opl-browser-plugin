@@ -5,7 +5,6 @@
   "description": "Inform users about labor actions and boycotts.",
   "permissions": [
     "storage",
-    "tabs",
     "alarms",
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess"
