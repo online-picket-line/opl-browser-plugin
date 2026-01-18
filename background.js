@@ -1,7 +1,9 @@
 // Background script - works as service worker (MV3) or background script (MV2)
+console.log('OPL Background script starting...');
 
 // Detect environment: MV3 uses service worker with importScripts, MV2 uses background page
 const isMV3 = typeof importScripts === 'function';
+console.log('Is MV3 (service worker):', isMV3);
 
 // Check for DNR API - must be MV3 AND have the updateDynamicRules method
 // Firefox MV2 may define declarativeNetRequest but it doesn't work
@@ -9,6 +11,7 @@ const hasDNR = isMV3 &&
                typeof chrome !== 'undefined' && 
                chrome.declarativeNetRequest && 
                typeof chrome.declarativeNetRequest.updateDynamicRules === 'function';
+console.log('Has DNR API:', hasDNR);
 
 // Load dependencies based on environment
 if (isMV3) {
@@ -21,6 +24,10 @@ if (isMV3) {
   }
 } 
 // For MV2 (Firefox), scripts are loaded via manifest
+
+console.log('ApiService available:', typeof ApiService !== 'undefined');
+console.log('WebRequestService available:', typeof WebRequestService !== 'undefined');
+console.log('DnrService available:', typeof DnrService !== 'undefined');
 
 const apiService = new ApiService();
 
@@ -41,7 +48,7 @@ if (hasDNR && typeof DnrService !== 'undefined') {
     addBypass: () => {},
     getRuleStats: () => Promise.resolve({ totalRules: 0 })
   };
-  console.warn('No blocking service available');
+  console.warn('No blocking service available - THIS IS A PROBLEM');
 }
 
 const _allowedBypasses = new Map(); // tabId -> url (reserved for future use)
@@ -69,7 +76,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 /**
- * Fetch and cache labor actions, then update DNR rules
+ * Fetch and cache labor actions, then update blocking rules
  * @returns {Promise<boolean>} Success status
  */
 async function refreshLaborActions() {
@@ -78,15 +85,20 @@ async function refreshLaborActions() {
     console.log(`Fetched ${actions.length} labor actions`);
 
     // Store in local storage for quick access
-    await chrome.storage.local.set({
-      labor_actions: actions,
-      connection_status: 'online',
-      failure_count: 0
+    await new Promise((resolve) => {
+      chrome.storage.local.set({
+        labor_actions: actions,
+        connection_status: 'online',
+        failure_count: 0
+      }, resolve);
     });
 
     // Update blocking rules based on current mode
-    const settings = await chrome.storage.sync.get(['blockMode']);
-    const blockMode = settings.blockMode || false;
+    const settings = await new Promise((resolve) => {
+      chrome.storage.sync.get(['blockMode'], resolve);
+    });
+    const blockMode = settings?.blockMode || false;
+    console.log('Current blockMode:', blockMode);
     
     await blockingService.updateRules(actions, blockMode);
 
@@ -95,8 +107,10 @@ async function refreshLaborActions() {
     console.error('Failed to refresh labor actions:', error);
 
     // Get current failure count
-    const result = await chrome.storage.local.get(['failure_count']);
-    const currentFailures = (result.failure_count || 0) + 1;
+    const result = await new Promise((resolve) => {
+      chrome.storage.local.get(['failure_count'], resolve);
+    });
+    const currentFailures = ((result?.failure_count) || 0) + 1;
 
     const updates = {
       failure_count: currentFailures
@@ -106,7 +120,9 @@ async function refreshLaborActions() {
       updates.connection_status = 'offline';
     }
 
-    await chrome.storage.local.set(updates);
+    await new Promise((resolve) => {
+      chrome.storage.local.set(updates, resolve);
+    });
 
     return false;
   }
@@ -241,13 +257,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   
   // Update blocking rules when mode changes
   else if (request.action === 'updateMode') {
-    chrome.storage.sync.get(['blockMode'], async (settings) => {
-      const blockMode = settings.blockMode || false;
-      const result = await chrome.storage.local.get(['labor_actions']);
-      const actions = result.labor_actions || [];
-      
-      await blockingService.updateRules(actions, blockMode);
-      sendResponse({ success: true });
+    chrome.storage.sync.get(['blockMode'], (settings) => {
+      const blockMode = settings?.blockMode || false;
+      chrome.storage.local.get(['labor_actions'], async (result) => {
+        const actions = result?.labor_actions || [];
+        
+        await blockingService.updateRules(actions, blockMode);
+        sendResponse({ success: true });
+      });
     });
     return true;
   }

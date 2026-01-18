@@ -8,6 +8,9 @@
  * before they are made, which is used to implement block mode.
  */
 
+/* eslint-disable no-unused-vars */
+'use strict';
+
 class WebRequestService {
   constructor() {
     this.isListenerActive = false;
@@ -186,8 +189,11 @@ class WebRequestService {
    */
   startListener() {
     if (this.isListenerActive) {
+      console.log('WebRequest listener already active, skipping');
       return;
     }
+
+    console.log('Starting WebRequest listener...');
 
     // Bind the handler to this instance
     this._boundHandler = this.handleRequest.bind(this);
@@ -195,14 +201,27 @@ class WebRequestService {
     // Use browser API (native in Firefox, polyfilled in Chrome)
     const webRequestAPI = (typeof browser !== 'undefined' && browser.webRequest) || chrome.webRequest;
     
-    webRequestAPI.onBeforeRequest.addListener(
-      this._boundHandler,
-      { urls: ['<all_urls>'], types: ['main_frame'] },
-      ['blocking']
-    );
+    if (!webRequestAPI) {
+      console.error('WebRequest API not available!');
+      return;
+    }
+    
+    if (!webRequestAPI.onBeforeRequest) {
+      console.error('WebRequest onBeforeRequest not available!');
+      return;
+    }
 
-    this.isListenerActive = true;
-    console.log('WebRequest blocking listener started');
+    try {
+      webRequestAPI.onBeforeRequest.addListener(
+        this._boundHandler,
+        { urls: ['<all_urls>'], types: ['main_frame'] },
+        ['blocking']
+      );
+      this.isListenerActive = true;
+      console.log('WebRequest blocking listener started successfully');
+    } catch (err) {
+      console.error('Failed to add WebRequest listener:', err);
+    }
   }
 
   /**
