@@ -1,5 +1,4 @@
 // Background script - works as service worker (MV3) or background script (MV2)
-console.log('OPL Background script starting...');
 
 // ============================================================================
 // INLINE WebRequestService for Firefox MV2 (avoids file loading issues)
@@ -29,7 +28,6 @@ WebRequestService.prototype.isDomainBypassed = function(url) {
 WebRequestService.prototype.addBypass = function(domain) {
   if (domain) {
     this.bypassedDomains[domain.toLowerCase()] = true;
-    console.log('Added bypass for domain:', domain);
   }
 };
 
@@ -63,15 +61,11 @@ WebRequestService.prototype.matchUrlToAction = function(url) {
 
 WebRequestService.prototype.handleRequest = function(details) {
   if (details.type !== 'main_frame') return;
-  console.log('WebRequest intercepted:', details.url, 'blockMode:', this.blockMode);
   if (!this.blockMode) return;
-  if (this.isDomainBypassed(details.url)) {
-    console.log('Allowing bypassed URL:', details.url);
-    return;
-  }
+  if (this.isDomainBypassed(details.url)) return;
+  
   var match = this.matchUrlToAction(details.url);
   if (match) {
-    console.log('BLOCKING URL:', details.url, 'Action:', match.title);
     var domain = '';
     try { domain = new URL(details.url).hostname; } catch (e) { domain = details.url.split('/')[2] || ''; }
     var api = (typeof browser !== 'undefined') ? browser : chrome;
@@ -83,7 +77,6 @@ WebRequestService.prototype.handleRequest = function(details) {
 WebRequestService.prototype.updateRules = function(laborActions, blockMode) {
   this.laborActions = laborActions || [];
   this.blockMode = blockMode;
-  console.log('WebRequest updateRules: ' + this.laborActions.length + ' actions, blockMode=' + blockMode);
   if (blockMode && !this.isListenerActive) {
     this.startListener();
   } else if (!blockMode && this.isListenerActive) {
@@ -94,7 +87,6 @@ WebRequestService.prototype.updateRules = function(laborActions, blockMode) {
 
 WebRequestService.prototype.startListener = function() {
   if (this.isListenerActive) return;
-  console.log('Starting WebRequest listener...');
   var self = this;
   this._boundHandler = function(details) { return self.handleRequest(details); };
   var api = (typeof browser !== 'undefined' && browser.webRequest) ? browser.webRequest : chrome.webRequest;
@@ -102,8 +94,7 @@ WebRequestService.prototype.startListener = function() {
   try {
     api.onBeforeRequest.addListener(this._boundHandler, { urls: ['<all_urls>'], types: ['main_frame'] }, ['blocking']);
     this.isListenerActive = true;
-    console.log('WebRequest listener STARTED successfully');
-  } catch (err) { console.error('Failed to start listener:', err); }
+  } catch (err) { console.error('Failed to start WebRequest listener:', err); }
 };
 
 WebRequestService.prototype.stopListener = function() {
@@ -112,7 +103,6 @@ WebRequestService.prototype.stopListener = function() {
   if (api && this._boundHandler) api.onBeforeRequest.removeListener(this._boundHandler);
   this.isListenerActive = false;
   this._boundHandler = null;
-  console.log('WebRequest listener stopped');
 };
 
 WebRequestService.prototype.clearRules = function() { this.stopListener(); this.laborActions = []; return Promise.resolve(true); };
@@ -126,8 +116,6 @@ WebRequestService.prototype.getRuleStats = function() { return Promise.resolve({
 // Detect environment
 var isMV3 = typeof importScripts === 'function';
 var hasDNR = isMV3 && typeof chrome !== 'undefined' && chrome.declarativeNetRequest && typeof chrome.declarativeNetRequest.updateDynamicRules === 'function';
-
-console.log('Environment: isMV3=' + isMV3 + ', hasDNR=' + hasDNR);
 
 // Load dependencies for MV3
 if (isMV3) {
@@ -144,16 +132,12 @@ var apiService = new ApiService();
 var blockingService;
 if (hasDNR && typeof DnrService !== 'undefined') {
   blockingService = new DnrService();
-  console.log('Using DNR service (MV3)');
 } else {
-  // Use inline WebRequestService for MV2/Firefox
   blockingService = new WebRequestService();
-  console.log('Using WebRequest service (MV2/Firefox) - INLINE VERSION');
 }
 
 // Refresh labor actions on installation
 chrome.runtime.onInstalled.addListener(function() {
-  console.log('Extension installed, fetching labor actions...');
   refreshLaborActions();
   chrome.storage.sync.get(['blockMode'], function(result) {
     if (result.blockMode === undefined) {
@@ -164,14 +148,12 @@ chrome.runtime.onInstalled.addListener(function() {
 
 chrome.alarms.onAlarm.addListener(function(alarm) {
   if (alarm.name === 'refreshLaborActions') {
-    console.log('Periodic refresh of labor actions');
     refreshLaborActions();
   }
 });
 
 function refreshLaborActions() {
   apiService.getLaborActions().then(function(actions) {
-    console.log('Fetched ' + actions.length + ' labor actions');
     chrome.storage.local.set({
       labor_actions: actions,
       connection_status: 'online',
@@ -179,7 +161,6 @@ function refreshLaborActions() {
     }, function() {
       chrome.storage.sync.get(['blockMode'], function(settings) {
         var blockMode = (settings && settings.blockMode) || false;
-        console.log('Current blockMode:', blockMode);
         blockingService.updateRules(actions, blockMode);
       });
     });
@@ -273,7 +254,6 @@ refreshLaborActions();
 // Check if blockMode is already enabled
 chrome.storage.sync.get(['blockMode'], function(result) {
   if (result && result.blockMode) {
-    console.log('Block mode already enabled at startup');
     chrome.storage.local.get(['labor_actions'], function(localResult) {
       var actions = (localResult && localResult.labor_actions) || [];
       blockingService.updateRules(actions, true);
