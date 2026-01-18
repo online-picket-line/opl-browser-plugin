@@ -122,21 +122,7 @@ This architecture ensures complex API patterns work reliably while providing bet
 
 ## Prerequisites
 
-
-Before using this extension, you need:
-
-1. Access to an Online Picketline instance (e.g., `https://your-instance.com`)
-2. No API key is required. The API is public and rate-limited (1 request per 2 minutes).
-
-
-### API Access
-
-**API key is required.** The API uses key-based authentication for external clients:
-
-- **Public API Keys**: Safe for client-side code (browser extensions), 10 requests per 2 minutes per IP
-- **Private API Keys**: Server-side only, 100 requests per 15 minutes
-
-Get an API key from your instance administrator or through the API management interface.
+No setup required! The extension connects automatically to the Online Picketline API at `https://onlinepicketline.com`. The API is public and rate-limited to ensure fair usage.
 
 ## Installation
 

@@ -104,7 +104,7 @@ When you visit a website associated with an active labor action:
 
 To test the extension:
 
-1. **Test with your API:** If you have access to an Online Picketline instance with labor actions configured, the extension will work automatically
+1. **Test the extension:** The extension connects automatically to the Online Picketline API and will display banners or blocks when you visit sites with active labor actions
 
 2. **Check the console:** Open browser DevTools (F12) to see debug messages about loaded labor actions
 
