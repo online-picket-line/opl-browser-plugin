@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Start Guide - Online Picket Line</title>
+  <meta name="description" content="Get started with the Online Picket Line browser extension in 3 easy steps.">
+  <link rel="icon" type="image/svg+xml" href="../opl.svg">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.7;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #f5f5f5;
+    }
+
+    header {
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      color: #d32f2f;
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+
+    h2 {
+      color: #333;
+      margin-top: 35px;
+      margin-bottom: 15px;
+      font-size: 1.4rem;
+    }
+
+    h3 {
+      color: #444;
+      margin-top: 25px;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+
+    p {
+      margin-bottom: 15px;
+    }
+
+    .step-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin: 20px 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .step-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      background: #d32f2f;
+      color: white;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-right: 12px;
+    }
+
+    .step-card h3 {
+      display: flex;
+      align-items: center;
+      margin-top: 0;
+    }
+
+    ul, ol {
+      margin-left: 25px;
+      margin-bottom: 15px;
+    }
+
+    li {
+      margin: 10px 0;
+    }
+
+    .install-button {
+      display: inline-block;
+      background: #4285f4;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 15px 0;
+    }
+
+    .install-button:hover {
+      background: #3367d6;
+    }
+
+    .mode-card {
+      background: #f9f9f9;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+
+    .mode-card.banner {
+      border-left: 4px solid #ff9800;
+    }
+
+    .mode-card.block {
+      border-left: 4px solid #d32f2f;
+    }
+
+    .mode-card h4 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    code {
+      background: #e8e8e8;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    .preview-box {
+      background: #263238;
+      color: #aed581;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      white-space: pre;
+      margin: 15px 0;
+    }
+
+    a {
+      color: #d32f2f;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #d32f2f;
+      font-weight: 500;
+    }
+
+    .troubleshooting {
+      background: #fff3e0;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      border-left: 4px solid #ff9800;
+    }
+
+    .troubleshooting h3 {
+      margin-top: 0;
+      color: #e65100;
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      text-align: center;
+      color: #666;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">← Back to Home</a>
+
+  <header>
+    <h1>🚀 Quick Start Guide</h1>
+    <p>Get started with Online Picket Line in 3 easy steps</p>
+  </header>
+
+  <main>
+    <div class="step-card">
+      <h3><span class="step-number">1</span> Install the Extension</h3>
+      
+      <h4>Chrome Web Store (Recommended)</h4>
+      <a href="https://chromewebstore.google.com/detail/online-picket-line-opl/pmfdobekpboegaedaejoepnphopacfog" 
+         class="install-button" 
+         target="_blank" 
+         rel="noopener noreferrer">
+        Install from Chrome Web Store
+      </a>
+      <p>Works with Chrome, Edge, Brave, and other Chromium-based browsers.</p>
+
+      <h4>Manual Installation</h4>
+      <p><strong>Chrome/Edge:</strong></p>
+      <ol>
+        <li>Download the extension from <a href="https://github.com/online-picket-line/opl-browser-plugin/releases">GitHub Releases</a></li>
+        <li>Go to <code>chrome://extensions/</code> or <code>edge://extensions/</code></li>
+        <li>Enable "Developer mode"</li>
+        <li>Drag and drop the .zip file or click "Load unpacked"</li>
+      </ol>
+
+      <p><strong>Firefox:</strong></p>
+      <ol>
+        <li>Download the Firefox version from GitHub Releases</li>
+        <li>Go to <code>about:addons</code></li>
+        <li>Click the gear icon → "Install Add-on From File"</li>
+      </ol>
+    </div>
+
+    <div class="step-card">
+      <h3><span class="step-number">2</span> Configure API Access</h3>
+      <ol>
+        <li>Click the extension icon in your browser toolbar</li>
+        <li>The extension comes pre-configured with the public API</li>
+        <li>Click <strong>Test API Connection</strong> to verify</li>
+        <li>(Optional) Enter a custom API URL if using your own instance</li>
+      </ol>
+    </div>
+
+    <div class="step-card">
+      <h3><span class="step-number">3</span> Choose Your Mode</h3>
+      
+      <div class="mode-card banner">
+        <h4>🟡 Banner Mode (Recommended for first-time users)</h4>
+        <ul>
+          <li>Shows a red informational banner at the bottom of pages</li>
+          <li>Non-intrusive and dismissible</li>
+          <li>Educates about labor actions without blocking access</li>
+        </ul>
+      </div>
+
+      <div class="mode-card block">
+        <h4>🔴 Block Mode (For committed supporters)</h4>
+        <ul>
+          <li>Prevents access to pages with labor actions</li>
+          <li>Shows full-page interstitial with details</li>
+          <li>Option to "Proceed Anyway" if needed</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>📊 What It Looks Like</h2>
+    
+    <h3>Banner Mode</h3>
+    <div class="preview-box">┌─────────────────────────────────────────────────────────────┐
+│ Your webpage content                                         │
+│ ...                                                          │
+└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│ ⚠️  Labor Action: Tech Workers Strike at Example Corp     ✕ │
+│     Workers are striking for better wages and conditions.   │
+│     Learn More →                                             │
+└─────────────────────────────────────────────────────────────┘</div>
+
+    <h3>Block Mode</h3>
+    <div class="preview-box">┌─────────────────────────────────────────────────────────────┐
+│                          ⚠️                                  │
+│                  Access Blocked                              │
+│     This page is currently subject to a labor action        │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │ STRIKE                                               │   │
+│  │ Labor Action: Tech Workers Strike                   │   │
+│  │ Workers at Example Corp are striking for better     │   │
+│  │ wages and improved working conditions.              │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                              │
+│  [ Learn More ]  [ Proceed Anyway ]  [ Go Back ]           │
+└─────────────────────────────────────────────────────────────┘</div>
+
+    <div class="troubleshooting">
+      <h3>🔧 Troubleshooting</h3>
+      <p><strong>"No data loaded yet"</strong><br>
+      → Click the Refresh button in the popup to load labor action data</p>
+      
+      <p><strong>"API connection failed"</strong><br>
+      → Check your internet connection and try again</p>
+      
+      <p><strong>"Extension not working on some sites"</strong><br>
+      → Some browser-restricted pages (like chrome:// URLs) cannot be modified</p>
+    </div>
+
+    <h2>📚 More Resources</h2>
+    <ul>
+      <li><a href="TESTING.html">Full Testing Guide</a></li>
+      <li><a href="PRIVACY_POLICY.html">Privacy Policy</a></li>
+      <li><a href="https://github.com/online-picket-line/opl-browser-plugin" target="_blank">GitHub Repository</a></li>
+      <li><a href="https://github.com/online-picket-line/opl-browser-plugin/issues" target="_blank">Report Issues</a></li>
+    </ul>
+  </main>
+
+  <footer>
+    <p>
+      <a href="index.html">Home</a> |
+      <a href="https://github.com/online-picket-line/opl-browser-plugin">GitHub</a>
+    </p>
+    <p style="margin-top: 10px;">© 2024-2026 Online Picket Line Project</p>
+  </footer>
+</body>
+</html>

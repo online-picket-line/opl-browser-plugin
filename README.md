@@ -140,9 +140,13 @@ Get an API key from your instance administrator or through the API management in
 
 ## Installation
 
+### Chrome Web Store (Recommended)
 
+**[Install from Chrome Web Store](https://chromewebstore.google.com/detail/online-picket-line-opl/pmfdobekpboegaedaejoepnphopacfog)** - Works with Chrome, Edge, Brave, and other Chromium-based browsers.
 
-### Chromium Browsers (Chrome, Edge, Opera, Brave, Vivaldi, etc.)
+### Manual Installation
+
+#### Chromium Browsers (Chrome, Edge, Opera, Brave, Vivaldi, etc.)
 
 The extension is fully compatible with all Chromium-based browsers, including Chrome, Edge, Opera, Brave, and Vivaldi.
 

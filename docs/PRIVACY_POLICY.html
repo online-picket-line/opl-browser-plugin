@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - Online Picket Line</title>
+  <meta name="description" content="Privacy Policy for the Online Picket Line browser extension.">
+  <link rel="icon" type="image/svg+xml" href="../opl.svg">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.7;
+      color: #333;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #f5f5f5;
+    }
+
+    header {
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      color: #d32f2f;
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+
+    .last-updated {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    h2 {
+      color: #333;
+      margin-top: 35px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #d32f2f;
+      font-size: 1.4rem;
+    }
+
+    h3 {
+      color: #444;
+      margin-top: 25px;
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+
+    p {
+      margin-bottom: 15px;
+    }
+
+    .highlight-box {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .highlight-box.commitment {
+      border-left: 4px solid #4caf50;
+      background: #e8f5e9;
+    }
+
+    .highlight-box strong {
+      color: #2e7d32;
+    }
+
+    .do-not-collect, .do-collect {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .do-not-collect {
+      border-left: 4px solid #f44336;
+    }
+
+    .do-not-collect h3 {
+      color: #c62828;
+    }
+
+    .do-collect {
+      border-left: 4px solid #4caf50;
+    }
+
+    .do-collect h3 {
+      color: #2e7d32;
+    }
+
+    ul {
+      margin-left: 25px;
+      margin-bottom: 15px;
+    }
+
+    li {
+      margin: 10px 0;
+    }
+
+    .item-red {
+      color: #c62828;
+    }
+
+    .item-green {
+      color: #2e7d32;
+    }
+
+    a {
+      color: #d32f2f;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #d32f2f;
+      font-weight: 500;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    .endpoint-box {
+      background: #f5f5f5;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 15px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+    }
+
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      text-align: center;
+      color: #666;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">← Back to Home</a>
+
+  <header>
+    <h1>🔒 Privacy Policy</h1>
+    <p class="last-updated">Last Updated: January 3, 2026 | Effective Date: January 3, 2026</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Introduction</h2>
+      <p>Online Picket Line ("OPL", "we", "our", or "the extension") is a browser extension that informs users about active labor actions (strikes, boycotts, etc.) when they visit websites associated with those actions. This privacy policy explains what data we collect, how we use it, and your rights regarding your information.</p>
+    </section>
+
+    <section>
+      <h2>Our Privacy Commitment</h2>
+      <div class="highlight-box commitment">
+        <strong>We do not collect, store, or transmit your browsing history or personal information.</strong>
+      </div>
+      <p>The extension is designed with privacy-first principles:</p>
+      <ul>
+        <li>Uses modern declarativeNetRequest API that cannot access page content by design</li>
+        <li>All URL matching happens locally in your browser</li>
+        <li>No tracking, no analytics, no user profiling</li>
+        <li>Open source code available for review</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Data Collection</h2>
+      
+      <div class="do-not-collect">
+        <h3>❌ What We DO NOT Collect</h3>
+        <ul>
+          <li><strong class="item-red">Browsing History:</strong> We do not collect, store, or transmit information about which websites you visit</li>
+          <li><strong class="item-red">Personal Information:</strong> No names, email addresses, phone numbers, or other PII</li>
+          <li><strong class="item-red">Page Content:</strong> We do not read, access, or transmit the content of web pages</li>
+          <li><strong class="item-red">Form Data:</strong> We do not access or collect data you enter into forms</li>
+          <li><strong class="item-red">Passwords or Credentials:</strong> We never access authentication information</li>
+          <li><strong class="item-red">User Behavior:</strong> No tracking of clicks, scrolling, time on site, or other behaviors</li>
+          <li><strong class="item-red">Device Information:</strong> No collection of device IDs, fingerprints, or hardware details</li>
+          <li><strong class="item-red">Location Data:</strong> No geolocation tracking</li>
+        </ul>
+      </div>
+
+      <div class="do-collect">
+        <h3>✅ What We DO Collect (Local Only)</h3>
+        <ul>
+          <li><strong class="item-green">User Preferences:</strong> Display mode choice (banner vs. block mode) - stored locally, not transmitted</li>
+          <li><strong class="item-green">Labor Action Data Cache:</strong> Public labor action information fetched from API - stored locally</li>
+          <li><strong class="item-green">Cache Timestamps:</strong> When labor action data was last fetched - stored locally</li>
+          <li><strong class="item-green">Extension Version:</strong> Your current version number - sent to GitHub API for update checks only</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>How the Extension Works</h2>
+      
+      <h3>Block Mode (Default)</h3>
+      <p>When block mode is enabled, the browser's declarativeNetRequest API matches URLs against rules at the browser level. <strong>No JavaScript execution</strong> occurs unless there's a match. If a match is found, the browser redirects to our informational page with cached details - no URL is transmitted anywhere.</p>
+      <p><strong>Technical Privacy Guarantee:</strong> The declarativeNetRequest API cannot access page content by architectural design. Chrome engineered this API specifically for privacy.</p>
+
+      <h3>Banner Mode (Non-Intrusive)</h3>
+      <p>When banner mode is enabled, a lightweight script (~5KB) checks the current URL against locally cached labor action patterns. All matching happens entirely in your browser. If a match is found, an informational banner is displayed. No network requests or data transmission occurs.</p>
+    </section>
+
+    <section>
+      <h2>Network Requests</h2>
+      <p>The extension makes network requests only to these endpoints:</p>
+      
+      <h3>1. Online Picketline API</h3>
+      <div class="endpoint-box">https://onlinepicketline.com/api/blocklist.json</div>
+      <p><strong>Frequency:</strong> Every 15 minutes</p>
+      <p><strong>Purpose:</strong> Keep labor action data current</p>
+      <p><strong>Data Sent:</strong> API key, extension version, content hash (for caching)</p>
+      <p><strong>Privacy:</strong> No user identification, no IP logging</p>
+
+      <h3>2. GitHub Releases API</h3>
+      <div class="endpoint-box">https://api.github.com/repos/online-picket-line/opl-browser-plugin/releases/latest</div>
+      <p><strong>Frequency:</strong> Once every 24 hours</p>
+      <p><strong>Purpose:</strong> Notify you when updates are available</p>
+      <p><strong>Data Sent:</strong> None (public API)</p>
+    </section>
+
+    <section>
+      <h2>Services We DO NOT Use</h2>
+      <ul>
+        <li class="item-red">❌ Google Analytics</li>
+        <li class="item-red">❌ Facebook Pixel</li>
+        <li class="item-red">❌ Any tracking or analytics services</li>
+        <li class="item-red">❌ Advertising networks</li>
+        <li class="item-red">❌ Crash reporting services</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Your Rights</h2>
+      <p>You have the right to:</p>
+      <ul>
+        <li>Uninstall the extension at any time</li>
+        <li>Clear all stored data via browser settings</li>
+        <li>Configure or disable network requests</li>
+        <li>Review the source code on GitHub</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Contact</h2>
+      <p>For privacy concerns or questions, please open an issue on our <a href="https://github.com/online-picket-line/opl-browser-plugin/issues" target="_blank" rel="noopener noreferrer">GitHub repository</a>.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      <a href="index.html">Home</a> |
+      <a href="https://github.com/online-picket-line/opl-browser-plugin">GitHub</a>
+    </p>
+    <p style="margin-top: 10px;">© 2024-2026 Online Picket Line Project</p>
+  </footer>
+</body>
+</html>
