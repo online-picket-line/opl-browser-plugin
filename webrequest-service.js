@@ -121,8 +121,11 @@ class WebRequestService {
       return;
     }
 
+    console.log('WebRequest intercepted:', details.url, 'blockMode:', this.blockMode, 'actions:', this.laborActions.length);
+
     // Skip if not in block mode
     if (!this.blockMode) {
+      console.log('WebRequest: Not in block mode, allowing');
       return;
     }
 
@@ -146,8 +149,9 @@ class WebRequestService {
         domain = details.url.replace(/^https?:\/\//, '').split('/')[0];
       }
 
-      // Redirect to block page
-      const blockPageUrl = browser.runtime.getURL('block.html');
+      // Redirect to block page - use browser or chrome API
+      const runtimeAPI = (typeof browser !== 'undefined' && browser.runtime) || chrome.runtime;
+      const blockPageUrl = runtimeAPI.getURL('block.html');
       return {
         redirectUrl: `${blockPageUrl}?domain=${encodeURIComponent(domain)}&url=${encodeURIComponent(details.url)}`
       };
@@ -166,7 +170,7 @@ class WebRequestService {
     console.log(`WebRequest service: ${this.laborActions.length} actions, blockMode=${blockMode}`);
 
     // Set up the listener if in block mode and not already active
-    if (blockMode && !this.isListenerActive && this.laborActions.length > 0) {
+    if (blockMode && !this.isListenerActive) {
       this.startListener();
     } 
     // Remove listener if not in block mode
@@ -188,7 +192,10 @@ class WebRequestService {
     // Bind the handler to this instance
     this._boundHandler = this.handleRequest.bind(this);
 
-    browser.webRequest.onBeforeRequest.addListener(
+    // Use browser API (native in Firefox, polyfilled in Chrome)
+    const webRequestAPI = (typeof browser !== 'undefined' && browser.webRequest) || chrome.webRequest;
+    
+    webRequestAPI.onBeforeRequest.addListener(
       this._boundHandler,
       { urls: ['<all_urls>'], types: ['main_frame'] },
       ['blocking']
@@ -206,7 +213,8 @@ class WebRequestService {
       return;
     }
 
-    browser.webRequest.onBeforeRequest.removeListener(this._boundHandler);
+    const webRequestAPI = (typeof browser !== 'undefined' && browser.webRequest) || chrome.webRequest;
+    webRequestAPI.onBeforeRequest.removeListener(this._boundHandler);
     this.isListenerActive = false;
     this._boundHandler = null;
     console.log('WebRequest blocking listener stopped');

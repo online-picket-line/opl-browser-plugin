@@ -2,7 +2,13 @@
 
 // Detect environment: MV3 uses service worker with importScripts, MV2 uses background page
 const isMV3 = typeof importScripts === 'function';
-const hasDNR = typeof chrome !== 'undefined' && chrome.declarativeNetRequest;
+
+// Check for DNR API - must be MV3 AND have the updateDynamicRules method
+// Firefox MV2 may define declarativeNetRequest but it doesn't work
+const hasDNR = isMV3 && 
+               typeof chrome !== 'undefined' && 
+               chrome.declarativeNetRequest && 
+               typeof chrome.declarativeNetRequest.updateDynamicRules === 'function';
 
 // Load dependencies based on environment
 if (isMV3) {
@@ -32,6 +38,7 @@ if (hasDNR && typeof DnrService !== 'undefined') {
     updateRules: () => Promise.resolve(true),
     clearRules: () => Promise.resolve(true),
     addBypassRule: () => Promise.resolve(true),
+    addBypass: () => {},
     getRuleStats: () => Promise.resolve({ totalRules: 0 })
   };
   console.warn('No blocking service available');
@@ -257,3 +264,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // Initial fetch on startup
 refreshLaborActions();
+
+// Also check if blockMode is already enabled and start listener immediately
+// This handles the case where the extension restarts with blockMode already on
+chrome.storage.sync.get(['blockMode'], (result) => {
+  if (result.blockMode) {
+    console.log('Block mode was already enabled, ensuring listener is active');
+    chrome.storage.local.get(['labor_actions'], (localResult) => {
+      const actions = localResult.labor_actions || [];
+      blockingService.updateRules(actions, true);
+    });
+  }
+});
