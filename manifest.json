@@ -14,6 +14,7 @@
       "data_collection_permissions": []
     }
   },
+  "granted_host_permissions": true,
   "permissions": [
     "storage",
     "alarms",
