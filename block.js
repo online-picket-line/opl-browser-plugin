@@ -35,8 +35,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Load labor actions from local storage and match against referrer
   try {
-    const result = await chrome.storage.local.get(['labor_actions']);
-    const actions = result.labor_actions || [];
+    const result = await new Promise((resolve) => {
+      chrome.storage.local.get(['labor_actions'], resolve);
+    });
+    const actions = (result && result.labor_actions) || [];
     
     // Find matching action based on domain hint or original URL
     let matchedAction = null;
