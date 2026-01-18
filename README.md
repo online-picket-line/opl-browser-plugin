@@ -4,121 +4,15 @@ A cross-browser extension that helps users stay informed about labor actions and
 
 ## Features
 
-- **Real-time Labor Action Tracking**: Integrates with Online Picketline API to fetch current labor actions
+- **Real-time Labor Action Tracking**: Automatically fetches current labor actions
 - **Two Display Modes**:
   - **Banner Mode** (Default): Shows an informational banner at the bottom of the page
   - **Block Mode**: Prevents access to the page with an interstitial screen
 - **Smart URL Matching**: Compares current page URLs against labor action targets from employers, social media, and company websites
-- **Automatic Updates**: Refreshes labor action data every 15 minutes (as recommended by API)
-- **In-App Update Notifications**: Automatically checks for new extension versions from GitHub and notifies users
-- **API Configuration**: Easy setup with your Online Picketline instance URL (no API key required)
+- **Automatic Updates**: Refreshes labor action data every 15 minutes
+- **In-App Update Notifications**: Automatically checks for new extension versions and notifies users
 - **Configurable Settings**: User-friendly popup interface for changing behavior
 - **Multi-Browser Support**: Compatible with Chrome, Edge, Opera, Brave, Firefox, and Safari
-
-## Technical Architecture
-
-### Modern Manifest V3 with declarativeNetRequest
-
-This extension uses **Manifest V3 with declarativeNetRequest API** for optimal performance, privacy, and Chrome Web Store compliance. This is the recommended modern approach for browser extensions.
-
-#### Hybrid Architecture
-
-The extension employs a **hybrid approach** combining declarativeNetRequest (for block mode) with lightweight content scripts (for banner mode):
-
-**Block Mode (Recommended):**
-1. Extension fetches labor action data from API every 15 minutes
-2. Transforms API patterns into declarativeNetRequest rules
-3. Browser engine matches URLs at **native level** (zero JavaScript overhead)
-4. If match found, browser redirects to `block.html` **before page loads**
-5. Block page displays labor action details from cached data
-6. User can click "Proceed Anyway" to add temporary session rule
-
-**Banner Mode (Non-Intrusive):**
-1. Lightweight content script runs on pages (~5KB)
-2. Checks current URL against locally cached patterns
-3. If match found, displays informational banner at bottom
-4. Page loads normally, user can dismiss banner
-5. No blocking, just informative
-
-#### Why declarativeNetRequest?
-
-The extension uses Manifest V3's `declarativeNetRequest` API because:
-
-**✅ Performance Benefits:**
-- **100x faster** than content script URL checking
-- **No JavaScript execution** until page already matched/blocked
-- **Lower CPU usage** - browser handles matching at native level
-- **Better battery life** - minimal resource consumption
-
-**✅ Privacy Benefits:**
-- **Cannot access page content** - architectural guarantee, not just a promise
-- **Browser-level matching** - extension never sees unmatched URLs
-- **No data leakage** - impossible to collect browsing history by design
-- **Stronger privacy** - Chrome engineered this API for privacy
-
-**✅ Required for Publication:**
-- **Chrome Web Store** mandates Manifest V3
-- **Firefox Add-ons** moving to Manifest V3
-- **Future-proof** - webRequest is deprecated
-- **Less scary permissions** - no "read all your browsing data" warning
-
-**✅ Functionality Maintained:**
-- **Dynamic updates** - `updateDynamicRules()` API refreshes rules when API data changes
-- **Complex patterns** - Converts regex to urlFilter format
-- **Bypass functionality** - Session rules with high priority allow temporary access
-- **Rich context** - Block page loads cached labor action details
-
-#### Implementation Details
-
-```javascript
-// background.js - Generate DNR rules from API data
-async function updateBlocklist() {
-  const response = await fetch(API_ENDPOINT, {
-    headers: { 'X-API-Key': API_KEY }
-  });
-  const data = await response.json();
-  
-  // Convert to declarativeNetRequest rules
-  const rules = data.actions.map((action, index) => ({
-    id: index + 1,
-    priority: 1,
-    action: {
-      type: 'redirect',
-      redirect: { extensionPath: '/block.html' }
-    },
-    condition: {
-      urlFilter: action.domain, // Browser matches at native level
-      resourceTypes: ['main_frame']
-    }
-  }));
-  
-  // Update rules dynamically (no restart needed)
-  await chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: oldRuleIds,
-    addRules: rules
-  });
-}
-
-// block.html - Loads cached details
-const actions = await chrome.storage.local.get('labor_actions');
-const matched = findMatchingAction(document.referrer, actions);
-displayActionDetails(matched);
-
-// Bypass with session rules (cleared on browser close)
-document.getElementById('proceed').onclick = async () => {
-  await chrome.declarativeNetRequest.updateSessionRules({
-    addRules: [{
-      id: 999999,
-      priority: 10, // Higher than block rules
-      action: { type: 'allow' },
-      condition: { urlFilter: domain, resourceTypes: ['main_frame'] }
-    }]
-  });
-  window.location.href = originalUrl;
-};
-```
-
-This architecture ensures complex API patterns work reliably while providing better performance and privacy than the deprecated webRequest approach.
 
 ## Prerequisites
 
@@ -130,29 +24,7 @@ No setup required! The extension connects automatically to the Online Picketline
 
 **[Install from Chrome Web Store](https://chromewebstore.google.com/detail/online-picket-line-opl/pmfdobekpboegaedaejoepnphopacfog)** - Works with Chrome, Edge, Brave, and other Chromium-based browsers.
 
-### Manual Installation
-
-#### Chromium Browsers (Chrome, Edge, Opera, Brave, Vivaldi, etc.)
-
-The extension is fully compatible with all Chromium-based browsers, including Chrome, Edge, Opera, Brave, and Vivaldi.
-
-1. Download or clone this repository
-2. Open your Chromium browser and navigate to the extensions page:
-   - Chrome: `chrome://extensions/`
-   - Edge: `edge://extensions/`
-   - Opera: `opera://extensions/`
-   - Brave: `brave://extensions/`
-   - Vivaldi: `vivaldi://extensions/`
-3. Enable "Developer mode" (or "Allow extensions from other stores" in Opera)
-4. Click "Load unpacked"
-5. Select the `opl-browser-plugin` directory
-6. The extension should now be installed and work out of the box in any Chromium browser.
-
-**Opera Note:** Opera supports Chrome/Chromium extensions natively. If prompted, enable "Allow extensions from other stores" in Opera's extensions page settings.
-
-**Brave/Vivaldi Note:** These browsers support Chrome/Chromium extensions natively. Use the same installation steps as Chrome. If you encounter any issues, ensure "Developer mode" is enabled in the extensions page.
-
-### Firefox
+### Firefox (Manual Installation)
 
 1. Download or clone this repository
 2. Copy `manifest-v2.json` to `manifest.json` (Firefox uses Manifest V2)
