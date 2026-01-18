@@ -13,6 +13,39 @@ class WebRequestService {
     this.isListenerActive = false;
     this.laborActions = [];
     this.blockMode = false;
+    this.bypassedDomains = new Set(); // Track bypassed domains in memory
+  }
+
+  /**
+   * Check if a domain has been bypassed
+   * @param {string} url - URL to check
+   * @returns {boolean} - True if bypassed
+   */
+  isDomainBypassed(url) {
+    try {
+      const hostname = new URL(url).hostname.toLowerCase();
+      // Check exact match or parent domain match
+      for (const bypassed of this.bypassedDomains) {
+        if (hostname === bypassed || hostname.endsWith('.' + bypassed)) {
+          return true;
+        }
+      }
+    } catch (_e) {
+      // Invalid URL
+    }
+    return false;
+  }
+
+  /**
+   * Add a domain to the bypass list
+   * @param {string} domain - Domain to bypass
+   * @param {string} _url - Original URL (unused but kept for API compatibility)
+   */
+  addBypass(domain, _url) {
+    if (domain) {
+      this.bypassedDomains.add(domain.toLowerCase());
+      console.log('Added bypass for domain:', domain);
+    }
   }
 
   /**
@@ -90,6 +123,12 @@ class WebRequestService {
 
     // Skip if not in block mode
     if (!this.blockMode) {
+      return;
+    }
+
+    // Check if this domain has been bypassed
+    if (this.isDomainBypassed(details.url)) {
+      console.log('WebRequest: Allowing bypassed URL:', details.url);
       return;
     }
 
@@ -201,6 +240,8 @@ class WebRequestService {
         // session storage may not be available in older Firefox
         console.log('Session storage not available for bypass');
       });
+      // Also add to in-memory bypass list
+      this.addBypass(domain);
     } catch (e) {
       console.error('Error adding bypass rule:', e);
     }
@@ -216,7 +257,8 @@ class WebRequestService {
       maxRules: 'unlimited',
       rulesRemaining: 'unlimited',
       listenerActive: this.isListenerActive,
-      blockMode: this.blockMode
+      blockMode: this.blockMode,
+      bypassedDomains: Array.from(this.bypassedDomains)
     });
   }
 }

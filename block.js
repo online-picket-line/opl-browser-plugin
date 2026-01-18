@@ -9,14 +9,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   const proceedBtn = document.getElementById('proceed-btn');
   const goBackBtn = document.getElementById('go-back-btn');
 
+  // Detect if DNR API is available (MV3) or if we need webRequest approach (MV2)
+  const hasDNR = typeof chrome !== 'undefined' && chrome.declarativeNetRequest;
+
   // Get the original URL from query params (preferred) or referrer (fallback)
   const urlParams = new URLSearchParams(window.location.search);
   const domainHint = urlParams.get('domain');
+  const fullUrl = urlParams.get('url'); // Full URL passed by webRequest redirect
   const referrerUrl = document.referrer || null;
   
-  // Reconstruct the original URL from domain hint
+  // Reconstruct the original URL - prefer full URL, then domain hint, then referrer
   let originalUrl = null;
-  if (domainHint) {
+  if (fullUrl) {
+    originalUrl = decodeURIComponent(fullUrl);
+  } else if (domainHint) {
     // Build a basic URL from the domain hint
     originalUrl = `https://${domainHint}`;
   } else if (referrerUrl) {
@@ -160,9 +166,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Handle proceed button - uses DNR session rules for bypass
+  // Handle proceed button - uses DNR session rules (MV3) or message to background (MV2)
   proceedBtn.addEventListener('click', async () => {
-    // Get the URL to proceed to - prefer domain hint, fall back to originalUrl
+    // Get the URL to proceed to - prefer originalUrl, fall back to domain hint
     let urlToProceed = window.originalUrl;
     const domain = window.domainHint;
     
@@ -173,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     if (urlToProceed) {
       try {
-        // Extract domain from URL for DNR rule
+        // Extract domain from URL for bypass rule
         let targetDomain = domain;
         if (!targetDomain) {
           try {
@@ -184,27 +190,40 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         }
         
-        // Generate unique ID for this bypass rule
-        const bypassRuleId = 990000 + Math.floor(Math.random() * 10000);
-        
-        // Add temporary session rule with high priority to allow access
-        await chrome.declarativeNetRequest.updateSessionRules({
-          addRules: [{
-            id: bypassRuleId,
-            priority: 100, // Much higher than block rules (which have priority 1)
-            action: { type: 'allow' },
-            condition: {
-              urlFilter: `||${targetDomain}`, // Match domain and all subpaths
-              resourceTypes: ['main_frame']
-            }
-          }]
-        });
+        if (hasDNR) {
+          // MV3: Use DNR session rules for bypass
+          const bypassRuleId = 990000 + Math.floor(Math.random() * 10000);
+          
+          await chrome.declarativeNetRequest.updateSessionRules({
+            addRules: [{
+              id: bypassRuleId,
+              priority: 100,
+              action: { type: 'allow' },
+              condition: {
+                urlFilter: `||${targetDomain}`,
+                resourceTypes: ['main_frame']
+              }
+            }]
+          });
+        } else {
+          // MV2/Firefox: Send message to background to add bypass
+          await chrome.runtime.sendMessage({
+            action: 'addBypass',
+            domain: targetDomain,
+            url: urlToProceed
+          });
+          
+          // Also set sessionStorage flag for content script
+          sessionStorage.setItem('opl_bypass', 'true');
+          sessionStorage.setItem('opl_bypass_domain', targetDomain);
+        }
         
         // Navigate to the original URL
         window.location.href = urlToProceed;
       } catch (error) {
         console.error('Error adding bypass rule:', error);
-        // Fallback: try to navigate anyway
+        // Fallback: set sessionStorage and try to navigate anyway
+        sessionStorage.setItem('opl_bypass', 'true');
         window.location.href = urlToProceed;
       }
     } else {

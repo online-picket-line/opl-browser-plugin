@@ -244,6 +244,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true;
   }
+  
+  // Add bypass for a domain (MV2/Firefox)
+  else if (request.action === 'addBypass') {
+    if (blockingService.addBypass) {
+      blockingService.addBypass(request.domain, request.url);
+    }
+    sendResponse({ success: true });
+    return true;
+  }
 });
 
 // Initial fetch on startup
