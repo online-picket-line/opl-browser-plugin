@@ -54,48 +54,113 @@
                    action._extensionData?.actionDetails?.unionImageUrl ||
                    '';
 
-    // Construct employer and location string
-    let employerLocationHtml = '';
+    // Construct employer and location values
     const employer = action.employer || action.employerName || action.employer_name || action.company;
     const location = (action.locations && action.locations.length > 0) ? action.locations[0] : null;
+
+    // Build banner content using safe DOM methods
+    const bannerContent = document.createElement('div');
+    bannerContent.className = 'opl-banner-content';
     
-    if (employer || location) {
-      let displayText = '';
-      if (employer && location) {
-        displayText = `${escapeHtml(employer)} - ${escapeHtml(location)}`;
-      } else if (employer) {
-        displayText = escapeHtml(employer);
-      } else {
-        displayText = escapeHtml(location);
-      }
-      employerLocationHtml = `<p class="opl-banner-employer-location" style="font-size: 0.9em; font-weight: 600; margin-top: 4px;">${displayText}</p>`;
+    // Add logo or icon
+    if (logoUrl) {
+      const logo = document.createElement('img');
+      logo.src = logoUrl;
+      logo.alt = 'Union logo';
+      logo.className = 'opl-banner-logo';
+      bannerContent.appendChild(logo);
+    } else {
+      const iconDiv = document.createElement('div');
+      iconDiv.className = 'opl-banner-icon';
+      iconDiv.textContent = '⚠️';
+      bannerContent.appendChild(iconDiv);
     }
     
-    // Add demands if available
-    const demandsHtml = action.demands ? `<p class="opl-banner-demands" style="font-size: 0.85em; margin-top: 4px; opacity: 0.95;"><strong>Demands:</strong> ${escapeHtml(action.demands)}</p>` : '';
-
-    // Build logo HTML if available
-    const logoHtml = logoUrl ? `<img src="${escapeHtml(logoUrl)}" alt="Union logo" class="opl-banner-logo" />` : `<div class="opl-banner-icon">⚠️</div>`;
-
-    banner.innerHTML = `
-      <div class="opl-banner-content">
-        ${logoHtml}
-        <div class="opl-banner-text">
-          <strong class="opl-banner-title">${escapeHtml(title)}</strong>
-          ${employerLocationHtml}
-          ${demandsHtml}
-          <p class="opl-banner-description" style="margin-top: 4px;"><strong>Description:</strong> ${escapeHtml(description)}</p>
-          <div class="opl-banner-links" style="margin-top: 4px;">
-            ${moreInfoUrl ? `<a href="${escapeHtml(moreInfoUrl)}" target="_blank" class="opl-banner-link">Learn More</a><span style="margin: 0 5px; opacity: 0.5;">|</span>` : ''}
-            <a href="https://onlinepicketline.com" target="_blank" class="opl-banner-link" style="font-size: 0.8em; opacity: 0.8;">Online Picket Line - OPL</a>
-          </div>
-        </div>
-        <button class="opl-banner-close" aria-label="Close banner">×</button>
-      </div>
-    `;
+    // Build text container
+    const textDiv = document.createElement('div');
+    textDiv.className = 'opl-banner-text';
+    
+    // Title
+    const titleEl = document.createElement('strong');
+    titleEl.className = 'opl-banner-title';
+    titleEl.textContent = title;
+    textDiv.appendChild(titleEl);
+    
+    // Employer/Location
+    if (employer || location) {
+      const locationP = document.createElement('p');
+      locationP.className = 'opl-banner-employer-location';
+      locationP.style.cssText = 'font-size: 0.9em; font-weight: 600; margin-top: 4px;';
+      if (employer && location) {
+        locationP.textContent = `${employer} - ${location}`;
+      } else {
+        locationP.textContent = employer || location;
+      }
+      textDiv.appendChild(locationP);
+    }
+    
+    // Demands
+    if (action.demands) {
+      const demandsP = document.createElement('p');
+      demandsP.className = 'opl-banner-demands';
+      demandsP.style.cssText = 'font-size: 0.85em; margin-top: 4px; opacity: 0.95;';
+      const demandsStrong = document.createElement('strong');
+      demandsStrong.textContent = 'Demands: ';
+      demandsP.appendChild(demandsStrong);
+      demandsP.appendChild(document.createTextNode(action.demands));
+      textDiv.appendChild(demandsP);
+    }
+    
+    // Description
+    const descP = document.createElement('p');
+    descP.className = 'opl-banner-description';
+    descP.style.cssText = 'margin-top: 4px;';
+    const descStrong = document.createElement('strong');
+    descStrong.textContent = 'Description: ';
+    descP.appendChild(descStrong);
+    descP.appendChild(document.createTextNode(description));
+    textDiv.appendChild(descP);
+    
+    // Links container
+    const linksDiv = document.createElement('div');
+    linksDiv.className = 'opl-banner-links';
+    linksDiv.style.cssText = 'margin-top: 4px;';
+    
+    if (moreInfoUrl) {
+      const learnMoreLink = document.createElement('a');
+      learnMoreLink.href = moreInfoUrl;
+      learnMoreLink.target = '_blank';
+      learnMoreLink.className = 'opl-banner-link';
+      learnMoreLink.textContent = 'Learn More';
+      linksDiv.appendChild(learnMoreLink);
+      
+      const separator = document.createElement('span');
+      separator.style.cssText = 'margin: 0 5px; opacity: 0.5;';
+      separator.textContent = '|';
+      linksDiv.appendChild(separator);
+    }
+    
+    const oplLink = document.createElement('a');
+    oplLink.href = 'https://onlinepicketline.com';
+    oplLink.target = '_blank';
+    oplLink.className = 'opl-banner-link';
+    oplLink.style.cssText = 'font-size: 0.8em; opacity: 0.8;';
+    oplLink.textContent = 'Online Picket Line - OPL';
+    linksDiv.appendChild(oplLink);
+    
+    textDiv.appendChild(linksDiv);
+    bannerContent.appendChild(textDiv);
+    
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'opl-banner-close';
+    closeBtn.setAttribute('aria-label', 'Close banner');
+    closeBtn.textContent = '×';
+    bannerContent.appendChild(closeBtn);
+    
+    banner.appendChild(bannerContent);
 
     // Add close button functionality
-    const closeBtn = banner.querySelector('.opl-banner-close');
     closeBtn.addEventListener('click', () => {
       banner.remove();
       currentBanner = null;

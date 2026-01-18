@@ -150,9 +150,36 @@ document.addEventListener('DOMContentLoaded', () => {
         statsHtml = 'No data loaded yet<br>Configure API and refresh';
       }
 
-      statsHtml += `<br><a href="https://onlinepicketline.com" target="_blank" style="color: inherit; text-decoration: underline; margin-top: 0.5rem; display: inline-block;">More Info at OnlinePicketLine.com</a>`;
-
-      statsContent.innerHTML = statsHtml;
+      // Clear existing content safely
+      while (statsContent.firstChild) {
+        statsContent.removeChild(statsContent.firstChild);
+      }
+      
+      // Build content using DOM methods for security
+      const textSpan = document.createElement('span');
+      textSpan.textContent = statsHtml.replace(/<br>/g, '\n').replace(/<[^>]*>/g, '');
+      
+      // Parse the stats text and create proper DOM elements
+      const parts = statsHtml.split('<br>');
+      parts.forEach((part, index) => {
+        if (index > 0) {
+          statsContent.appendChild(document.createElement('br'));
+        }
+        // Skip the link part, we'll add it separately
+        if (!part.includes('<a href=')) {
+          const textNode = document.createTextNode(part.replace(/<[^>]*>/g, ''));
+          statsContent.appendChild(textNode);
+        }
+      });
+      
+      // Add the link safely
+      statsContent.appendChild(document.createElement('br'));
+      const link = document.createElement('a');
+      link.href = 'https://onlinepicketline.com';
+      link.target = '_blank';
+      link.style.cssText = 'color: inherit; text-decoration: underline; margin-top: 0.5rem; display: inline-block;';
+      link.textContent = 'More Info at OnlinePicketLine.com';
+      statsContent.appendChild(link);
     });
   }
 
