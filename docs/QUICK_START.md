@@ -25,16 +25,9 @@
 ### Step 2: Configure API Access
 
 1. Click the extension icon in your browser toolbar
-2. Enter your Online Picketline instance URL:
-   ```text
-   https://your-instance.com
-   ```
-3. Enter your API key (get from your instance administrator):
-   ```text
-   opl_your_key_here
-   ```
-4. Click **Save Configuration**
-5. Click **Test API Connection** to verify
+2. The extension comes pre-configured with the public API
+3. Click **Test API Connection** to verify
+4. (Optional) Enter a custom API URL if using your own instance
 
 ### Step 3: Choose Your Mode
 

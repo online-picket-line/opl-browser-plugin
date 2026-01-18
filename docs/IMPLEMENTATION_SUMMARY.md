@@ -127,11 +127,10 @@ The extension transforms the API's blocklist format into internal labor action o
 ### Setup
 1. Install extension in browser
 2. Click extension icon
-3. Enter API base URL (e.g., `https://your-instance.com`)
-4. Enter API key (starts with `opk_`)
-5. Click "Save Configuration"
-6. Click "Test API Connection" to verify
-7. Click "Refresh Labor Actions" to load data
+3. The extension comes pre-configured with the public API
+4. Click "Test API Connection" to verify
+5. Click "Refresh Labor Actions" to load data
+6. (Optional) Enter a custom API URL if using your own instance
 
 ### Usage
 1. Browse normally

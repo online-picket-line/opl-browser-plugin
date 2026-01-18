@@ -227,14 +227,13 @@ For detailed instructions, see Apple's [Converting a Web Extension for Safari](h
 
 ## Setup
 
-After installation, you **must configure the extension** before it will work:
+After installation:
 
 1. Click the extension icon in your browser toolbar
-2. Enter your **API Base URL** (e.g., `https://your-instance.com`)
-3. Enter your **API Key** (e.g., `opl_your_key_here`)
-4. Click **Save Configuration**
-5. Click **Test API Connection** to verify your setup
-6. Click **Refresh Labor Actions** to load the current data
+2. The extension comes pre-configured with the public API
+3. Click **Test API Connection** to verify your setup
+4. Click **Refresh Labor Actions** to load the current data
+5. (Optional) Enter a custom API URL if using your own instance
 
 ## Usage
 
@@ -354,12 +353,11 @@ If rate-limited, the extension will use cached data and retry after the specifie
 
 ### Customization
 
-To customize the API endpoint, users can configure it in the extension popup:
+To use a custom API endpoint, users can configure it in the extension popup:
 
 1. Click the extension icon
 2. Enter the API Base URL for your Online Picketline instance
-3. Enter your API key
-4. Click "Save Configuration"
+3. Click "Save Configuration"
 
 For development/testing, you can also modify the default URL in `api-service.js`:
 
