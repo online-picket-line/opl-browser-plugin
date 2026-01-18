@@ -216,10 +216,9 @@ For detailed instructions, see Apple's [Converting a Web Extension for Safari](h
 After installation:
 
 1. Click the extension icon in your browser toolbar
-2. The extension comes pre-configured with the public API
-3. Click **Test API Connection** to verify your setup
-4. Click **Refresh Labor Actions** to load the current data
-5. (Optional) Enter a custom API URL if using your own instance
+2. The extension comes pre-configured and connects automatically
+3. Click **Refresh Labor Actions** to load the current data
+4. Choose your preferred mode (Banner or Block)
 
 ## Usage
 

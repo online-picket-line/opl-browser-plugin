@@ -22,14 +22,7 @@
 3. Open the generated Xcode project and run (⌘R)
 4. In Safari: Preferences → Extensions → Enable "Online Picket Line"
 
-### Step 2: Configure API Access
-
-1. Click the extension icon in your browser toolbar
-2. The extension comes pre-configured with the public API
-3. Click **Test API Connection** to verify
-4. (Optional) Enter a custom API URL if using your own instance
-
-### Step 3: Choose Your Mode
+### Step 2: Choose Your Mode
 
 **Banner Mode** (Recommended for first-time users)
 - Shows a red informational banner at the bottom of pages
@@ -87,13 +80,10 @@ When you visit a website associated with an active labor action:
 ## 🔧 Troubleshooting
 
 **"No data loaded yet"**
-→ Configure your API URL and key, then click Refresh
-
-**"Invalid or missing API key"**
-→ Make sure your key starts with `opl_` and is copied correctly
+→ Click Refresh to load the latest labor action data
 
 **"Connection failed"**
-→ Check that your Online Picketline instance URL is correct and accessible
+→ Check your internet connection and try again
 
 **Banner not showing**
 → The current website may not be in the labor action database
@@ -124,7 +114,6 @@ To test the extension:
 
 **As an organizer:**
 - Deploy to your team/community
-- Configure with your Online Picketline instance
 - Track which companies have active campaigns
 
 **As a developer:**
