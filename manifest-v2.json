@@ -3,15 +3,22 @@
   "name": "Online Picket Line",
   "version": "1.2.0",
   "description": "Browser extension to inform users about labor actions and boycotts",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "opl@onlinepicketline.org",
+      "strict_min_version": "57.0"
+    }
+  },
   "permissions": [
     "storage",
     "tabs",
     "webRequest",
+    "webRequestBlocking",
     "alarms",
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["browser-polyfill.js", "api-service.js", "background.js"]
+    "scripts": ["browser-polyfill.js", "api-service.js", "webrequest-service.js", "background.js"]
   },
   "content_scripts": [
     {

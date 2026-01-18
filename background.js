@@ -1,10 +1,41 @@
-// Background service worker
-importScripts('browser-polyfill.js');
-importScripts('api-service.js');
-importScripts('dnr-service.js');
+// Background script - works as service worker (MV3) or background script (MV2)
+
+// Detect environment: MV3 uses service worker with importScripts, MV2 uses background page
+const isMV3 = typeof importScripts === 'function';
+const hasDNR = typeof chrome !== 'undefined' && chrome.declarativeNetRequest;
+
+// Load dependencies based on environment
+if (isMV3) {
+  importScripts('browser-polyfill.js');
+  importScripts('api-service.js');
+  if (hasDNR) {
+    importScripts('dnr-service.js');
+  } else {
+    importScripts('webrequest-service.js');
+  }
+} 
+// For MV2 (Firefox), scripts are loaded via manifest
 
 const apiService = new ApiService();
-const dnrService = new DnrService();
+
+// Use DNR service for MV3/Chrome, WebRequest service for MV2/Firefox
+let blockingService;
+if (hasDNR && typeof DnrService !== 'undefined') {
+  blockingService = new DnrService();
+  console.log('Using DNR service (Manifest V3)');
+} else if (typeof WebRequestService !== 'undefined') {
+  blockingService = new WebRequestService();
+  console.log('Using WebRequest service (Manifest V2/Firefox)');
+} else {
+  // Fallback: create a no-op service
+  blockingService = {
+    updateRules: () => Promise.resolve(true),
+    clearRules: () => Promise.resolve(true),
+    addBypassRule: () => Promise.resolve(true),
+    getRuleStats: () => Promise.resolve({ totalRules: 0 })
+  };
+  console.warn('No blocking service available');
+}
 
 const _allowedBypasses = new Map(); // tabId -> url (reserved for future use)
 // We use chrome.storage.local for blocked states to persist across service worker restarts
@@ -46,11 +77,11 @@ async function refreshLaborActions() {
       failure_count: 0
     });
 
-    // Update DNR rules based on current mode
+    // Update blocking rules based on current mode
     const settings = await chrome.storage.sync.get(['blockMode']);
     const blockMode = settings.blockMode || false;
     
-    await dnrService.updateRules(actions, blockMode);
+    await blockingService.updateRules(actions, blockMode);
 
     return actions.length > 0 || true; // Return true even if empty (successful fetch)
   } catch (error) {
@@ -201,14 +232,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
   
-  // Update DNR rules when mode changes
+  // Update blocking rules when mode changes
   else if (request.action === 'updateMode') {
     chrome.storage.sync.get(['blockMode'], async (settings) => {
       const blockMode = settings.blockMode || false;
       const result = await chrome.storage.local.get(['labor_actions']);
       const actions = result.labor_actions || [];
       
-      await dnrService.updateRules(actions, blockMode);
+      await blockingService.updateRules(actions, blockMode);
       sendResponse({ success: true });
     });
     return true;
