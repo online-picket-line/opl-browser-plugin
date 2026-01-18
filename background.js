@@ -1,279 +1,267 @@
 // Background script - works as service worker (MV3) or background script (MV2)
 console.log('OPL Background script starting...');
 
-// Detect environment: MV3 uses service worker with importScripts, MV2 uses background page
-const isMV3 = typeof importScripts === 'function';
-console.log('Is MV3 (service worker):', isMV3);
+// ============================================================================
+// INLINE WebRequestService for Firefox MV2 (avoids file loading issues)
+// ============================================================================
+function WebRequestService() {
+  this.isListenerActive = false;
+  this.laborActions = [];
+  this.blockMode = false;
+  this.bypassedDomains = {};
+  this._boundHandler = null;
+}
 
-// Check for DNR API - must be MV3 AND have the updateDynamicRules method
-// Firefox MV2 may define declarativeNetRequest but it doesn't work
-const hasDNR = isMV3 && 
-               typeof chrome !== 'undefined' && 
-               chrome.declarativeNetRequest && 
-               typeof chrome.declarativeNetRequest.updateDynamicRules === 'function';
-console.log('Has DNR API:', hasDNR);
+WebRequestService.prototype.isDomainBypassed = function(url) {
+  try {
+    var hostname = new URL(url).hostname.toLowerCase();
+    for (var domain in this.bypassedDomains) {
+      if (this.bypassedDomains.hasOwnProperty(domain)) {
+        if (hostname === domain || hostname.endsWith('.' + domain)) {
+          return true;
+        }
+      }
+    }
+  } catch (e) {}
+  return false;
+};
 
-// Load dependencies based on environment
+WebRequestService.prototype.addBypass = function(domain) {
+  if (domain) {
+    this.bypassedDomains[domain.toLowerCase()] = true;
+    console.log('Added bypass for domain:', domain);
+  }
+};
+
+WebRequestService.prototype.matchUrlToAction = function(url) {
+  if (!url || !this.laborActions || this.laborActions.length === 0) return null;
+  try {
+    var urlToTest = url.toLowerCase();
+    for (var i = 0; i < this.laborActions.length; i++) {
+      var action = this.laborActions[i];
+      if (action.status && action.status !== 'active') continue;
+      
+      if (action._extensionData && action._extensionData.matchingUrlRegexes) {
+        var patterns = action._extensionData.matchingUrlRegexes;
+        for (var j = 0; j < patterns.length; j++) {
+          try {
+            if (new RegExp(patterns[j], 'i').test(urlToTest)) return action;
+          } catch (e) {}
+        }
+      } else {
+        var hostname = new URL(url).hostname.toLowerCase();
+        var targets = action.target_urls || action.targets || action.domains || [];
+        for (var k = 0; k < targets.length; k++) {
+          var target = targets[k].toLowerCase();
+          if (hostname === target || hostname.endsWith('.' + target)) return action;
+        }
+      }
+    }
+  } catch (error) { console.error('Error matching URL:', error); }
+  return null;
+};
+
+WebRequestService.prototype.handleRequest = function(details) {
+  if (details.type !== 'main_frame') return;
+  console.log('WebRequest intercepted:', details.url, 'blockMode:', this.blockMode);
+  if (!this.blockMode) return;
+  if (this.isDomainBypassed(details.url)) {
+    console.log('Allowing bypassed URL:', details.url);
+    return;
+  }
+  var match = this.matchUrlToAction(details.url);
+  if (match) {
+    console.log('BLOCKING URL:', details.url, 'Action:', match.title);
+    var domain = '';
+    try { domain = new URL(details.url).hostname; } catch (e) { domain = details.url.split('/')[2] || ''; }
+    var api = (typeof browser !== 'undefined') ? browser : chrome;
+    var blockPageUrl = api.runtime.getURL('block.html');
+    return { redirectUrl: blockPageUrl + '?domain=' + encodeURIComponent(domain) + '&url=' + encodeURIComponent(details.url) };
+  }
+};
+
+WebRequestService.prototype.updateRules = function(laborActions, blockMode) {
+  this.laborActions = laborActions || [];
+  this.blockMode = blockMode;
+  console.log('WebRequest updateRules: ' + this.laborActions.length + ' actions, blockMode=' + blockMode);
+  if (blockMode && !this.isListenerActive) {
+    this.startListener();
+  } else if (!blockMode && this.isListenerActive) {
+    this.stopListener();
+  }
+  return Promise.resolve(true);
+};
+
+WebRequestService.prototype.startListener = function() {
+  if (this.isListenerActive) return;
+  console.log('Starting WebRequest listener...');
+  var self = this;
+  this._boundHandler = function(details) { return self.handleRequest(details); };
+  var api = (typeof browser !== 'undefined' && browser.webRequest) ? browser.webRequest : chrome.webRequest;
+  if (!api) { console.error('WebRequest API not available!'); return; }
+  try {
+    api.onBeforeRequest.addListener(this._boundHandler, { urls: ['<all_urls>'], types: ['main_frame'] }, ['blocking']);
+    this.isListenerActive = true;
+    console.log('WebRequest listener STARTED successfully');
+  } catch (err) { console.error('Failed to start listener:', err); }
+};
+
+WebRequestService.prototype.stopListener = function() {
+  if (!this.isListenerActive) return;
+  var api = (typeof browser !== 'undefined' && browser.webRequest) ? browser.webRequest : chrome.webRequest;
+  if (api && this._boundHandler) api.onBeforeRequest.removeListener(this._boundHandler);
+  this.isListenerActive = false;
+  this._boundHandler = null;
+  console.log('WebRequest listener stopped');
+};
+
+WebRequestService.prototype.clearRules = function() { this.stopListener(); this.laborActions = []; return Promise.resolve(true); };
+WebRequestService.prototype.addBypassRule = function(url) { try { this.addBypass(new URL(url).hostname); } catch(e){} return Promise.resolve(true); };
+WebRequestService.prototype.getRuleStats = function() { return Promise.resolve({ totalRules: this.laborActions.length, listenerActive: this.isListenerActive, blockMode: this.blockMode }); };
+
+// ============================================================================
+// END WebRequestService
+// ============================================================================
+
+// Detect environment
+var isMV3 = typeof importScripts === 'function';
+var hasDNR = isMV3 && typeof chrome !== 'undefined' && chrome.declarativeNetRequest && typeof chrome.declarativeNetRequest.updateDynamicRules === 'function';
+
+console.log('Environment: isMV3=' + isMV3 + ', hasDNR=' + hasDNR);
+
+// Load dependencies for MV3
 if (isMV3) {
   importScripts('browser-polyfill.js');
   importScripts('api-service.js');
   if (hasDNR) {
     importScripts('dnr-service.js');
-  } else {
-    importScripts('webrequest-service.js');
   }
-} 
-// For MV2 (Firefox), scripts are loaded via manifest
-
-console.log('ApiService available:', typeof ApiService !== 'undefined');
-console.log('WebRequestService available:', typeof WebRequestService !== 'undefined');
-console.log('DnrService available:', typeof DnrService !== 'undefined');
-
-const apiService = new ApiService();
-
-// Use DNR service for MV3/Chrome, WebRequest service for MV2/Firefox
-let blockingService;
-if (hasDNR && typeof DnrService !== 'undefined') {
-  blockingService = new DnrService();
-  console.log('Using DNR service (Manifest V3)');
-} else if (typeof WebRequestService !== 'undefined') {
-  blockingService = new WebRequestService();
-  console.log('Using WebRequest service (Manifest V2/Firefox)');
-} else {
-  // Fallback: create a no-op service
-  blockingService = {
-    updateRules: () => Promise.resolve(true),
-    clearRules: () => Promise.resolve(true),
-    addBypassRule: () => Promise.resolve(true),
-    addBypass: () => {},
-    getRuleStats: () => Promise.resolve({ totalRules: 0 })
-  };
-  console.warn('No blocking service available - THIS IS A PROBLEM');
 }
 
-const _allowedBypasses = new Map(); // tabId -> url (reserved for future use)
-// We use chrome.storage.local for blocked states to persist across service worker restarts
-// Key format: blocked_tab_${tabId}
+var apiService = new ApiService();
 
-// Refresh labor actions on installation and periodically
-chrome.runtime.onInstalled.addListener(async () => {
+// Select blocking service
+var blockingService;
+if (hasDNR && typeof DnrService !== 'undefined') {
+  blockingService = new DnrService();
+  console.log('Using DNR service (MV3)');
+} else {
+  // Use inline WebRequestService for MV2/Firefox
+  blockingService = new WebRequestService();
+  console.log('Using WebRequest service (MV2/Firefox) - INLINE VERSION');
+}
+
+// Refresh labor actions on installation
+chrome.runtime.onInstalled.addListener(function() {
   console.log('Extension installed, fetching labor actions...');
-  await refreshLaborActions();
-
-  // Set default settings
-  chrome.storage.sync.get(['blockMode'], (result) => {
+  refreshLaborActions();
+  chrome.storage.sync.get(['blockMode'], function(result) {
     if (result.blockMode === undefined) {
-      chrome.storage.sync.set({ blockMode: false }); // Default to banner mode
+      chrome.storage.sync.set({ blockMode: false });
     }
   });
 });
 
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.onAlarm.addListener(function(alarm) {
   if (alarm.name === 'refreshLaborActions') {
     console.log('Periodic refresh of labor actions');
     refreshLaborActions();
   }
 });
 
-/**
- * Fetch and cache labor actions, then update blocking rules
- * @returns {Promise<boolean>} Success status
- */
-async function refreshLaborActions() {
-  try {
-    const actions = await apiService.getLaborActions();
-    console.log(`Fetched ${actions.length} labor actions`);
-
-    // Store in local storage for quick access
-    await new Promise((resolve) => {
-      chrome.storage.local.set({
-        labor_actions: actions,
-        connection_status: 'online',
-        failure_count: 0
-      }, resolve);
+function refreshLaborActions() {
+  apiService.getLaborActions().then(function(actions) {
+    console.log('Fetched ' + actions.length + ' labor actions');
+    chrome.storage.local.set({
+      labor_actions: actions,
+      connection_status: 'online',
+      failure_count: 0
+    }, function() {
+      chrome.storage.sync.get(['blockMode'], function(settings) {
+        var blockMode = (settings && settings.blockMode) || false;
+        console.log('Current blockMode:', blockMode);
+        blockingService.updateRules(actions, blockMode);
+      });
     });
-
-    // Update blocking rules based on current mode
-    const settings = await new Promise((resolve) => {
-      chrome.storage.sync.get(['blockMode'], resolve);
-    });
-    const blockMode = settings?.blockMode || false;
-    console.log('Current blockMode:', blockMode);
-    
-    await blockingService.updateRules(actions, blockMode);
-
-    return actions.length > 0 || true; // Return true even if empty (successful fetch)
-  } catch (error) {
+  }).catch(function(error) {
     console.error('Failed to refresh labor actions:', error);
-
-    // Get current failure count
-    const result = await new Promise((resolve) => {
-      chrome.storage.local.get(['failure_count'], resolve);
+    chrome.storage.local.get(['failure_count'], function(result) {
+      var currentFailures = ((result && result.failure_count) || 0) + 1;
+      var updates = { failure_count: currentFailures };
+      if (currentFailures >= 3) updates.connection_status = 'offline';
+      chrome.storage.local.set(updates);
     });
-    const currentFailures = ((result?.failure_count) || 0) + 1;
-
-    const updates = {
-      failure_count: currentFailures
-    };
-
-    if (currentFailures >= 3) {
-      updates.connection_status = 'offline';
-    }
-
-    await new Promise((resolve) => {
-      chrome.storage.local.set(updates, resolve);
-    });
-
-    return false;
-  }
+  });
 }
 
-/**
- * Check if a URL matches any labor actions using optimized extension format
- *
- * Uses the optimized pattern matching from API v3.0 extension format:
- * 1. Tests against optimized combined patterns first (fast)
- * 2. Falls back to individual pattern matching for accuracy
- * 3. Returns full action details for rich notifications
- *
- * @param {string} url - URL to check
- * @param {Array} actions - List of labor actions with _extensionData
- * @returns {Object|null} Matching action object or null if no match found
- */
 function matchUrlToAction(url, actions) {
-  if (!url || !actions || actions.length === 0) {
-    return null;
-  }
-
+  if (!url || !actions || actions.length === 0) return null;
   try {
-    const urlToTest = url.toLowerCase();
-
-    // Check each action using extension format data if available
-    for (const action of actions) {
-      // Skip inactive actions
-      if (action.status && action.status !== 'active') {
-        continue;
-      }
-
-      // Use extension format data if available (preferred)
+    var urlToTest = url.toLowerCase();
+    for (var i = 0; i < actions.length; i++) {
+      var action = actions[i];
+      if (action.status && action.status !== 'active') continue;
       if (action._extensionData && action._extensionData.matchingUrlRegexes) {
-        for (const pattern of action._extensionData.matchingUrlRegexes) {
-          try {
-            const regex = new RegExp(pattern, 'i');
-            if (regex.test(urlToTest)) {
-              return action;
-            }
-          } catch (_e) {
-            console.warn('Invalid regex pattern:', pattern);
-            continue;
-          }
+        var patterns = action._extensionData.matchingUrlRegexes;
+        for (var j = 0; j < patterns.length; j++) {
+          try { if (new RegExp(patterns[j], 'i').test(urlToTest)) return action; } catch(e){}
         }
       } else {
-        // Fallback to legacy target_urls matching
-        const hostname = new URL(url).hostname.toLowerCase();
-        const targets = action.target_urls || action.targets || action.domains || [];
-
-        for (const target of targets) {
-          const targetLower = target.toLowerCase();
-
-          // Match exact domain or subdomain
-          if (hostname === targetLower || hostname.endsWith('.' + targetLower)) {
-            return action;
-          }
+        var hostname = new URL(url).hostname.toLowerCase();
+        var targets = action.target_urls || action.targets || action.domains || [];
+        for (var k = 0; k < targets.length; k++) {
+          var target = targets[k].toLowerCase();
+          if (hostname === target || hostname.endsWith('.' + target)) return action;
         }
-
-        // Fallback: check company name
         if (action.company) {
-          const companyLower = action.company.toLowerCase().replace(/\s+/g, '');
-          if (hostname.includes(companyLower)) {
-            return action;
-          }
+          var companyLower = action.company.toLowerCase().replace(/\s+/g, '');
+          if (hostname.indexOf(companyLower) !== -1) return action;
         }
       }
     }
-  } catch (error) {
-    console.error('Error matching URL:', error);
-  }
-
+  } catch (error) { console.error('Error matching URL:', error); }
   return null;
 }
 
-// Listen for messages from content scripts and popup
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  // Banner mode: Check URL for content script
-  if (request.action === 'checkUrlForBanner') {
-    chrome.storage.local.get(['labor_actions'], (result) => {
-      const actions = result.labor_actions || [];
-      const match = matchUrlToAction(request.url, actions);
-
-      chrome.storage.sync.get(['blockMode'], (settings) => {
-        sendResponse({
-          match: match,
-          blockMode: settings.blockMode || false
+// Message listener
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.action === 'checkUrlForBanner' || request.action === 'checkUrl') {
+    chrome.storage.local.get(['labor_actions'], function(result) {
+      var actions = (result && result.labor_actions) || [];
+      var match = matchUrlToAction(request.url, actions);
+      chrome.storage.sync.get(['blockMode'], function(settings) {
+        sendResponse({ match: match, blockMode: (settings && settings.blockMode) || false });
+      });
+    });
+    return true;
+  }
+  
+  if (request.action === 'refreshActions') {
+    refreshLaborActions();
+    sendResponse({ success: true });
+    return true;
+  }
+  
+  if (request.action === 'clearCache') {
+    apiService.clearCache().then(function() { sendResponse({ success: true }); });
+    return true;
+  }
+  
+  if (request.action === 'updateMode') {
+    chrome.storage.sync.get(['blockMode'], function(settings) {
+      var blockMode = (settings && settings.blockMode) || false;
+      chrome.storage.local.get(['labor_actions'], function(result) {
+        var actions = (result && result.labor_actions) || [];
+        blockingService.updateRules(actions, blockMode).then(function() {
+          sendResponse({ success: true });
         });
       });
     });
-
-    return true; // Async response
-  }
-  
-  // Legacy support for old checkUrl action
-  else if (request.action === 'checkUrl') {
-    // Redirect to new handler
-    chrome.storage.local.get(['labor_actions'], (result) => {
-      const actions = result.labor_actions || [];
-      const match = matchUrlToAction(request.url, actions);
-
-      chrome.storage.sync.get(['blockMode'], (settings) => {
-        sendResponse({
-          match: match,
-          blockMode: settings.blockMode || false
-        });
-      });
-    });
-
     return true;
   }
   
-  // Refresh labor actions and update DNR rules
-  else if (request.action === 'refreshActions') {
-    refreshLaborActions().then((success) => {
-      if (success) {
-        sendResponse({ success: true });
-      } else {
-        sendResponse({ success: false, error: 'Failed to fetch labor actions. Check API configuration.' });
-      }
-    });
-    return true;
-  }
-  
-  // Clear API cache
-  else if (request.action === 'clearCache') {
-    apiService.clearCache().then(() => {
-      sendResponse({ success: true });
-    });
-    return true;
-  }
-  
-  // Update blocking rules when mode changes
-  else if (request.action === 'updateMode') {
-    chrome.storage.sync.get(['blockMode'], (settings) => {
-      const blockMode = settings?.blockMode || false;
-      chrome.storage.local.get(['labor_actions'], async (result) => {
-        const actions = result?.labor_actions || [];
-        
-        await blockingService.updateRules(actions, blockMode);
-        sendResponse({ success: true });
-      });
-    });
-    return true;
-  }
-  
-  // Add bypass for a domain (MV2/Firefox)
-  else if (request.action === 'addBypass') {
-    if (blockingService.addBypass) {
-      blockingService.addBypass(request.domain, request.url);
-    }
+  if (request.action === 'addBypass') {
+    if (blockingService.addBypass) blockingService.addBypass(request.domain);
     sendResponse({ success: true });
     return true;
   }
@@ -282,13 +270,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // Initial fetch on startup
 refreshLaborActions();
 
-// Also check if blockMode is already enabled and start listener immediately
-// This handles the case where the extension restarts with blockMode already on
-chrome.storage.sync.get(['blockMode'], (result) => {
-  if (result.blockMode) {
-    console.log('Block mode was already enabled, ensuring listener is active');
-    chrome.storage.local.get(['labor_actions'], (localResult) => {
-      const actions = localResult.labor_actions || [];
+// Check if blockMode is already enabled
+chrome.storage.sync.get(['blockMode'], function(result) {
+  if (result && result.blockMode) {
+    console.log('Block mode already enabled at startup');
+    chrome.storage.local.get(['labor_actions'], function(localResult) {
+      var actions = (localResult && localResult.labor_actions) || [];
       blockingService.updateRules(actions, true);
     });
   }
