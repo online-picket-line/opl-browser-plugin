@@ -60,6 +60,13 @@ jobs:
           path: dist/
         continue-on-error: true
 
+      - name: Download Safari Xcode project from CI
+        uses: actions/download-artifact@v4
+        with:
+          name: safari-xcode-project
+          path: dist/
+        continue-on-error: true
+
       - name: Get version from tag
         id: get_version
         run: |
@@ -94,10 +101,9 @@ jobs:
 
           Download the appropriate package for your target browser store:
 
-          - **Chrome Web Store**: `opl-chrome-edge.zip`
+          - **Chrome/Edge/Opera/Brave**: `opl-chromium.zip`
           - **Firefox Add-ons**: `opl-firefox.zip`
-          - **Opera Add-ons**: `opl-opera.zip`
-          - **Safari App Store**: `opl-safari.zip` (requires Xcode conversion)
+          - **Safari App Store**: `opl-safari-xcode-project.zip` (Xcode project ready for signing)
 
           ### Installation Instructions
 
@@ -108,7 +114,13 @@ jobs:
           4. Fill in store listing information
           5. Submit for review
 
-          See [STORE_UPDATE_GUIDE.md][guide] for submission instructions.
+          **For Safari:**
+          1. Download `opl-safari-xcode-project.zip`
+          2. Unzip and open in Xcode
+          3. Configure signing with your Apple Developer account
+          4. Archive and upload to App Store Connect
+
+          See [STORE_UPDATE_GUIDE.md][guide] for detailed submission instructions.
 
           [guide]: https://github.com/online-picket-line/opl-browser-plugin/blob/main/STORE_UPDATE_GUIDE.md
 
@@ -116,7 +128,7 @@ jobs:
 
           **Chrome/Edge/Brave/Opera:**
           ```bash
-          unzip opl-chrome-edge.zip -d opl-unpacked
+          unzip opl-chromium.zip -d opl-unpacked
           # Load unpacked: chrome://extensions → Developer mode → Load unpacked → select opl-unpacked
           ```
 
@@ -138,10 +150,9 @@ jobs:
           name: Release v${{ steps.get_version.outputs.version }}
           body_path: release_notes.md
           files: |
-            dist/opl-chrome-edge.zip
+            dist/opl-chromium.zip
             dist/opl-firefox.zip
-            dist/opl-opera.zip
-            dist/opl-safari.zip
+            dist/opl-safari-xcode-project.zip
             dist/checksums.txt
           draft: false
           prerelease: false

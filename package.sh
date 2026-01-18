@@ -9,28 +9,9 @@ echo "Packaging Online Picket Line Browser Extension..."
 mkdir -p dist
 
 
-# Package for Chrome/Edge (Manifest V3)
-echo "Creating Chrome/Edge package..."
-zip -r dist/opl-chrome-edge.zip \
-  manifest.json \
-  browser-polyfill.js \
-  api-service.js \
-  dnr-service.js \
-  background.js \
-  content.js \
-  content.css \
-  popup.html \
-  popup.js \
-  block.html \
-  block.js \
-  theme.css \
-  disable-pwa.webmanifest \
-  icons/ \
-  -x "*.DS_Store" "*.swp"
-
-# Package for Opera (Manifest V3, same as Chrome)
-echo "Creating Opera package..."
-zip -r dist/opl-opera.zip \
+# Package for Chromium-based browsers (Chrome, Edge, Opera, Brave, Vivaldi, etc.)
+echo "Creating Chromium package..."
+zip -r dist/opl-chromium.zip \
   manifest.json \
   browser-polyfill.js \
   api-service.js \
@@ -73,36 +54,17 @@ zip -r dist/opl-firefox.zip \
 # Restore original manifest
 mv manifest-v3-backup.json manifest.json
 
-# Package for Safari (Manifest V3)
-echo "Creating Safari package..."
-zip -r dist/opl-safari.zip \
-  manifest.json \
-  browser-polyfill.js \
-  api-service.js \
-  dnr-service.js \
-  background.js \
-  content.js \
-  content.css \
-  popup.html \
-  popup.js \
-  block.html \
-  block.js \
-  theme.css \
-  disable-pwa.webmanifest \
-  icons/ \
-  -x "*.DS_Store" "*.swp"
-
 echo "✓ Packages created in dist/ directory:"
 ls -lh dist/
 
 echo ""
 echo "Installation instructions:"
-echo "- Chrome/Edge/Brave: Use opl-chrome-edge.zip"
+echo "- Chrome/Edge/Opera/Brave/Vivaldi: Use opl-chromium.zip"
 echo "- Firefox: Use opl-firefox.zip"
-echo "- Safari: Use opl-safari.zip (requires Xcode conversion)"
+echo "- Safari: Use opl-chromium.zip (requires Xcode conversion)"
 echo ""
-echo "For Safari development, first extract opl-safari.zip, then convert:"
-echo "  unzip dist/opl-safari.zip -d dist/opl-safari-unpacked"
+echo "For Safari development, first extract opl-chromium.zip, then convert:"
+echo "  unzip dist/opl-chromium.zip -d dist/opl-safari-unpacked"
 echo "  xcrun safari-web-extension-converter dist/opl-safari-unpacked --app-name \"Online Picket Line\""
 echo ""
 echo "Or convert directly from the source directory:"

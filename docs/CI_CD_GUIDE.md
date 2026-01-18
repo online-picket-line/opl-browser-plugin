@@ -37,12 +37,22 @@ The project uses **GitHub Actions** for continuous integration and automated rel
   3. Generate icons
   4. Build extension packages (runs `package.sh`)
   5. Upload individual store packages (90 days retention):
-     - `chrome-webstore-package` - For Chrome Web Store
+     - `chromium-package` - For Chrome/Edge/Opera/Brave Web Stores
      - `firefox-addons-package` - For Firefox Add-ons
-     - `opera-addons-package` - For Opera Add-ons
-     - `safari-package` - For Safari App Store
   6. Upload combined package with all browsers
   7. Display build summary with package sizes
+
+#### Build Safari Job
+- Runs on: macOS Latest
+- Requires: Test job to pass
+- Steps:
+  1. Checkout code
+  2. Install dependencies
+  3. Generate icons
+  4. Convert to Safari extension using `safari-web-extension-converter`
+  5. Build Xcode project (unsigned)
+  6. Upload Safari Xcode project artifact (90 days retention):
+     - `safari-xcode-project` - Pre-converted Xcode project
 
 **Artifacts Produced:**
 - Individual `.zip` files ready for store submission
@@ -99,7 +109,7 @@ The `package.sh` script creates store-ready packages for all browsers:
 
 **Created Packages:**
 
-1. **`opl-chrome-edge.zip`** - Chrome Web Store, Edge Add-ons, Brave
+1. **`opl-chromium.zip`** - Chrome Web Store, Edge Add-ons, Opera, Brave, Vivaldi
    - Uses `manifest.json` (Manifest V3)
    - Includes all extension files
    - Ready for direct upload to stores
@@ -109,15 +119,10 @@ The `package.sh` script creates store-ready packages for all browsers:
    - Includes all extension files
    - Ready for direct upload to Firefox Add-ons
 
-3. **`opl-opera.zip`** - Opera Add-ons
-   - Uses `manifest.json` (Manifest V3)
-   - Identical to Chrome package
-   - Ready for direct upload to Opera Add-ons
-
-4. **`opl-safari.zip`** - Safari App Store
-   - Uses `manifest.json` (Manifest V3)
-   - Requires Xcode conversion after download
-   - See [SAFARI_SETUP.md](SAFARI_SETUP.md) for conversion instructions
+3. **`opl-safari-xcode-project.zip`** - Safari App Store (built by CI on macOS)
+   - Pre-converted Xcode project using `safari-web-extension-converter`
+   - Ready for signing and App Store submission
+   - See [SAFARI_SETUP.md](SAFARI_SETUP.md) for submission instructions
 
 **Files Included in Packages:**
 - `manifest.json` - Extension manifest
@@ -192,10 +197,9 @@ Once the workflow completes:
 1. Go to **Releases** tab
 2. Find the new release (e.g., "Release v1.0.1")
 3. Download appropriate packages:
-   - `opl-chrome-edge.zip` for Chrome Web Store
+   - `opl-chromium.zip` for Chrome/Edge/Opera/Brave Web Stores
    - `opl-firefox.zip` for Firefox Add-ons
-   - `opl-opera.zip` for Opera Add-ons
-   - `opl-safari.zip` for Safari App Store
+   - `opl-safari-xcode-project.zip` for Safari App Store
 
 #### 6. Submit to Stores
 
@@ -366,7 +370,7 @@ npm run test:coverage
 ./package.sh
 
 # Test in Chrome
-# 1. Extract package: unzip dist/opl-chrome-edge.zip -d test-build
+# 1. Extract package: unzip dist/opl-chromium.zip -d test-build
 # 2. Load: chrome://extensions → Load unpacked → select test-build
 
 # Test in Firefox
