@@ -3,294 +3,268 @@
  * 
  * This service uses the webRequest API to block pages based on labor actions.
  * This is the Firefox/MV2 equivalent of the DNR service used in Chrome/MV3.
- * 
- * The webRequest API allows intercepting and blocking/redirecting requests
- * before they are made, which is used to implement block mode.
  */
 
-/* eslint-disable no-unused-vars */
-'use strict';
+// Use function constructor for better Firefox compatibility
+function WebRequestService() {
+  this.isListenerActive = false;
+  this.laborActions = [];
+  this.blockMode = false;
+  this.bypassedDomains = {};
+  this._boundHandler = null;
+}
 
-class WebRequestService {
-  constructor() {
-    this.isListenerActive = false;
-    this.laborActions = [];
-    this.blockMode = false;
-    this.bypassedDomains = new Set(); // Track bypassed domains in memory
-  }
-
-  /**
-   * Check if a domain has been bypassed
-   * @param {string} url - URL to check
-   * @returns {boolean} - True if bypassed
-   */
-  isDomainBypassed(url) {
-    try {
-      const hostname = new URL(url).hostname.toLowerCase();
-      // Check exact match or parent domain match
-      for (const bypassed of this.bypassedDomains) {
-        if (hostname === bypassed || hostname.endsWith('.' + bypassed)) {
+/**
+ * Check if a domain has been bypassed
+ */
+WebRequestService.prototype.isDomainBypassed = function(url) {
+  try {
+    var hostname = new URL(url).hostname.toLowerCase();
+    for (var domain in this.bypassedDomains) {
+      if (this.bypassedDomains.hasOwnProperty(domain)) {
+        if (hostname === domain || hostname.endsWith('.' + domain)) {
           return true;
         }
       }
-    } catch (_e) {
-      // Invalid URL
     }
-    return false;
+  } catch (e) {
+    // Invalid URL
   }
+  return false;
+};
 
-  /**
-   * Add a domain to the bypass list
-   * @param {string} domain - Domain to bypass
-   * @param {string} _url - Original URL (unused but kept for API compatibility)
-   */
-  addBypass(domain, _url) {
-    if (domain) {
-      this.bypassedDomains.add(domain.toLowerCase());
-      console.log('Added bypass for domain:', domain);
-    }
+/**
+ * Add a domain to the bypass list
+ */
+WebRequestService.prototype.addBypass = function(domain) {
+  if (domain) {
+    this.bypassedDomains[domain.toLowerCase()] = true;
+    console.log('Added bypass for domain:', domain);
   }
+};
 
-  /**
-   * Match URL against labor action patterns
-   * @param {string} url - URL to check
-   * @returns {Object|null} - Matching action or null
-   */
-  matchUrlToAction(url) {
-    if (!url || !this.laborActions || this.laborActions.length === 0) {
-      return null;
-    }
-
-    try {
-      const urlToTest = url.toLowerCase();
-
-      for (const action of this.laborActions) {
-        // Skip inactive actions
-        if (action.status && action.status !== 'active') {
-          continue;
-        }
-
-        // Use extension format data if available (preferred)
-        if (action._extensionData && action._extensionData.matchingUrlRegexes) {
-          for (const pattern of action._extensionData.matchingUrlRegexes) {
-            try {
-              const regex = new RegExp(pattern, 'i');
-              if (regex.test(urlToTest)) {
-                return action;
-              }
-            } catch (_e) {
-              console.warn('Invalid regex pattern:', pattern);
-              continue;
-            }
-          }
-        } else {
-          // Fallback to legacy target_urls matching
-          const hostname = new URL(url).hostname.toLowerCase();
-          const targets = action.target_urls || action.targets || action.domains || [];
-
-          for (const target of targets) {
-            const targetLower = target.toLowerCase();
-
-            // Match exact domain or subdomain
-            if (hostname === targetLower || hostname.endsWith('.' + targetLower)) {
-              return action;
-            }
-          }
-
-          // Fallback: check company name
-          if (action.company) {
-            const companyLower = action.company.toLowerCase().replace(/\s+/g, '');
-            if (hostname.includes(companyLower)) {
-              return action;
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error matching URL in WebRequestService:', error);
-    }
-
+/**
+ * Match URL against labor action patterns
+ */
+WebRequestService.prototype.matchUrlToAction = function(url) {
+  if (!url || !this.laborActions || this.laborActions.length === 0) {
     return null;
   }
 
-  /**
-   * Handle webRequest.onBeforeRequest event
-   * @param {Object} details - Request details
-   * @returns {Object|void} - Blocking response or nothing
-   */
-  handleRequest(details) {
-    // Only process main frame (top-level navigation)
-    if (details.type !== 'main_frame') {
-      return;
-    }
+  try {
+    var urlToTest = url.toLowerCase();
+    var i, j, action, patterns, pattern, regex, hostname, targets, target;
 
-    console.log('WebRequest intercepted:', details.url, 'blockMode:', this.blockMode, 'actions:', this.laborActions.length);
-
-    // Skip if not in block mode
-    if (!this.blockMode) {
-      console.log('WebRequest: Not in block mode, allowing');
-      return;
-    }
-
-    // Check if this domain has been bypassed
-    if (this.isDomainBypassed(details.url)) {
-      console.log('WebRequest: Allowing bypassed URL:', details.url);
-      return;
-    }
-
-    // Check if this URL matches a labor action
-    const match = this.matchUrlToAction(details.url);
-    
-    if (match) {
-      console.log('WebRequest blocking URL:', details.url, 'Action:', match.title);
+    for (i = 0; i < this.laborActions.length; i++) {
+      action = this.laborActions[i];
       
-      // Extract domain for block page
-      let domain = '';
-      try {
-        domain = new URL(details.url).hostname;
-      } catch (e) {
-        domain = details.url.replace(/^https?:\/\//, '').split('/')[0];
+      // Skip inactive actions
+      if (action.status && action.status !== 'active') {
+        continue;
       }
 
-      // Redirect to block page - use browser or chrome API
-      const runtimeAPI = (typeof browser !== 'undefined' && browser.runtime) || chrome.runtime;
-      const blockPageUrl = runtimeAPI.getURL('block.html');
-      return {
-        redirectUrl: `${blockPageUrl}?domain=${encodeURIComponent(domain)}&url=${encodeURIComponent(details.url)}`
-      };
-    }
-  }
-
-  /**
-   * Update the webRequest listener based on current settings
-   * @param {Array} laborActions - Labor actions from API
-   * @param {boolean} blockMode - Whether block mode is enabled
-   */
-  updateRules(laborActions, blockMode) {
-    this.laborActions = laborActions || [];
-    this.blockMode = blockMode;
-
-    console.log(`WebRequest service: ${this.laborActions.length} actions, blockMode=${blockMode}`);
-
-    // Set up the listener if in block mode and not already active
-    if (blockMode && !this.isListenerActive) {
-      this.startListener();
-    } 
-    // Remove listener if not in block mode
-    else if (!blockMode && this.isListenerActive) {
-      this.stopListener();
-    }
-
-    return Promise.resolve(true);
-  }
-
-  /**
-   * Start the webRequest listener
-   */
-  startListener() {
-    if (this.isListenerActive) {
-      console.log('WebRequest listener already active, skipping');
-      return;
-    }
-
-    console.log('Starting WebRequest listener...');
-
-    // Bind the handler to this instance
-    this._boundHandler = this.handleRequest.bind(this);
-
-    // Use browser API (native in Firefox, polyfilled in Chrome)
-    const webRequestAPI = (typeof browser !== 'undefined' && browser.webRequest) || chrome.webRequest;
-    
-    if (!webRequestAPI) {
-      console.error('WebRequest API not available!');
-      return;
-    }
-    
-    if (!webRequestAPI.onBeforeRequest) {
-      console.error('WebRequest onBeforeRequest not available!');
-      return;
-    }
-
-    try {
-      webRequestAPI.onBeforeRequest.addListener(
-        this._boundHandler,
-        { urls: ['<all_urls>'], types: ['main_frame'] },
-        ['blocking']
-      );
-      this.isListenerActive = true;
-      console.log('WebRequest blocking listener started successfully');
-    } catch (err) {
-      console.error('Failed to add WebRequest listener:', err);
-    }
-  }
-
-  /**
-   * Stop the webRequest listener
-   */
-  stopListener() {
-    if (!this.isListenerActive || !this._boundHandler) {
-      return;
-    }
-
-    const webRequestAPI = (typeof browser !== 'undefined' && browser.webRequest) || chrome.webRequest;
-    webRequestAPI.onBeforeRequest.removeListener(this._boundHandler);
-    this.isListenerActive = false;
-    this._boundHandler = null;
-    console.log('WebRequest blocking listener stopped');
-  }
-
-  /**
-   * Clear all rules (stop blocking)
-   */
-  clearRules() {
-    this.stopListener();
-    this.laborActions = [];
-    return Promise.resolve(true);
-  }
-
-  /**
-   * Add bypass for a URL (store in session)
-   * @param {string} url - URL to bypass
-   */
-  addBypassRule(url) {
-    // For MV2, we handle bypasses differently - store bypassed domains in session storage
-    // The content script and block page can check this
-    try {
-      const domain = new URL(url).hostname;
-      browser.storage.session.get(['bypassed_domains']).then((result) => {
-        const bypassed = result.bypassed_domains || [];
-        if (!bypassed.includes(domain)) {
-          bypassed.push(domain);
-          browser.storage.session.set({ bypassed_domains: bypassed });
+      // Use extension format data if available
+      if (action._extensionData && action._extensionData.matchingUrlRegexes) {
+        patterns = action._extensionData.matchingUrlRegexes;
+        for (j = 0; j < patterns.length; j++) {
+          pattern = patterns[j];
+          try {
+            regex = new RegExp(pattern, 'i');
+            if (regex.test(urlToTest)) {
+              return action;
+            }
+          } catch (e) {
+            console.warn('Invalid regex pattern:', pattern);
+          }
         }
-      }).catch(() => {
-        // session storage may not be available in older Firefox
-        console.log('Session storage not available for bypass');
-      });
-      // Also add to in-memory bypass list
-      this.addBypass(domain);
-    } catch (e) {
-      console.error('Error adding bypass rule:', e);
+      } else {
+        // Fallback to legacy target_urls matching
+        try {
+          hostname = new URL(url).hostname.toLowerCase();
+        } catch (e) {
+          continue;
+        }
+        targets = action.target_urls || action.targets || action.domains || [];
+
+        for (j = 0; j < targets.length; j++) {
+          target = targets[j].toLowerCase();
+          if (hostname === target || hostname.endsWith('.' + target)) {
+            return action;
+          }
+        }
+
+        // Fallback: check company name
+        if (action.company) {
+          var companyLower = action.company.toLowerCase().replace(/\s+/g, '');
+          if (hostname.indexOf(companyLower) !== -1) {
+            return action;
+          }
+        }
+      }
     }
-    return Promise.resolve(true);
+  } catch (error) {
+    console.error('Error matching URL in WebRequestService:', error);
   }
 
-  /**
-   * Get rule statistics
-   */
-  getRuleStats() {
-    return Promise.resolve({
-      totalRules: this.laborActions.length,
-      maxRules: 'unlimited',
-      rulesRemaining: 'unlimited',
-      listenerActive: this.isListenerActive,
-      blockMode: this.blockMode,
-      bypassedDomains: Array.from(this.bypassedDomains)
-    });
-  }
-}
+  return null;
+};
 
-// Export for use in background script
-if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+/**
+ * Handle webRequest.onBeforeRequest event
+ */
+WebRequestService.prototype.handleRequest = function(details) {
+  // Only process main frame
+  if (details.type !== 'main_frame') {
+    return;
+  }
+
+  console.log('WebRequest intercepted:', details.url, 'blockMode:', this.blockMode, 'actions:', this.laborActions.length);
+
+  if (!this.blockMode) {
+    return;
+  }
+
+  if (this.isDomainBypassed(details.url)) {
+    console.log('WebRequest: Allowing bypassed URL:', details.url);
+    return;
+  }
+
+  var match = this.matchUrlToAction(details.url);
+  
+  if (match) {
+    console.log('WebRequest blocking URL:', details.url, 'Action:', match.title);
+    
+    var domain = '';
+    try {
+      domain = new URL(details.url).hostname;
+    } catch (e) {
+      domain = details.url.replace(/^https?:\/\//, '').split('/')[0];
+    }
+
+    var blockPageUrl = (typeof browser !== 'undefined' ? browser : chrome).runtime.getURL('block.html');
+    return {
+      redirectUrl: blockPageUrl + '?domain=' + encodeURIComponent(domain) + '&url=' + encodeURIComponent(details.url)
+    };
+  }
+};
+
+/**
+ * Update the webRequest listener based on current settings
+ */
+WebRequestService.prototype.updateRules = function(laborActions, blockMode) {
+  this.laborActions = laborActions || [];
+  this.blockMode = blockMode;
+
+  console.log('WebRequest service: ' + this.laborActions.length + ' actions, blockMode=' + blockMode);
+
+  if (blockMode && !this.isListenerActive) {
+    this.startListener();
+  } else if (!blockMode && this.isListenerActive) {
+    this.stopListener();
+  }
+
+  return Promise.resolve(true);
+};
+
+/**
+ * Start the webRequest listener
+ */
+WebRequestService.prototype.startListener = function() {
+  if (this.isListenerActive) {
+    console.log('WebRequest listener already active');
+    return;
+  }
+
+  console.log('Starting WebRequest listener...');
+
+  var self = this;
+  this._boundHandler = function(details) {
+    return self.handleRequest(details);
+  };
+
+  var webRequestAPI = (typeof browser !== 'undefined' ? browser.webRequest : null) || 
+                      (typeof chrome !== 'undefined' ? chrome.webRequest : null);
+  
+  if (!webRequestAPI) {
+    console.error('WebRequest API not available!');
+    return;
+  }
+
+  try {
+    webRequestAPI.onBeforeRequest.addListener(
+      this._boundHandler,
+      { urls: ['<all_urls>'], types: ['main_frame'] },
+      ['blocking']
+    );
+    this.isListenerActive = true;
+    console.log('WebRequest blocking listener started successfully');
+  } catch (err) {
+    console.error('Failed to add WebRequest listener:', err);
+  }
+};
+
+/**
+ * Stop the webRequest listener
+ */
+WebRequestService.prototype.stopListener = function() {
+  if (!this.isListenerActive || !this._boundHandler) {
+    return;
+  }
+
+  var webRequestAPI = (typeof browser !== 'undefined' ? browser.webRequest : null) || 
+                      (typeof chrome !== 'undefined' ? chrome.webRequest : null);
+  
+  if (webRequestAPI) {
+    webRequestAPI.onBeforeRequest.removeListener(this._boundHandler);
+  }
+  
+  this.isListenerActive = false;
+  this._boundHandler = null;
+  console.log('WebRequest blocking listener stopped');
+};
+
+/**
+ * Clear all rules
+ */
+WebRequestService.prototype.clearRules = function() {
+  this.stopListener();
+  this.laborActions = [];
+  return Promise.resolve(true);
+};
+
+/**
+ * Add bypass rule (compatibility method)
+ */
+WebRequestService.prototype.addBypassRule = function(url) {
+  try {
+    var domain = new URL(url).hostname;
+    this.addBypass(domain);
+  } catch (e) {
+    console.error('Error adding bypass rule:', e);
+  }
+  return Promise.resolve(true);
+};
+
+/**
+ * Get rule statistics
+ */
+WebRequestService.prototype.getRuleStats = function() {
+  var bypassList = [];
+  for (var domain in this.bypassedDomains) {
+    if (this.bypassedDomains.hasOwnProperty(domain)) {
+      bypassList.push(domain);
+    }
+  }
+  return Promise.resolve({
+    totalRules: this.laborActions.length,
+    maxRules: 'unlimited',
+    listenerActive: this.isListenerActive,
+    blockMode: this.blockMode,
+    bypassedDomains: bypassList
+  });
+};
+
+// Export for Node.js testing
+if (typeof module !== 'undefined' && module.exports) {
   module.exports = WebRequestService;
 }
