@@ -3,6 +3,13 @@
   "name": "Online Picket Line - OPL",
   "version": "1.2.0",
   "description": "Inform users about labor actions and boycotts.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "opl@onlinepicketline.org",
+      "strict_min_version": "109.0",
+      "data_collection_permissions": []
+    }
+  },
   "permissions": [
     "storage",
     "alarms",
