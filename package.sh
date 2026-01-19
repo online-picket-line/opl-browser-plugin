@@ -24,7 +24,6 @@ zip -r dist/opl-chromium.zip \
   block.html \
   block.js \
   theme.css \
-  disable-pwa.webmanifest \
   icons/ \
   -x "*.DS_Store" "*.swp"
 
@@ -47,7 +46,6 @@ zip -r dist/opl-firefox.zip \
   block.html \
   block.js \
   theme.css \
-  disable-pwa.webmanifest \
   icons/ \
   -x "*.DS_Store" "*.swp"
 
