@@ -71,9 +71,9 @@ describe('DnrService', () => {
 
   describe('convertRegexToUrlFilter', () => {
     test('should convert simple domain pattern', () => {
-      // Note: backslashes are preserved in simple domain patterns
+      // Backslash-escaped dots are converted to literal dots for DNR urlFilter format
       const result = dnrService.convertRegexToUrlFilter('example\\.com');
-      expect(result).toBe('||example\\.com^');
+      expect(result).toBe('||example.com^');
     });
 
     test('should convert domain with path', () => {
@@ -112,15 +112,15 @@ describe('DnrService', () => {
     test('should expand OR pattern into multiple filters', () => {
       const result = dnrService.expandRegexToMultipleFilters('(example\\.com|test\\.com|another\\.com)');
       expect(result).toHaveLength(3);
-      expect(result).toContain('||example\\.com^');
-      expect(result).toContain('||test\\.com^');
-      expect(result).toContain('||another\\.com^');
+      expect(result).toContain('||example.com^');
+      expect(result).toContain('||test.com^');
+      expect(result).toContain('||another.com^');
     });
 
     test('should return single filter for non-OR patterns', () => {
       const result = dnrService.expandRegexToMultipleFilters('example\\.com');
       expect(result).toHaveLength(1);
-      expect(result[0]).toBe('||example\\.com^');
+      expect(result[0]).toBe('||example.com^');
     });
 
     test('should filter out null results', () => {

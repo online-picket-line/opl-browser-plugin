@@ -53,7 +53,8 @@ class DnrService {
       // Common conversions
       // Domain pattern: example\.com -> ||example.com^
       if (pattern.match(/^[a-z0-9\\.-]+\.[a-z]{2,}$/i)) {
-        return `||${pattern}^`;
+        // Unescape dots for DNR urlFilter format
+        return `||${pattern.replace(/\\\./g, '.')}^`;
       }
       
       // Domain with path: example\.com/path -> ||example.com/path
@@ -63,8 +64,12 @@ class DnrService {
       }
       
       // Facebook/social media pattern: facebook\.com/company
-      if (pattern.includes('facebook.com') || pattern.includes('twitter.com') || 
-          pattern.includes('instagram.com') || pattern.includes('linkedin.com')) {
+      if (pattern.includes('facebook\\.com') || pattern.includes('facebook.com') ||
+          pattern.includes('twitter\\.com') || pattern.includes('twitter.com') || 
+          pattern.includes('instagram\\.com') || pattern.includes('instagram.com') ||
+          pattern.includes('linkedin\\.com') || pattern.includes('linkedin.com') ||
+          pattern.includes('youtube\\.com') || pattern.includes('youtube.com') ||
+          pattern.includes('pinterest\\.com') || pattern.includes('pinterest.com')) {
         pattern = pattern.replace(/\\\./g, '.').replace(/\.\*/g, '*');
         return `||${pattern}*`;
       }
