@@ -701,6 +701,58 @@ describe('ApiService', () => {
     });
   });
 
+  describe('getLogoForCompany', () => {
+    test('should return null for empty company name', () => {
+      const instance = new ApiService();
+      expect(instance.getLogoForCompany('')).toBeNull();
+      expect(instance.getLogoForCompany(null)).toBeNull();
+      expect(instance.getLogoForCompany(undefined)).toBeNull();
+    });
+
+    test('should return logo for exact match', () => {
+      const instance = new ApiService();
+      instance._logoCache.set('testcompany', 'https://example.com/logo.png');
+      instance._logoCacheTimestamp = Date.now();
+      
+      expect(instance.getLogoForCompany('testcompany')).toBe('https://example.com/logo.png');
+      expect(instance.getLogoForCompany('TestCompany')).toBe('https://example.com/logo.png'); // case insensitive
+    });
+
+    test('should return logo for partial match', () => {
+      const instance = new ApiService();
+      instance._logoCache.set('newyork-presbyterian hospital', 'https://example.com/nyp-logo.png');
+      instance._logoCacheTimestamp = Date.now();
+      
+      expect(instance.getLogoForCompany('newyork-presbyterian')).toBe('https://example.com/nyp-logo.png');
+    });
+
+    test('should return logo for normalized match with hyphens and spaces', () => {
+      const instance = new ApiService();
+      instance._logoCache.set('newyork-presbyterian', 'https://example.com/nyp-logo.png');
+      instance._logoCacheTimestamp = Date.now();
+      
+      // Should match even with different hyphen/space patterns
+      expect(instance.getLogoForCompany('NewYork Presbyterian')).toBe('https://example.com/nyp-logo.png');
+      expect(instance.getLogoForCompany('newyorkpresbyterian')).toBe('https://example.com/nyp-logo.png');
+    });
+
+    test('should return null when cache is expired', () => {
+      const instance = new ApiService();
+      instance._logoCache.set('testcompany', 'https://example.com/logo.png');
+      instance._logoCacheTimestamp = Date.now() - (6 * 60 * 1000); // 6 minutes ago (cache is 5 min)
+      
+      expect(instance.getLogoForCompany('testcompany')).toBeNull();
+    });
+
+    test('should return null for no match', () => {
+      const instance = new ApiService();
+      instance._logoCache.set('somecompany', 'https://example.com/logo.png');
+      instance._logoCacheTimestamp = Date.now();
+      
+      expect(instance.getLogoForCompany('differentcompany')).toBeNull();
+    });
+  });
+
   describe('API Key Management', () => {
     test('should return valid obfuscated API key', () => {
       const instance = new ApiService();

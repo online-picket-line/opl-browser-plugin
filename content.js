@@ -46,13 +46,8 @@
     const description = action.description || 'This company is currently subject to a labor action.';
     // const actionType = action.type || 'strike';  // Currently unused
     const moreInfoUrl = action.url || action.more_info || '';
-    // Check for logoUrl in stored data (will be empty for base64 images)
-    const storedLogoUrl = action.logoUrl || 
-                   action._extensionData?.logoUrl || 
-                   action._extensionData?.unionImageUrl ||
-                   action._extensionData?.actionDetails?.logoUrl ||
-                   action._extensionData?.actionDetails?.unionImageUrl ||
-                   '';
+    // Check for logoUrl in stored data (URL only - base64 images are fetched via getLogo message)
+    const storedLogoUrl = action.logoUrl || '';
 
     // Construct employer and location values
     const employer = action.employer || action.employerName || action.employer_name || action.company;
@@ -82,7 +77,8 @@
       logoContainer.appendChild(iconDiv);
       
       // Request logo from background script (memory cache)
-      const company = action.company;
+      // Try company first, then title as fallback (title may contain org name)
+      const company = action.company || action.title;
       if (company) {
         chrome.runtime.sendMessage({ action: 'getLogo', company: company }, (response) => {
           if (response && response.logo) {

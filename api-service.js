@@ -599,9 +599,18 @@ class ApiService {
       return this._logoCache.get(key);
     }
     
+    // Normalize key by removing hyphens and spaces for fuzzy matching
+    const normalizedKey = key.replace(/[-\s]/g, '');
+    
     // Try partial match (company name might be slightly different)
     for (const [cachedKey, logo] of this._logoCache.entries()) {
+      // Direct partial match
       if (cachedKey.includes(key) || key.includes(cachedKey)) {
+        return logo;
+      }
+      // Normalized match (handles "NewYork-Presbyterian" vs "newyorkpresbyterian")
+      const normalizedCachedKey = cachedKey.replace(/[-\s]/g, '');
+      if (normalizedCachedKey.includes(normalizedKey) || normalizedKey.includes(normalizedCachedKey)) {
         return logo;
       }
     }
