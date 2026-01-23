@@ -97,6 +97,9 @@ class ApiService {
     this.baseUrl = DEFAULT_API_BASE_URL;
     this.keyResolver = _getObfuscatedKey;
     this._environmentValid = null; // Lazy initialization
+    // In-memory logo cache (not persisted to storage to save quota)
+    this._logoCache = new Map();
+    this._logoCacheTimestamp = 0;
   }
   
   _checkEnvironment() {
@@ -225,11 +228,22 @@ class ApiService {
 
       if (response.status === 401) {
         // Store upgrade needed status for UI to display
-        await chrome.storage.local.set({ 
-          upgrade_needed: true,
-          upgrade_reason: 'api_key_invalid',
-          connection_status: 'upgrade_needed'
-        });
+        try {
+          await new Promise((resolve) => {
+            chrome.storage.local.set({ 
+              upgrade_needed: true,
+              upgrade_reason: 'api_key_invalid',
+              connection_status: 'upgrade_needed'
+            }, () => {
+              if (chrome.runtime.lastError) {
+                console.warn('Failed to store upgrade status:', chrome.runtime.lastError.message);
+              }
+              resolve();
+            });
+          });
+        } catch (e) {
+          console.warn('Error storing upgrade status:', e);
+        }
         console.warn('API key rejected - extension upgrade may be required');
         // Don't throw - return cached data or empty array gracefully
         const cached = await this.getCachedData(true);
@@ -241,7 +255,18 @@ class ApiService {
       }
 
       // Clear upgrade flag on successful response
-      await chrome.storage.local.set({ upgrade_needed: false });
+      try {
+        await new Promise((resolve) => {
+          chrome.storage.local.set({ upgrade_needed: false }, () => {
+            if (chrome.runtime.lastError) {
+              console.warn('Failed to clear upgrade flag:', chrome.runtime.lastError.message);
+            }
+            resolve();
+          });
+        });
+      } catch (e) {
+        console.warn('Error clearing upgrade flag:', e);
+      }
 
       if (!response.ok) {
         throw new Error(`API request failed: ${response.status} ${response.statusText}`);
@@ -290,6 +315,10 @@ class ApiService {
     }
 
     const actions = [];
+    
+    // Clear and rebuild logo cache
+    this._logoCache.clear();
+    this._logoCacheTimestamp = Date.now();
 
     // Process each organization in the extension format
     for (const [orgName, orgData] of Object.entries(extensionData)) {
@@ -300,6 +329,21 @@ class ApiService {
 
       // Extract action details with fallbacks
       const actionDetails = orgData.actionDetails || {};
+
+      // Get the logo (including base64) but only cache in memory, not storage
+      const logoData = orgData.logoUrl || orgData.unionImageUrl || 
+                       actionDetails.logoUrl || actionDetails.unionImageUrl || '';
+      
+      // Cache logo in memory (keyed by company name)
+      if (logoData) {
+        this._logoCache.set(orgName.toLowerCase(), logoData);
+      }
+
+      // For storage, only keep URL references (not base64)
+      let logoUrl = '';
+      if (logoData && !logoData.startsWith('data:')) {
+        logoUrl = logoData; // It's a URL, safe to store
+      }
 
       const action = {
         id: actionDetails.id || `org-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -315,10 +359,13 @@ class ApiService {
         startDate: orgData.startTime || actionDetails.startDate || '',
         endDate: orgData.endTime || actionDetails.endDate || '',
         contactInfo: actionDetails.contactInfo || '',
-        logoUrl: orgData.logoUrl || orgData.unionImageUrl || actionDetails.logoUrl || actionDetails.unionImageUrl || '',
+        logoUrl: logoUrl,
         divisions: [],
-        // Store original extension data for advanced matching
-        _extensionData: orgData
+        // Store only essential extension data for matching (not the full orgData with images!)
+        _extensionData: {
+          matchingUrlRegexes: orgData.matchingUrlRegexes || [],
+          moreInfoUrl: orgData.moreInfoUrl || ''
+        }
       };
 
       actions.push(action);
@@ -407,11 +454,91 @@ class ApiService {
    * @param {Array} data - Labor actions data to cache
    */
   async setCachedData(data) {
+    // Optimize data before storage to reduce size
+    const optimizedData = this.optimizeDataForStorage(data);
+    
     return new Promise((resolve) => {
       chrome.storage.local.set({
-        [CACHE_KEY]: data,
+        [CACHE_KEY]: optimizedData,
         cache_timestamp: Date.now()
-      }, resolve);
+      }, () => {
+        // Check for quota exceeded error
+        if (chrome.runtime.lastError) {
+          console.warn('Storage error:', chrome.runtime.lastError.message);
+          // Try to clear old data and retry with minimal data
+          this.handleStorageQuotaError(optimizedData).then(resolve);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
+   * Optimize data for storage by removing large redundant fields
+   * @param {Array} data - Labor actions data
+   * @returns {Array} Optimized data
+   */
+  optimizeDataForStorage(data) {
+    if (!Array.isArray(data)) return data;
+    
+    return data.map(action => {
+      // Create a copy without the full _extensionData to save space
+      const optimized = { ...action };
+      
+      // Remove base64 encoded images (they're ~65KB each!)
+      // Keep only URL references, not embedded data
+      if (optimized.logoUrl && optimized.logoUrl.startsWith('data:')) {
+        optimized.logoUrl = ''; // Strip base64 images
+      }
+      
+      // Keep only essential matching data from _extensionData
+      if (action._extensionData) {
+        optimized._extensionData = {
+          matchingUrlRegexes: action._extensionData.matchingUrlRegexes || [],
+          moreInfoUrl: action._extensionData.moreInfoUrl || ''
+          // Explicitly NOT storing unionImageUrl or other large fields
+        };
+      }
+      
+      return optimized;
+    });
+  }
+
+  /**
+   * Handle storage quota exceeded error
+   * @param {Array} data - Data that failed to store
+   */
+  async handleStorageQuotaError(data) {
+    console.warn('Storage quota exceeded, attempting cleanup...');
+    
+    // Clear old cache first
+    await this.clearCache();
+    
+    // Try storing minimal data
+    const minimalData = data.map(action => ({
+      id: action.id,
+      title: action.title,
+      company: action.company,
+      type: action.type,
+      status: action.status,
+      more_info: action.more_info,
+      target_urls: action.target_urls,
+      _extensionData: action._extensionData ? {
+        matchingUrlRegexes: action._extensionData.matchingUrlRegexes || []
+      } : undefined
+    }));
+    
+    return new Promise((resolve) => {
+      chrome.storage.local.set({
+        [CACHE_KEY]: minimalData,
+        cache_timestamp: Date.now()
+      }, () => {
+        if (chrome.runtime.lastError) {
+          console.error('Failed to store even minimal data:', chrome.runtime.lastError.message);
+        }
+        resolve();
+      });
     });
   }
 
@@ -442,8 +569,53 @@ class ApiService {
    */
   async setCachedHash(hash) {
     return new Promise((resolve) => {
-      chrome.storage.local.set({ [CACHE_HASH_KEY]: hash }, resolve);
+      chrome.storage.local.set({ [CACHE_HASH_KEY]: hash }, () => {
+        if (chrome.runtime.lastError) {
+          console.warn('Failed to store content hash:', chrome.runtime.lastError.message);
+        }
+        resolve();
+      });
     });
+  }
+
+  /**
+   * Get logo for a company from memory cache
+   * @param {string} company - Company name to look up
+   * @returns {string|null} Logo URL or base64 data, or null if not found
+   */
+  getLogoForCompany(company) {
+    if (!company) return null;
+    
+    // Check if cache is still valid (5 minutes)
+    const cacheAge = Date.now() - this._logoCacheTimestamp;
+    if (cacheAge > CACHE_DURATION) {
+      // Cache expired, will be refreshed on next API call
+      return null;
+    }
+    
+    // Try exact match first
+    const key = company.toLowerCase();
+    if (this._logoCache.has(key)) {
+      return this._logoCache.get(key);
+    }
+    
+    // Try partial match (company name might be slightly different)
+    for (const [cachedKey, logo] of this._logoCache.entries()) {
+      if (cachedKey.includes(key) || key.includes(cachedKey)) {
+        return logo;
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * Check if logo cache has data
+   * @returns {boolean}
+   */
+  hasLogosInCache() {
+    const cacheAge = Date.now() - this._logoCacheTimestamp;
+    return this._logoCache.size > 0 && cacheAge <= CACHE_DURATION;
   }
 }
 

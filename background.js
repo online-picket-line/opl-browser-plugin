@@ -159,6 +159,11 @@ function refreshLaborActions() {
       connection_status: 'online',
       failure_count: 0
     }, function() {
+      // Check for storage quota error
+      if (chrome.runtime.lastError) {
+        console.warn('Storage error in refreshLaborActions:', chrome.runtime.lastError.message);
+        // Still update the blocking service with the actions even if storage failed
+      }
       chrome.storage.sync.get(['blockMode'], function(settings) {
         var blockMode = (settings && settings.blockMode) || false;
         blockingService.updateRules(actions, blockMode);
@@ -244,6 +249,27 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'addBypass') {
     if (blockingService.addBypass) blockingService.addBypass(request.domain);
     sendResponse({ success: true });
+    return true;
+  }
+  
+  if (request.action === 'getLogo') {
+    // Get logo from memory cache
+    var logo = apiService.getLogoForCompany(request.company);
+    if (logo) {
+      sendResponse({ logo: logo });
+    } else {
+      // If no logo in cache, try refreshing data first
+      if (!apiService.hasLogosInCache()) {
+        apiService.getLaborActions().then(function() {
+          var refreshedLogo = apiService.getLogoForCompany(request.company);
+          sendResponse({ logo: refreshedLogo || null });
+        }).catch(function() {
+          sendResponse({ logo: null });
+        });
+      } else {
+        sendResponse({ logo: null });
+      }
+    }
     return true;
   }
 });

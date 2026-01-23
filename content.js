@@ -46,8 +46,8 @@
     const description = action.description || 'This company is currently subject to a labor action.';
     // const actionType = action.type || 'strike';  // Currently unused
     const moreInfoUrl = action.url || action.more_info || '';
-    // Check multiple locations and field names for logoUrl
-    const logoUrl = action.logoUrl || 
+    // Check for logoUrl in stored data (will be empty for base64 images)
+    const storedLogoUrl = action.logoUrl || 
                    action._extensionData?.logoUrl || 
                    action._extensionData?.unionImageUrl ||
                    action._extensionData?.actionDetails?.logoUrl ||
@@ -62,19 +62,42 @@
     const bannerContent = document.createElement('div');
     bannerContent.className = 'opl-banner-content';
     
+    // Create logo placeholder (will be filled async if needed)
+    const logoContainer = document.createElement('div');
+    logoContainer.className = 'opl-banner-logo-container';
+    
     // Add logo or icon
-    if (logoUrl) {
+    if (storedLogoUrl) {
+      // We have a URL stored, use it directly
       const logo = document.createElement('img');
-      logo.src = logoUrl;
+      logo.src = storedLogoUrl;
       logo.alt = 'Union logo';
       logo.className = 'opl-banner-logo';
-      bannerContent.appendChild(logo);
+      logoContainer.appendChild(logo);
     } else {
+      // No stored URL - add placeholder icon, then try to fetch from background
       const iconDiv = document.createElement('div');
       iconDiv.className = 'opl-banner-icon';
       iconDiv.textContent = '⚠️';
-      bannerContent.appendChild(iconDiv);
+      logoContainer.appendChild(iconDiv);
+      
+      // Request logo from background script (memory cache)
+      const company = action.company;
+      if (company) {
+        chrome.runtime.sendMessage({ action: 'getLogo', company: company }, (response) => {
+          if (response && response.logo) {
+            // Replace icon with logo
+            logoContainer.innerHTML = '';
+            const logo = document.createElement('img');
+            logo.src = response.logo;
+            logo.alt = 'Union logo';
+            logo.className = 'opl-banner-logo';
+            logoContainer.appendChild(logo);
+          }
+        });
+      }
     }
+    bannerContent.appendChild(logoContainer);
     
     // Build text container
     const textDiv = document.createElement('div');

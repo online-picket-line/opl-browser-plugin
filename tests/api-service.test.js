@@ -464,13 +464,14 @@ describe('ApiService', () => {
       // Should return empty array (no cached data available)
       expect(result).toEqual([]);
       
-      // Should set upgrade_needed flag in storage
+      // Should set upgrade_needed flag in storage (with callback)
       expect(mockChromeStorage.local.set).toHaveBeenCalledWith(
         expect.objectContaining({
           upgrade_needed: true,
           upgrade_reason: 'api_key_invalid',
           connection_status: 'upgrade_needed'
-        })
+        }),
+        expect.any(Function)
       );
       
       // Should warn but not throw error
