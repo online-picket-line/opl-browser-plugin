@@ -139,6 +139,91 @@ describe('DnrService', () => {
     });
   });
 
+  describe('escaped dot conversion (regression tests)', () => {
+    // These tests ensure that regex-escaped dots (\.) are properly converted
+    // to literal dots for DNR urlFilter format. DNR uses literal text matching,
+    // not regex, so escaped dots must be unescaped.
+    // Bug reference: quikrete.com, rinkerpipe.com, nyp.org were not being blocked
+    // because patterns like "quikrete\.com" were not converted to "quikrete.com"
+
+    test('should convert nyp.org pattern correctly', () => {
+      const result = dnrService.convertRegexToUrlFilter('nyp\\.org');
+      expect(result).toBe('||nyp.org^');
+      // Ensure no backslashes remain
+      expect(result).not.toContain('\\');
+    });
+
+    test('should convert quikrete.com pattern correctly', () => {
+      const result = dnrService.convertRegexToUrlFilter('quikrete\\.com');
+      expect(result).toBe('||quikrete.com^');
+      expect(result).not.toContain('\\');
+    });
+
+    test('should convert rinkerpipe.com pattern correctly', () => {
+      const result = dnrService.convertRegexToUrlFilter('rinkerpipe\\.com');
+      expect(result).toBe('||rinkerpipe.com^');
+      expect(result).not.toContain('\\');
+    });
+
+    test('should handle Rinker Materials OR pattern with multiple domains', () => {
+      // Real pattern from the blocklist for Rinker Materials labor action
+      const pattern = '(quikrete\\.com|rinkerpipe\\.com)';
+      const result = dnrService.expandRegexToMultipleFilters(pattern);
+      
+      expect(result).toHaveLength(2);
+      expect(result).toContain('||quikrete.com^');
+      expect(result).toContain('||rinkerpipe.com^');
+      // Ensure no backslashes in any result
+      result.forEach(filter => {
+        expect(filter).not.toContain('\\');
+      });
+    });
+
+    test('should handle complex OR pattern with social media and main domain', () => {
+      // Pattern similar to real blocklist entries
+      const pattern = '(facebook\\.com/Quikrete|instagram\\.com/quikreteconcrete|quikrete\\.com|rinkerpipe\\.com)';
+      const result = dnrService.expandRegexToMultipleFilters(pattern);
+      
+      expect(result.length).toBeGreaterThanOrEqual(2);
+      // Check that simple domains are converted correctly
+      expect(result).toContain('||quikrete.com^');
+      expect(result).toContain('||rinkerpipe.com^');
+      // Check that social media paths are converted correctly  
+      expect(result.some(f => f.includes('facebook.com/Quikrete'))).toBe(true);
+      expect(result.some(f => f.includes('instagram.com/quikreteconcrete'))).toBe(true);
+      // No backslashes should remain
+      result.forEach(filter => {
+        expect(filter).not.toContain('\\');
+      });
+    });
+
+    test('should handle NewYork-Presbyterian pattern', () => {
+      // Real pattern from the blocklist
+      const pattern = '(facebook\\.com/newyorkpresbyterian|nyp\\.org|twitter\\.com/nyphospital)';
+      const result = dnrService.expandRegexToMultipleFilters(pattern);
+      
+      expect(result.length).toBeGreaterThanOrEqual(2);
+      expect(result).toContain('||nyp.org^');
+      expect(result.some(f => f.includes('facebook.com/newyorkpresbyterian'))).toBe(true);
+      // No backslashes should remain
+      result.forEach(filter => {
+        expect(filter).not.toContain('\\');
+      });
+    });
+
+    test('should handle multiple escaped dots in subdomain patterns', () => {
+      const result = dnrService.convertRegexToUrlFilter('www\\.example\\.com');
+      expect(result).toBe('||www.example.com^');
+      expect(result).not.toContain('\\');
+    });
+
+    test('should handle escaped dots in path patterns', () => {
+      const result = dnrService.convertRegexToUrlFilter('example\\.com/path/file\\.html');
+      expect(result).toContain('example.com/path/file.html');
+      expect(result).not.toContain('\\');
+    });
+  });
+
   describe('generateBlockModeRules', () => {
     const mockActions = [
       {
