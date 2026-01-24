@@ -110,7 +110,7 @@ describe('ApiService', () => {
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
         company: 'Test Org',
-        logoUrl: ''
+        logoUrl: null  // API v3.1 returns null for missing logos
       });
     });
 
@@ -198,11 +198,11 @@ describe('ApiService', () => {
       expect(result[0].logoUrl).toBe("https://example.com/primary-logo.png");
     });
 
-    it('should use unionImageUrl from orgData level when logoUrl is not available', () => {
-      const dataWithUnionImageUrl = {
+    it('should use unionLogoUrl from orgData level when logoUrl is not available', () => {
+      const dataWithUnionLogoUrl = {
         "Test Org": {
           "moreInfoUrl": "https://test.com",
-          "unionImageUrl": "https://example.com/union-image.png",
+          "unionLogoUrl": "/union_logos/test-union.png",
           "matchingUrlRegexes": ["test.com"],
           "actionDetails": {
             "id": "test-123",
@@ -213,14 +213,14 @@ describe('ApiService', () => {
         }
       };
 
-      const result = apiService.transformExtensionApiResponse(dataWithUnionImageUrl);
+      const result = apiService.transformExtensionApiResponse(dataWithUnionLogoUrl);
 
       expect(result).toHaveLength(1);
-      expect(result[0].logoUrl).toBe("https://example.com/union-image.png");
+      expect(result[0].logoUrl).toBe("/union_logos/test-union.png");
     });
 
-    it('should use unionImageUrl from actionDetails when other options not available', () => {
-      const dataWithActionDetailsUnionImageUrl = {
+    it('should use unionLogoUrl from actionDetails when other options not available', () => {
+      const dataWithActionDetailsUnionLogoUrl = {
         "Test Org": {
           "moreInfoUrl": "https://test.com",
           "matchingUrlRegexes": ["test.com"],
@@ -229,23 +229,23 @@ describe('ApiService', () => {
             "organization": "Test Org",
             "actionType": "strike",
             "status": "active",
-            "unionImageUrl": "https://example.com/action-details-union-image.png"
+            "unionLogoUrl": "/union_logos/action-details-union.png"
           }
         }
       };
 
-      const result = apiService.transformExtensionApiResponse(dataWithActionDetailsUnionImageUrl);
+      const result = apiService.transformExtensionApiResponse(dataWithActionDetailsUnionLogoUrl);
 
       expect(result).toHaveLength(1);
-      expect(result[0].logoUrl).toBe("https://example.com/action-details-union-image.png");
+      expect(result[0].logoUrl).toBe("/union_logos/action-details-union.png");
     });
 
-    it('should prefer logoUrl over unionImageUrl', () => {
+    it('should prefer logoUrl over unionLogoUrl', () => {
       const dataWithBothLogoTypes = {
         "Test Org": {
           "moreInfoUrl": "https://test.com",
           "logoUrl": "https://example.com/logo.png",
-          "unionImageUrl": "https://example.com/union-image.png",
+          "unionLogoUrl": "/union_logos/union-logo.png",
           "matchingUrlRegexes": ["test.com"],
           "actionDetails": {
             "id": "test-123",

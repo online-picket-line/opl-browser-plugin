@@ -1,4 +1,5 @@
 // Mock sample extension format data for testing
+// Updated for API v3.1 (January 2026): unionLogoUrl replaces unionImageUrl, endTime removed
 const mockExtensionData = {
   "Wirecutter": {
     "moreInfoUrl": "https://twitter.com/wirecutterunion/status/123",
@@ -9,7 +10,7 @@ const mockExtensionData = {
       "twitter.com/wirecutter"
     ],
     "startTime": "2023-12-09T00:00:00.000-05:00",
-    "endTime": "2023-12-10T00:00:00.000-05:00",
+    // Note: endTime removed from API in v3.1 - use status field instead
     "actionDetails": {
       "id": "action-123",
       "organization": "Wirecutter Union",
@@ -19,6 +20,7 @@ const mockExtensionData = {
       "demands": "15% wage increase, healthcare coverage",
       "contactInfo": "support@wirecutterunion.org",
       "logoUrl": "https://example.com/logos/wirecutter-union.png",
+      "unionLogoUrl": "/union_logos/wirecutter-union.png",
       "location": "New York, NY",
       "learnMoreUrl": "https://twitter.com/wirecutterunion/status/123"
     }
@@ -38,6 +40,7 @@ const mockExtensionData = {
       "description": "Consumer boycott for worker rights",
       "demands": "Union recognition, fair wages",
       "logoUrl": "https://example.com/logos/workers-united.png",
+      "unionLogoUrl": "/union_logos/workers-united.png",
       "location": "Detroit, MI",
       "learnMoreUrl": "https://example.com/boycott"
     }

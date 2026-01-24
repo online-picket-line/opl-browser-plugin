@@ -209,23 +209,20 @@ describe('Block Page', () => {
       expect(elements['union-logo'].style.display).toBe('none');
     });
 
-    it('should display action dates if available', () => {
+    it('should display action dates if available (start date only, API no longer returns end date)', () => {
       const action = {
         title: 'Test Action',
-        startDate: '2025-01-01',
-        endDate: '2025-12-31'
+        startDate: '2025-06-15'  // Use mid-year date to avoid timezone issues
+        // Note: endDate removed from API v3.1 - use status field instead
       };
 
       const updateUI = (action) => {
         let hasDetails = false;
 
         if (action.startDate) {
+          // API no longer returns endDate, always show "Present" for ongoing actions
           let dateText = new Date(action.startDate).toLocaleDateString();
-          if (action.endDate) {
-            dateText += ' - ' + new Date(action.endDate).toLocaleDateString();
-          } else {
-            dateText += ' - Present';
-          }
+          dateText += ' - Present';
           elements['action-dates'].textContent = dateText;
           elements['action-dates-container'].style.display = 'block';
           hasDetails = true;
@@ -240,23 +237,26 @@ describe('Block Page', () => {
 
       updateUI(action);
 
-      expect(elements['action-dates'].textContent).toContain('2025');
+      // Check for date and "Present" text (exact format depends on locale)
+      expect(elements['action-dates'].textContent).toContain('Present');
       expect(elements['action-dates-container'].style.display).toBe('block');
     });
 
-    it('should show "Present" when no end date is provided', () => {
+    it('should show "Present" for ongoing actions (endDate removed from API)', () => {
       const action = {
         title: 'Test Action',
-        startDate: '2025-01-01'
+        startDate: '2025-01-01',
+        status: 'active'
       };
 
       const updateUI = (action) => {
         if (action.startDate) {
+          // API v3.1: Use status field instead of endDate
           let dateText = new Date(action.startDate).toLocaleDateString();
-          if (action.endDate) {
-            dateText += ' - ' + new Date(action.endDate).toLocaleDateString();
-          } else {
+          if (action.status === 'active') {
             dateText += ' - Present';
+          } else if (action.status === 'completed') {
+            dateText += ' (Completed)';
           }
           elements['action-dates'].textContent = dateText;
         }

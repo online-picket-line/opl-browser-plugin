@@ -39,10 +39,12 @@
     }
   ],
   "api_format_notes": {
-    "description": "This is a sample data file showing the expected format for labor actions API",
+    "description": "This is a sample data file showing the expected format for labor actions API (v3.1)",
     "required_fields": ["id", "title", "status"],
-    "optional_fields": ["description", "type", "company", "target_urls", "domains", "targets", "url", "more_info", "start_date", "end_date", "location"],
+    "optional_fields": ["description", "type", "company", "target_urls", "domains", "targets", "url", "more_info", "start_date", "location", "unionLogoUrl"],
+    "removed_fields_v3_1": ["end_date", "unionImageUrl"],
     "status_values": ["active", "completed", "pending"],
-    "type_values": ["strike", "boycott", "picket", "protest", "other"]
+    "type_values": ["strike", "boycott", "picket", "protest", "other"],
+    "logo_format_note": "unionLogoUrl now returns URL paths (e.g., /union_logos/uaw.png) instead of base64 data"
   }
 }

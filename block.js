@@ -1,5 +1,9 @@
 // Block page script - DNR version
 // This page is loaded via declarativeNetRequest redirect
+
+// API base URL for resolving relative logo URLs
+const API_BASE_URL = 'https://onlinepicketline.com';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const actionTitle = document.getElementById('action-title');
   const actionDescription = document.getElementById('action-description');
@@ -103,14 +107,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   function updateUI(action, originalUrl) {
     if (action) {
       // Display union logo if available - check multiple locations and field names
+      // API now returns unionLogoUrl (URLs only, not base64)
       const logoUrl = action.logoUrl || 
                      action._extensionData?.logoUrl || 
-                     action._extensionData?.unionImageUrl ||
+                     action._extensionData?.unionLogoUrl ||
                      action._extensionData?.actionDetails?.logoUrl || 
-                     action._extensionData?.actionDetails?.unionImageUrl ||
-                     '';
+                     action._extensionData?.actionDetails?.unionLogoUrl ||
+                     null;
       if (logoUrl) {
-        unionLogo.src = logoUrl;
+        // Handle relative URLs from API (e.g., /union_logos/uaw.png)
+        const fullLogoUrl = logoUrl.startsWith('/') 
+          ? `${API_BASE_URL}${logoUrl}` 
+          : logoUrl;
+        unionLogo.src = fullLogoUrl;
         unionLogo.style.display = 'block';
       } else {
         unionLogo.style.display = 'none';

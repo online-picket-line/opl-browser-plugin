@@ -330,19 +330,15 @@ class ApiService {
       // Extract action details with fallbacks
       const actionDetails = orgData.actionDetails || {};
 
-      // Get the logo (including base64) but only cache in memory, not storage
-      const logoData = orgData.logoUrl || orgData.unionImageUrl || 
-                       actionDetails.logoUrl || actionDetails.unionImageUrl || '';
+      // Get the logo URL - API now returns URLs only, not base64 data
+      // unionLogoUrl is the new field name, with fallbacks for backward compatibility
+      const logoUrl = orgData.logoUrl || orgData.unionLogoUrl || 
+                       actionDetails.logoUrl || actionDetails.unionLogoUrl || null;
       
-      // Cache logo in memory (keyed by company name)
-      if (logoData) {
-        this._logoCache.set(orgName.toLowerCase(), logoData);
-      }
-
-      // For storage, only keep URL references (not base64)
-      let logoUrl = '';
-      if (logoData && !logoData.startsWith('data:')) {
-        logoUrl = logoData; // It's a URL, safe to store
+      // Cache logo URL in memory (keyed by company name)
+      // Since API v3.1, logos are URLs so they're safe to store anywhere
+      if (logoUrl) {
+        this._logoCache.set(orgName.toLowerCase(), logoUrl);
       }
 
       const action = {
@@ -357,7 +353,7 @@ class ApiService {
         locations: actionDetails.location ? [actionDetails.location] : [],
         demands: actionDetails.demands || '',
         startDate: orgData.startTime || actionDetails.startDate || '',
-        endDate: orgData.endTime || actionDetails.endDate || '',
+        // Note: endDate/endTime removed from API - use status field instead
         contactInfo: actionDetails.contactInfo || '',
         logoUrl: logoUrl,
         divisions: [],
@@ -476,6 +472,7 @@ class ApiService {
 
   /**
    * Optimize data for storage by removing large redundant fields
+   * Note: Since API v3.1, logos are served as URLs (not base64) so storage is much smaller
    * @param {Array} data - Labor actions data
    * @returns {Array} Optimized data
    */
@@ -486,10 +483,10 @@ class ApiService {
       // Create a copy without the full _extensionData to save space
       const optimized = { ...action };
       
-      // Remove base64 encoded images (they're ~65KB each!)
+      // Legacy support: Remove any remaining base64 images (API v3.1+ no longer sends these)
       // Keep only URL references, not embedded data
       if (optimized.logoUrl && optimized.logoUrl.startsWith('data:')) {
-        optimized.logoUrl = ''; // Strip base64 images
+        optimized.logoUrl = ''; // Strip base64 images from legacy data
       }
       
       // Keep only essential matching data from _extensionData
@@ -497,7 +494,7 @@ class ApiService {
         optimized._extensionData = {
           matchingUrlRegexes: action._extensionData.matchingUrlRegexes || [],
           moreInfoUrl: action._extensionData.moreInfoUrl || ''
-          // Explicitly NOT storing unionImageUrl or other large fields
+          // Note: unionLogoUrl is now a URL (not base64) so it's safe in logoUrl field
         };
       }
       
