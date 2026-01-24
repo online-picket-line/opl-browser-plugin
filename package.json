@@ -1,7 +1,7 @@
 {
   "name": "opl-browser-plugin",
-  "version": "1.0.0",
-  "description": "Browser plugin for Online Picket Line",
+  "version": "2.0.0",
+  "description": "Browser extension to inform users about labor actions and boycotts",
   "main": "api-service.js",
   "scripts": {
     "test": "jest",

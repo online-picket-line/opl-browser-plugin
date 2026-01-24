@@ -1,8 +1,8 @@
 # Online Picket Line Browser Extension - Project Specification
 
-**Version:** 1.0.1  
-**Last Updated:** January 3, 2026  
-**Status:** Production Ready - Chrome Web Store Submission Prepared  
+**Version:** 2.0.0  
+**Last Updated:** January 24, 2026  
+**Status:** Production Ready - Multi-Store Submission Prepared  
 **Architecture:** Manifest V3 with declarativeNetRequest API  
 
 ---

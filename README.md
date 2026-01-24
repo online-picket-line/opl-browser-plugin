@@ -1,5 +1,9 @@
 # Online Picket Line - Browser Extension
 
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/online-picket-line/opl-browser-plugin/releases)
+[![License](https://img.shields.io/badge/license-ISC-green.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-219%20passed-brightgreen.svg)](tests/)
+
 A cross-browser extension that helps users stay informed about labor actions and boycotts by integrating with the [Online Picketline API](https://github.com/online-picket-line/online-picketline). The extension notifies users when they visit websites associated with active labor actions.
 
 ## Features
@@ -24,64 +28,52 @@ No setup required! The extension connects automatically to the Online Picketline
 
 **[Install from Chrome Web Store](https://chromewebstore.google.com/detail/online-picket-line-opl/pmfdobekpboegaedaejoepnphopacfog)** - Works with Chrome, Edge, Brave, and other Chromium-based browsers.
 
-### Firefox (Manual Installation)
+### Firefox Add-ons
+
+**[Install from Firefox Add-ons](https://addons.mozilla.org/firefox/addon/online-picket-line/)** - Works with Firefox Desktop and Firefox for Android.
+
+### Opera Add-ons
+
+**[Install from Opera Add-ons](https://addons.opera.com/extensions/details/online-picket-line/)** - Works with Opera and Opera GX.
+
+### Safari (Mac App Store)
+
+**[Download from Mac App Store](https://apps.apple.com/app/online-picket-line/)** - Requires macOS Big Sur (11.0) or later.
+
+### Manual Installation (Development)
+
+#### Chrome/Edge/Brave (Manifest V3)
 
 1. Download or clone this repository
-2. Copy `manifest-v2.json` to `manifest.json` (Firefox uses Manifest V2)
+2. Open Chrome and navigate to `chrome://extensions`
+3. Enable "Developer mode" (toggle in top right)
+4. Click "Load unpacked"
+5. Select the `opl-browser-plugin` directory
+
+#### Firefox (Manifest V2)
+
+1. Download or clone this repository
+2. Copy `manifest-v2.json` to `manifest.json`:
    ```bash
    cp manifest-v2.json manifest.json
    ```
 3. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
 4. Click "Load Temporary Add-on"
 5. Select any file in the `opl-browser-plugin` directory
-6. The extension should now be installed
 
-### Safari
-
-Safari 14+ supports web extensions using the same WebExtensions API as Chrome and Firefox. The extension is fully compatible with Safari's Manifest V3 implementation.
-
-#### Installation Methods
-
-**Method 1: For Development/Testing (Recommended for trying the extension)**
+#### Safari (Development)
 
 1. Download or clone this repository
 2. Open Terminal and navigate to the extension directory
-3. Convert the extension to Safari App Extension format:
+3. Convert to Safari App Extension format:
    ```bash
    xcrun safari-web-extension-converter . --app-name "Online Picket Line"
    ```
 4. Open the generated Xcode project
 5. Build and run the project (⌘R)
-6. Safari will launch automatically with the extension enabled
-7. In Safari, go to Preferences → Extensions and enable "Online Picket Line"
+6. In Safari, go to Preferences → Extensions and enable "Online Picket Line"
 
-**Method 2: Manual Loading (Quick Testing)**
-
-1. Download or clone this repository
-2. Open Safari and go to Safari → Preferences → Advanced
-3. Check "Show Develop menu in menu bar"
-4. Go to Develop → Allow Unsigned Extensions
-5. Go to Safari → Preferences → Extensions
-6. Click the "+" button and select the extension directory
-
-**Method 3: Distribution via Mac App Store**
-
-For distributing to end users, the extension must be:
-1. Converted using `xcrun safari-web-extension-converter`
-2. Signed with an Apple Developer account
-3. Submitted to the Mac App Store as part of a Mac app
-
-For detailed instructions, see Apple's [Converting a Web Extension for Safari](https://developer.apple.com/documentation/safariservices/safari_web_extensions/converting_a_web_extension_for_safari) guide.
-
-#### Safari-Specific Notes
-
-- Safari 14+ (macOS Big Sur or later) is required for Manifest V3 support
-- The extension uses a browser API polyfill for cross-browser compatibility
-- All features work identically to Chrome/Edge versions
-- Extension settings sync via iCloud if Safari sync is enabled
-- Performance is optimized for Safari's energy efficiency requirements
-
-**Need detailed Safari instructions?** See [SAFARI_SETUP.md](docs/SAFARI_SETUP.md) for comprehensive setup, troubleshooting, and distribution guide.
+**For detailed Safari instructions, see [SAFARI_SETUP.md](docs/safari_plugin_store/SAFARI_SETUP.md)**
 
 ## Setup
 

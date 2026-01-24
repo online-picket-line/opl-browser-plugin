@@ -360,7 +360,8 @@ class ApiService {
         // Store only essential extension data for matching (not the full orgData with images!)
         _extensionData: {
           matchingUrlRegexes: orgData.matchingUrlRegexes || [],
-          moreInfoUrl: orgData.moreInfoUrl || ''
+          moreInfoUrl: orgData.moreInfoUrl || '',
+          logoUrl: logoUrl || '' // Include logoUrl for fallback access
         }
       };
 
@@ -493,8 +494,8 @@ class ApiService {
       if (action._extensionData) {
         optimized._extensionData = {
           matchingUrlRegexes: action._extensionData.matchingUrlRegexes || [],
-          moreInfoUrl: action._extensionData.moreInfoUrl || ''
-          // Note: unionLogoUrl is now a URL (not base64) so it's safe in logoUrl field
+          moreInfoUrl: action._extensionData.moreInfoUrl || '',
+          logoUrl: optimized.logoUrl || '' // Include logoUrl for fallback access
         };
       }
       
@@ -521,6 +522,7 @@ class ApiService {
       status: action.status,
       more_info: action.more_info,
       target_urls: action.target_urls,
+      logoUrl: action.logoUrl || '', // Include logoUrl (URLs are small)
       _extensionData: action._extensionData ? {
         matchingUrlRegexes: action._extensionData.matchingUrlRegexes || []
       } : undefined

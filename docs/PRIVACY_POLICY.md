@@ -1,7 +1,8 @@
 # Privacy Policy - Online Picket Line Browser Extension
 
-**Last Updated:** January 3, 2026  
-**Effective Date:** January 3, 2026
+**Last Updated:** January 24, 2026  
+**Effective Date:** January 24, 2026  
+**Version:** 2.0.0
 
 ## Introduction
 

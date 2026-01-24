@@ -3,6 +3,9 @@
 (function() {
   'use strict';
 
+  // API base URL for resolving relative logo URLs
+  const API_BASE_URL = 'https://onlinepicketline.com';
+
   let currentBanner = null;
 
   /**
@@ -46,8 +49,20 @@
     const description = action.description || 'This company is currently subject to a labor action.';
     // const actionType = action.type || 'strike';  // Currently unused
     const moreInfoUrl = action.url || action.more_info || '';
-    // Check for logoUrl in stored data (URL only - base64 images are fetched via getLogo message)
-    const storedLogoUrl = action.logoUrl || '';
+    
+    // Check for logoUrl in stored data - handle both direct URL and nested locations
+    // API now returns URLs (not base64), which may be relative paths
+    let storedLogoUrl = action.logoUrl || 
+                        action._extensionData?.logoUrl || 
+                        action._extensionData?.unionLogoUrl ||
+                        action._extensionData?.actionDetails?.logoUrl || 
+                        action._extensionData?.actionDetails?.unionLogoUrl ||
+                        '';
+    
+    // Handle relative URLs from API (e.g., /union_logos/uaw.png)
+    if (storedLogoUrl && storedLogoUrl.startsWith('/')) {
+      storedLogoUrl = `${API_BASE_URL}${storedLogoUrl}`;
+    }
 
     // Construct employer and location values
     const employer = action.employer || action.employerName || action.employer_name || action.company;
@@ -63,7 +78,7 @@
     
     // Add logo or icon
     if (storedLogoUrl) {
-      // We have a URL stored, use it directly
+      // We have a URL stored, use it directly (already resolved above)
       const logo = document.createElement('img');
       logo.src = storedLogoUrl;
       logo.alt = 'Union logo';
@@ -82,10 +97,14 @@
       if (company) {
         chrome.runtime.sendMessage({ action: 'getLogo', company: company }, (response) => {
           if (response && response.logo) {
-            // Replace icon with logo
+            // Replace icon with logo - handle relative URLs
+            let logoUrl = response.logo;
+            if (logoUrl.startsWith('/')) {
+              logoUrl = `${API_BASE_URL}${logoUrl}`;
+            }
             logoContainer.innerHTML = '';
             const logo = document.createElement('img');
-            logo.src = response.logo;
+            logo.src = logoUrl;
             logo.alt = 'Union logo';
             logo.className = 'opl-banner-logo';
             logoContainer.appendChild(logo);

@@ -3,7 +3,7 @@
 ## Extension Overview
 
 **Name:** Online Picket Line - OPL  
-**Version:** 1.0.1  
+**Version:** 2.0.0  
 **Category:** Productivity  
 **Single Purpose:** To inform users about active labor actions (strikes, boycotts) when they visit websites associated with those actions.
 
