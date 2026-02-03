@@ -1,93 +1,37 @@
 #!/bin/bash
 
 # Test Runner Script
-# Validates test files and runs Jest tests if available
-# Supports Fedora Silverblue with flatpak/toolbox
+# Validates test files and runs Jest tests
 
 echo "================================================"
 echo "Online Picket Line - Update Service Test Runner"
 echo "================================================"
 echo ""
 
-# Detect if running in flatpak (Silverblue scenario)
-USING_FLATPAK=false
-TOOLBOX_NAME="opl-dev"
-
-if [ -f "/.flatpak-info" ] || [ -n "$FLATPAK_ID" ]; then
-    echo "🔍 Detected flatpak environment (Silverblue)"
-    USING_FLATPAK=true
-    
-    # Check if flatpak-spawn is available
-    if ! command -v flatpak-spawn &> /dev/null; then
-        echo "❌ flatpak-spawn not found"
-        echo "   This is unexpected in a flatpak environment"
-        exit 1
-    fi
-    
-    echo "✅ flatpak-spawn available"
-    
-    # Check if toolbox exists
-    if ! flatpak-spawn --host toolbox list 2>/dev/null | grep -q "$TOOLBOX_NAME"; then
-        echo "⚠️  Toolbox '$TOOLBOX_NAME' not found"
-        echo "   Creating toolbox..."
-        flatpak-spawn --host toolbox create "$TOOLBOX_NAME"
-        if [ $? -ne 0 ]; then
-            echo "❌ Failed to create toolbox"
-            echo "   Run: toolbox create $TOOLBOX_NAME"
-            exit 1
-        fi
-        echo "✅ Toolbox created"
-    fi
-    
-    echo "✅ Using toolbox: $TOOLBOX_NAME"
-    
-    # Install Node.js in toolbox if needed
-    echo "📦 Checking Node.js in toolbox..."
-    if ! flatpak-spawn --host toolbox run -c "$TOOLBOX_NAME" node --version &> /dev/null; then
-        echo "📦 Installing Node.js in toolbox..."
-        flatpak-spawn --host toolbox run -c "$TOOLBOX_NAME" sudo dnf install -y nodejs npm
-        if [ $? -ne 0 ]; then
-            echo "❌ Failed to install Node.js"
-            exit 1
-        fi
-    fi
-    
-    NODE_VERSION=$(flatpak-spawn --host toolbox run -c "$TOOLBOX_NAME" node --version 2>/dev/null)
-    NPM_VERSION=$(flatpak-spawn --host toolbox run -c "$TOOLBOX_NAME" npm --version 2>/dev/null)
-    
-    echo "✅ Node.js version: $NODE_VERSION"
-    echo "✅ npm version: $NPM_VERSION"
-else
-    # Regular environment (not flatpak)
-    # Check if Node.js is installed
-    if ! command -v node &> /dev/null; then
-        echo "❌ Node.js is not installed"
-        echo "   Please install Node.js v16 or higher"
-        echo "   Visit: https://nodejs.org/"
-        exit 1
-    fi
-    
-    echo "✅ Node.js version: $(node --version)"
-    
-    # Check if npm is installed
-    if ! command -v npm &> /dev/null; then
-        echo "❌ npm is not installed"
-        echo "   Please install npm (usually comes with Node.js)"
-        exit 1
-    fi
-    
-    echo "✅ npm version: $(npm --version)"
+# Check if Node.js is installed
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js is not installed"
+    echo "   Please install Node.js v16 or higher"
+    echo "   Visit: https://nodejs.org/"
+    exit 1
 fi
+
+echo "✅ Node.js version: $(node --version)"
+
+# Check if npm is installed
+if ! command -v npm &> /dev/null; then
+    echo "❌ npm is not installed"
+    echo "   Please install npm (usually comes with Node.js)"
+    exit 1
+fi
+
+echo "✅ npm version: $(npm --version)"
 
 echo ""
 
-# Function to run npm command (handles flatpak/toolbox)
+# Function to run npm command
 run_npm() {
-    if [ "$USING_FLATPAK" = true ]; then
-        flatpak-spawn --host toolbox run -c "$TOOLBOX_NAME" bash -c "cd '$PWD' && $*"
-    else
-        eval "$*"
-    fi
+    eval "$*"
 }
 
 # Check if node_modules exists
