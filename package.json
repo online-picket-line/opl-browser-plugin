@@ -39,6 +39,9 @@
     ],
     "testMatch": [
       "**/tests/**/*.test.js"
+    ],
+    "reporters": [
+      "<rootDir>/tests/dot-reporter.js"
     ]
   }
 }
