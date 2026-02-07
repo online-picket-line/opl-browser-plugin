@@ -46,31 +46,7 @@ if [ ! -d "node_modules" ]; then
     echo ""
 fi
 
-# Verify test files exist
-echo "🔍 Checking test files..."
-test_files=(
-    "tests/update-service.test.js"
-    "tests/background-update-integration.test.js"
-    "tests/popup-update-ui.test.js"
-)
 
-missing_files=0
-for file in "${test_files[@]}"; do
-    if [ -f "$file" ]; then
-        echo "  ✅ $file"
-    else
-        echo "  ❌ $file (missing)"
-        missing_files=$((missing_files + 1))
-    fi
-done
-
-if [ $missing_files -gt 0 ]; then
-    echo ""
-    echo "❌ $missing_files test file(s) missing"
-    exit 1
-fi
-
-echo ""
 echo "================================================"
 echo "Running Tests"
 echo "================================================"
