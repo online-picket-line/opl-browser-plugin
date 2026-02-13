@@ -16,11 +16,14 @@ const createMockDocument = () => {
   const elements = {
     'mode-banner': createMockElement('mode-banner'),
     'mode-block': createMockElement('mode-block'),
+    'mode-inject': createMockElement('mode-inject'),
     'status': createMockElement('status'),
     'stats-content': createMockElement('stats-content'),
     'connection-indicator': createMockElement('connection-indicator'),
     'connection-text': createMockElement('connection-text'),
-    'test-mode-btn': createMockElement('test-mode-btn')
+    'test-mode-btn': createMockElement('test-mode-btn'),
+    'inject-options': createMockElement('inject-options'),
+    'inject-block-ads': createMockElement('inject-block-ads')
   };
 
   return {

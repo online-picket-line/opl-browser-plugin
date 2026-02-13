@@ -20,6 +20,7 @@ class DnrService {
   constructor() {
     this.MAX_RULES = 5000; // Chrome limit for dynamic rules
     this.RULE_ID_OFFSET = 1; // Starting rule ID
+    this.INJECT_RULE_ID_OFFSET = 10001; // Separate range for ad-blocking rules
   }
 
   /**
@@ -222,20 +223,83 @@ class DnrService {
   }
 
   /**
+   * Generate DNR rules for strike injector mode
+   * Blocks ad network requests so the content script can replace empty ad containers
+   * 
+   * @param {boolean} injectBlockAds - Whether to block ad network requests
+   * @returns {Array} - Array of DNR rule objects for blocking ad networks
+   */
+  generateInjectModeRules(injectBlockAds) {
+    if (!injectBlockAds) {
+      return [];
+    }
+
+    // Import ad network domains — available via importScripts in service worker
+    var adNetworks;
+    if (typeof AD_NETWORK_DOMAINS !== 'undefined') {
+      adNetworks = AD_NETWORK_DOMAINS;
+    } else {
+      // Fallback: inline core ad networks if module not loaded
+      adNetworks = [
+        { urlFilter: '||googlesyndication.com^' },
+        { urlFilter: '||doubleclick.net^' },
+        { urlFilter: '||googleadservices.com^' },
+        { urlFilter: '||adservice.google.com^' },
+        { urlFilter: '||amazon-adsystem.com^' },
+        { urlFilter: '||cdn.taboola.com^' },
+        { urlFilter: '||widgets.outbrain.com^' },
+        { urlFilter: '||media.net^' },
+        { urlFilter: '||criteo.com^' },
+        { urlFilter: '||adnxs.com^' }
+      ];
+    }
+
+    var adBlockResourceTypes = (typeof AD_BLOCK_RESOURCE_TYPES !== 'undefined')
+      ? AD_BLOCK_RESOURCE_TYPES
+      : ['script', 'image', 'sub_frame', 'xmlhttprequest'];
+
+    var rules = [];
+    var ruleId = this.INJECT_RULE_ID_OFFSET;
+
+    for (var i = 0; i < adNetworks.length; i++) {
+      rules.push({
+        id: ruleId++,
+        priority: 2, // Higher than block-mode redirect rules (priority 1)
+        action: {
+          type: 'block'
+        },
+        condition: {
+          urlFilter: adNetworks[i].urlFilter,
+          resourceTypes: adBlockResourceTypes
+        }
+      });
+    }
+
+    return rules;
+  }
+
+  /**
    * Update DNR rules based on labor actions and mode
    * 
    * @param {Array} laborActions - Array of labor action objects
-   * @param {boolean} blockMode - Whether to use block mode (true) or banner mode (false)
+   * @param {string} mode - 'banner', 'block', or 'inject'
+   * @param {boolean} [injectBlockAds=true] - Whether to block ad networks in inject mode
    * @returns {Promise<boolean>} - Success status
    */
-  async updateRules(laborActions, blockMode) {
+  async updateRules(laborActions, mode, injectBlockAds) {
     try {
-      console.log(`Updating DNR rules for ${blockMode ? 'block' : 'banner'} mode`);
+      if (typeof injectBlockAds === 'undefined') injectBlockAds = true;
+      console.log(`Updating DNR rules for ${mode} mode`);
       
       // Generate rules based on mode
-      const newRules = blockMode 
-        ? this.generateBlockModeRules(laborActions)
-        : this.generateBannerModeRules(laborActions);
+      var newRules;
+      if (mode === 'block') {
+        newRules = this.generateBlockModeRules(laborActions);
+      } else if (mode === 'inject') {
+        newRules = this.generateInjectModeRules(injectBlockAds);
+      } else {
+        newRules = this.generateBannerModeRules(laborActions);
+      }
 
       console.log(`Generated ${newRules.length} DNR rules`);
 

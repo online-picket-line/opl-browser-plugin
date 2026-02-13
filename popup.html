@@ -51,6 +51,11 @@
       margin-top: 0.25rem;
       accent-color: var(--primary);
     }
+    .option input[type="checkbox"] {
+      margin-right: 0.5rem;
+      margin-top: 0.25rem;
+      accent-color: var(--primary);
+    }
     .option-content {
       flex: 1;
     }
@@ -238,6 +243,29 @@
         <div class="option-description">
           Prevent access to pages with active labor actions. <br>
           <em>Note: If you choose to "Proceed Anyway" on a blocked page, the block will be disabled for that tab until you close it.</em>
+        </div>
+      </div>
+    </div>
+
+    <div class="option">
+      <input type="radio" id="mode-inject" name="mode" value="inject">
+      <div class="option-content">
+        <label for="mode-inject">Strike Injector</label>
+        <div class="option-description">
+          Replace ads on websites with strike and labor action information
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="inject-options" class="card section" style="display: none;">
+    <div class="section-title">Injector Options</div>
+    <div class="option">
+      <input type="checkbox" id="inject-block-ads" checked>
+      <div class="option-content">
+        <label for="inject-block-ads">Block ad network requests</label>
+        <div class="option-description">
+          More effective — prevents ads from loading so containers can be replaced with strike info. Disable if you experience page issues.
         </div>
       </div>
     </div>

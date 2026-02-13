@@ -7,6 +7,7 @@
   const API_BASE_URL = 'https://onlinepicketline.com';
 
   let currentBanner = null;
+  let currentInjector = null;
 
   /**
    * Check if current page matches any labor actions (banner mode only)
@@ -21,13 +22,42 @@
     chrome.runtime.sendMessage(
       { action: 'checkUrlForBanner', url: window.location.href },
       (response) => {
-        if (response && response.match && !response.blockMode) {
-          // Only show banner in banner mode
-          // Block mode is handled by DNR redirect
+        if (!response) return;
+        
+        var mode = response.mode || (response.blockMode ? 'block' : 'banner');
+        
+        if (mode === 'inject') {
+          // Strike Injector mode: replace ads on ALL pages with action info
+          startInjectorMode();
+        } else if (mode === 'banner' && response.match) {
+          // Banner mode: show banner only on matched domains
           showBanner(response.match);
         }
+        // Block mode: DNR handles it, content script does nothing
       }
     );
+  }
+
+  /**
+   * Start the strike injector on this page.
+   * Requests all available actions from the background and starts ad replacement.
+   */
+  function startInjectorMode() {
+    // Stop any previous injector instance
+    if (currentInjector) {
+      if (typeof stopStrikeInjector === 'function') {
+        stopStrikeInjector();
+      }
+      currentInjector = null;
+    }
+
+    chrome.runtime.sendMessage({ action: 'getActionsForInjection' }, (response) => {
+      if (response && response.actions && response.actions.length > 0) {
+        if (typeof initStrikeInjector === 'function') {
+          currentInjector = initStrikeInjector(response.actions);
+        }
+      }
+    });
   }
 
   /**
@@ -240,6 +270,11 @@
   window.addEventListener('popstate', () => {
     if (window.location.href !== lastUrl) {
       lastUrl = window.location.href;
+      // Clean up injector on navigation
+      if (currentInjector && typeof stopStrikeInjector === 'function') {
+        stopStrikeInjector();
+        currentInjector = null;
+      }
       checkCurrentPage();
     }
   });
@@ -252,6 +287,10 @@
     originalPushState.apply(this, arguments);
     if (window.location.href !== lastUrl) {
       lastUrl = window.location.href;
+      if (currentInjector && typeof stopStrikeInjector === 'function') {
+        stopStrikeInjector();
+        currentInjector = null;
+      }
       checkCurrentPage();
     }
   };
@@ -260,6 +299,10 @@
     originalReplaceState.apply(this, arguments);
     if (window.location.href !== lastUrl) {
       lastUrl = window.location.href;
+      if (currentInjector && typeof stopStrikeInjector === 'function') {
+        stopStrikeInjector();
+        currentInjector = null;
+      }
       checkCurrentPage();
     }
   };

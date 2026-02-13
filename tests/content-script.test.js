@@ -270,8 +270,11 @@ describe('Content Script Integration', () => {
     it('should handle response from background script', () => {
       const handleResponse = (response) => {
         if (response && response.match) {
-          if (response.blockMode) {
+          var mode = response.mode || (response.blockMode ? 'block' : 'banner');
+          if (mode === 'block') {
             return { action: 'block', match: response.match };
+          } else if (mode === 'inject') {
+            return { action: 'inject', match: response.match };
           } else {
             return { action: 'banner', match: response.match };
           }
@@ -282,7 +285,7 @@ describe('Content Script Integration', () => {
       // Test with blocking response
       const blockResponse = {
         match: { title: 'Test Action' },
-        blockMode: true
+        mode: 'block'
       };
       const blockResult = handleResponse(blockResponse);
       expect(blockResult.action).toBe('block');
@@ -290,10 +293,26 @@ describe('Content Script Integration', () => {
       // Test with banner response
       const bannerResponse = {
         match: { title: 'Test Action' },
-        blockMode: false
+        mode: 'banner'
       };
       const bannerResult = handleResponse(bannerResponse);
       expect(bannerResult.action).toBe('banner');
+
+      // Test with inject response
+      const injectResponse = {
+        match: { title: 'Test Action' },
+        mode: 'inject'
+      };
+      const injectResult = handleResponse(injectResponse);
+      expect(injectResult.action).toBe('inject');
+
+      // Test with legacy blockMode response (backward compatibility)
+      const legacyBlockResponse = {
+        match: { title: 'Test Action' },
+        blockMode: true
+      };
+      const legacyResult = handleResponse(legacyBlockResponse);
+      expect(legacyResult.action).toBe('block');
 
       // Test with no match
       const noMatchResult = handleResponse(null);

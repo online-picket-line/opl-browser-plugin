@@ -6,18 +6,38 @@
 document.addEventListener('DOMContentLoaded', () => {
   const modeBannerRadio = document.getElementById('mode-banner');
   const modeBlockRadio = document.getElementById('mode-block');
+  const modeInjectRadio = document.getElementById('mode-inject');
   const statusDiv = document.getElementById('status');
   const statsContent = document.getElementById('stats-content');
   const connectionIndicator = document.getElementById('connection-indicator');
   const connectionText = document.getElementById('connection-text');
+  const injectOptionsDiv = document.getElementById('inject-options');
+  const injectBlockAdsCheckbox = document.getElementById('inject-block-ads');
 
   // Load current settings
-  chrome.storage.sync.get(['blockMode'], (result) => {
-    const blockMode = result.blockMode || false;
-    if (blockMode) {
+  chrome.storage.sync.get(['mode', 'blockMode', 'injectBlockAds'], (result) => {
+    // Support legacy blockMode boolean for backward compatibility
+    let mode = result.mode;
+    if (mode === undefined) {
+      mode = result.blockMode ? 'block' : 'banner';
+    }
+    
+    if (mode === 'block') {
       modeBlockRadio.checked = true;
+    } else if (mode === 'inject') {
+      modeInjectRadio.checked = true;
     } else {
       modeBannerRadio.checked = true;
+    }
+    
+    // Show/hide inject options
+    if (injectOptionsDiv) {
+      injectOptionsDiv.style.display = (mode === 'inject') ? 'block' : 'none';
+    }
+    
+    // Load inject sub-option
+    if (injectBlockAdsCheckbox) {
+      injectBlockAdsCheckbox.checked = result.injectBlockAds !== false; // default true
     }
   });
 
@@ -43,35 +63,48 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Save settings when radio buttons change
-  modeBannerRadio.addEventListener('change', () => {
-    if (modeBannerRadio.checked) {
-      chrome.storage.sync.set({ blockMode: false }, () => {
-        // Update DNR rules when mode changes
-        chrome.runtime.sendMessage({ action: 'updateMode' }, (response) => {
-          if (response && response.success) {
-            showStatus('Banner mode enabled', 'success');
-          } else {
-            showStatus('Settings saved (rules update pending)', 'success');
-          }
-        });
+  function onModeChange(newMode) {
+    chrome.storage.sync.set({ mode: newMode }, () => {
+      // Show/hide inject options
+      if (injectOptionsDiv) {
+        injectOptionsDiv.style.display = (newMode === 'inject') ? 'block' : 'none';
+      }
+      // Update DNR rules when mode changes
+      chrome.runtime.sendMessage({ action: 'updateMode' }, (response) => {
+        var modeLabel = newMode === 'block' ? 'Block' : newMode === 'inject' ? 'Strike Injector' : 'Banner';
+        if (response && response.success) {
+          showStatus(modeLabel + ' mode enabled', 'success');
+        } else {
+          showStatus('Settings saved (rules update pending)', 'success');
+        }
       });
-    }
+    });
+  }
+
+  modeBannerRadio.addEventListener('change', () => {
+    if (modeBannerRadio.checked) onModeChange('banner');
   });
 
   modeBlockRadio.addEventListener('change', () => {
-    if (modeBlockRadio.checked) {
-      chrome.storage.sync.set({ blockMode: true }, () => {
-        // Update DNR rules when mode changes
+    if (modeBlockRadio.checked) onModeChange('block');
+  });
+
+  modeInjectRadio.addEventListener('change', () => {
+    if (modeInjectRadio.checked) onModeChange('inject');
+  });
+
+  // Inject sub-option: block ad network requests
+  if (injectBlockAdsCheckbox) {
+    injectBlockAdsCheckbox.addEventListener('change', () => {
+      chrome.storage.sync.set({ injectBlockAds: injectBlockAdsCheckbox.checked }, () => {
         chrome.runtime.sendMessage({ action: 'updateMode' }, (response) => {
           if (response && response.success) {
-            showStatus('Block mode enabled', 'success');
-          } else {
-            showStatus('Settings saved (rules update pending)', 'success');
+            showStatus(injectBlockAdsCheckbox.checked ? 'Ad blocking enabled' : 'Ad blocking disabled', 'success');
           }
         });
       });
-    }
-  });
+    });
+  }
 
   /**
    * Show status message

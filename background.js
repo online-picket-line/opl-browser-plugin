@@ -6,7 +6,7 @@
 function WebRequestService() {
   this.isListenerActive = false;
   this.laborActions = [];
-  this.blockMode = false;
+  this.mode = 'banner';
   this.bypassedDomains = {};
   this._boundHandler = null;
 }
@@ -61,7 +61,7 @@ WebRequestService.prototype.matchUrlToAction = function(url) {
 
 WebRequestService.prototype.handleRequest = function(details) {
   if (details.type !== 'main_frame') return;
-  if (!this.blockMode) return;
+  if (this.mode !== 'block') return;
   if (this.isDomainBypassed(details.url)) return;
   
   var match = this.matchUrlToAction(details.url);
@@ -74,12 +74,12 @@ WebRequestService.prototype.handleRequest = function(details) {
   }
 };
 
-WebRequestService.prototype.updateRules = function(laborActions, blockMode) {
+WebRequestService.prototype.updateRules = function(laborActions, mode, _injectBlockAds) {
   this.laborActions = laborActions || [];
-  this.blockMode = blockMode;
-  if (blockMode && !this.isListenerActive) {
+  this.mode = mode || 'banner';
+  if (mode === 'block' && !this.isListenerActive) {
     this.startListener();
-  } else if (!blockMode && this.isListenerActive) {
+  } else if (mode !== 'block' && this.isListenerActive) {
     this.stopListener();
   }
   return Promise.resolve(true);
@@ -107,7 +107,7 @@ WebRequestService.prototype.stopListener = function() {
 
 WebRequestService.prototype.clearRules = function() { this.stopListener(); this.laborActions = []; return Promise.resolve(true); };
 WebRequestService.prototype.addBypassRule = function(url) { try { this.addBypass(new URL(url).hostname); } catch(e){} return Promise.resolve(true); };
-WebRequestService.prototype.getRuleStats = function() { return Promise.resolve({ totalRules: this.laborActions.length, listenerActive: this.isListenerActive, blockMode: this.blockMode }); };
+WebRequestService.prototype.getRuleStats = function() { return Promise.resolve({ totalRules: this.laborActions.length, listenerActive: this.isListenerActive, mode: this.mode }); };
 
 // ============================================================================
 // END WebRequestService
@@ -121,6 +121,7 @@ var hasDNR = isMV3 && typeof chrome !== 'undefined' && chrome.declarativeNetRequ
 if (isMV3) {
   importScripts('browser-polyfill.js');
   importScripts('api-service.js');
+  importScripts('ad-networks.js');
   if (hasDNR) {
     importScripts('dnr-service.js');
   }
@@ -139,9 +140,22 @@ if (hasDNR && typeof DnrService !== 'undefined') {
 // Refresh labor actions on installation
 chrome.runtime.onInstalled.addListener(function() {
   refreshLaborActions();
-  chrome.storage.sync.get(['blockMode'], function(result) {
-    if (result.blockMode === undefined) {
-      chrome.storage.sync.set({ blockMode: false });
+  // Migrate legacy boolean blockMode to string mode enum
+  chrome.storage.sync.get(['blockMode', 'mode'], function(result) {
+    if (result.mode === undefined) {
+      // Migrate from old boolean blockMode
+      var migratedMode = 'banner';
+      if (result.blockMode === true) migratedMode = 'block';
+      chrome.storage.sync.set({ mode: migratedMode }, function() {
+        // Clean up legacy key
+        chrome.storage.sync.remove('blockMode');
+      });
+    }
+  });
+  // Initialize injectBlockAds default
+  chrome.storage.sync.get(['injectBlockAds'], function(result) {
+    if (result.injectBlockAds === undefined) {
+      chrome.storage.sync.set({ injectBlockAds: true });
     }
   });
 });
@@ -164,9 +178,10 @@ function refreshLaborActions() {
         console.warn('Storage error in refreshLaborActions:', chrome.runtime.lastError.message);
         // Still update the blocking service with the actions even if storage failed
       }
-      chrome.storage.sync.get(['blockMode'], function(settings) {
-        var blockMode = (settings && settings.blockMode) || false;
-        blockingService.updateRules(actions, blockMode);
+      chrome.storage.sync.get(['mode', 'injectBlockAds'], function(settings) {
+        var mode = (settings && settings.mode) || 'banner';
+        var injectBlockAds = settings && settings.injectBlockAds !== undefined ? settings.injectBlockAds : true;
+        blockingService.updateRules(actions, mode, injectBlockAds);
       });
     });
   }).catch(function(error) {
@@ -215,8 +230,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     chrome.storage.local.get(['labor_actions'], function(result) {
       var actions = (result && result.labor_actions) || [];
       var match = matchUrlToAction(request.url, actions);
-      chrome.storage.sync.get(['blockMode'], function(settings) {
-        sendResponse({ match: match, blockMode: (settings && settings.blockMode) || false });
+      chrome.storage.sync.get(['mode'], function(settings) {
+        sendResponse({ match: match, mode: (settings && settings.mode) || 'banner' });
       });
     });
     return true;
@@ -234,14 +249,27 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
   
   if (request.action === 'updateMode') {
-    chrome.storage.sync.get(['blockMode'], function(settings) {
-      var blockMode = (settings && settings.blockMode) || false;
+    chrome.storage.sync.get(['mode', 'injectBlockAds'], function(settings) {
+      var mode = (settings && settings.mode) || 'banner';
+      var injectBlockAds = settings && settings.injectBlockAds !== undefined ? settings.injectBlockAds : true;
       chrome.storage.local.get(['labor_actions'], function(result) {
         var actions = (result && result.labor_actions) || [];
-        blockingService.updateRules(actions, blockMode).then(function() {
+        blockingService.updateRules(actions, mode, injectBlockAds).then(function() {
           sendResponse({ success: true });
         });
       });
+    });
+    return true;
+  }
+
+  if (request.action === 'getActionsForInjection') {
+    chrome.storage.local.get(['labor_actions'], function(result) {
+      var actions = (result && result.labor_actions) || [];
+      // Return all active actions for ad replacement rotation
+      var activeActions = actions.filter(function(a) {
+        return !a.status || a.status === 'active';
+      });
+      sendResponse({ actions: activeActions });
     });
     return true;
   }
@@ -277,12 +305,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 // Initial fetch on startup
 refreshLaborActions();
 
-// Check if blockMode is already enabled
-chrome.storage.sync.get(['blockMode'], function(result) {
-  if (result && result.blockMode) {
+// Restore mode on startup
+chrome.storage.sync.get(['mode', 'injectBlockAds'], function(result) {
+  var mode = (result && result.mode) || 'banner';
+  var injectBlockAds = result && result.injectBlockAds !== undefined ? result.injectBlockAds : true;
+  if (mode === 'block' || mode === 'inject') {
     chrome.storage.local.get(['labor_actions'], function(localResult) {
       var actions = (localResult && localResult.labor_actions) || [];
-      blockingService.updateRules(actions, true);
+      blockingService.updateRules(actions, mode, injectBlockAds);
     });
   }
 });

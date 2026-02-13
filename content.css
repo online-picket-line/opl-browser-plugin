@@ -138,3 +138,231 @@
     font-size: 20px;
   }
 }
+
+/* ============================================================================
+   Strike Injector Card Styles
+   Adaptive cards that replace ad elements with labor action information.
+   ============================================================================ */
+
+.opl-strike-card {
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  background: #faf8f5 !important;
+  border: 2px solid #1a1a1a !important;
+  box-shadow: 3px 3px 0 0 #1a1a1a !important;
+  color: #1a1a1a !important;
+  line-height: 1.4 !important;
+  cursor: default !important;
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+.opl-strike-card * {
+  box-sizing: border-box !important;
+}
+
+.opl-strike-card__inner {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  padding: 8px !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* --- Small Card --- */
+.opl-strike-card--small .opl-strike-card__inner {
+  align-items: center !important;
+  text-align: center !important;
+  gap: 4px !important;
+  padding: 6px !important;
+}
+
+.opl-strike-card__icon {
+  font-size: 20px !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+}
+
+.opl-strike-card__headline {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.opl-strike-card__link {
+  font-size: 10px !important;
+  color: #8B2C2C !important;
+  text-decoration: underline !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+}
+
+.opl-strike-card__link:hover {
+  opacity: 0.7 !important;
+}
+
+/* --- Medium Card --- */
+.opl-strike-card--medium .opl-strike-card__inner {
+  gap: 6px !important;
+  padding: 10px !important;
+}
+
+.opl-strike-card__top-row {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+}
+
+.opl-strike-card__logo {
+  width: 32px !important;
+  height: 32px !important;
+  object-fit: contain !important;
+  flex-shrink: 0 !important;
+  border-radius: 2px !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  padding: 2px !important;
+}
+
+.opl-strike-card__icon--medium {
+  font-size: 28px !important;
+  width: 32px !important;
+  text-align: center !important;
+}
+
+.opl-strike-card__text-col {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.opl-strike-card__badge {
+  display: inline-block !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  color: #8B2C2C !important;
+  margin-bottom: 2px !important;
+}
+
+.opl-strike-card__employer {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.opl-strike-card__location {
+  font-size: 11px !important;
+  color: #555 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.opl-strike-card__btn {
+  display: inline-block !important;
+  background: #8B2C2C !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 4px 12px !important;
+  text-decoration: none !important;
+  border: 1px solid #1a1a1a !important;
+  box-shadow: 1px 1px 0 0 #1a1a1a !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  transition: opacity 0.15s !important;
+}
+
+.opl-strike-card__btn:hover {
+  opacity: 0.85 !important;
+}
+
+.opl-strike-card__footer {
+  font-size: 9px !important;
+  color: #888 !important;
+  text-align: right !important;
+  white-space: nowrap !important;
+}
+
+/* --- Large Card --- */
+.opl-strike-card--large .opl-strike-card__inner {
+  gap: 8px !important;
+  padding: 14px !important;
+}
+
+.opl-strike-card__header {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+}
+
+.opl-strike-card__logo--large {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.opl-strike-card__header-text {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+.opl-strike-card__title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #1a1a1a !important;
+  margin-bottom: 2px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.opl-strike-card__subline {
+  font-size: 12px !important;
+  color: #555 !important;
+  margin-top: 2px !important;
+}
+
+.opl-strike-card__demands {
+  font-size: 12px !important;
+  color: #333 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.opl-strike-card__demands strong {
+  color: #8B2C2C !important;
+}
+
+.opl-strike-card__description {
+  font-size: 11px !important;
+  color: #555 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.opl-strike-card__bottom-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-top: auto !important;
+}

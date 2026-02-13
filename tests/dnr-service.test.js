@@ -339,7 +339,7 @@ describe('DnrService', () => {
     ];
 
     test('should update rules in block mode', async () => {
-      const success = await dnrService.updateRules(mockActions, true);
+      const success = await dnrService.updateRules(mockActions, 'block');
 
       expect(success).toBe(true);
       expect(chrome.declarativeNetRequest.getDynamicRules).toHaveBeenCalled();
@@ -347,13 +347,42 @@ describe('DnrService', () => {
     });
 
     test('should clear rules in banner mode', async () => {
-      const success = await dnrService.updateRules(mockActions, false);
+      const success = await dnrService.updateRules(mockActions, 'banner');
 
       expect(success).toBe(true);
       expect(chrome.declarativeNetRequest.updateDynamicRules).toHaveBeenCalledWith({
         removeRuleIds: [],
         addRules: []
       });
+    });
+
+    test('should generate ad-blocking rules in inject mode with blocking enabled', async () => {
+      const success = await dnrService.updateRules(mockActions, 'inject', true);
+
+      expect(success).toBe(true);
+      const call = chrome.declarativeNetRequest.updateDynamicRules.mock.calls[0][0];
+      expect(call.addRules.length).toBeGreaterThan(0);
+      // All rules should be block type
+      call.addRules.forEach(rule => {
+        expect(rule.action.type).toBe('block');
+      });
+    });
+
+    test('should generate no rules in inject mode with blocking disabled', async () => {
+      const success = await dnrService.updateRules(mockActions, 'inject', false);
+
+      expect(success).toBe(true);
+      expect(chrome.declarativeNetRequest.updateDynamicRules).toHaveBeenCalledWith({
+        removeRuleIds: [],
+        addRules: []
+      });
+    });
+
+    test('should support legacy boolean for backward compatibility', async () => {
+      // true → block mode
+      const success = await dnrService.updateRules(mockActions, true);
+      // Should not throw; treated as truthy → generates block-mode-like rules
+      expect(success).toBe(true);
     });
 
     test('should remove existing rules before adding new ones', async () => {
@@ -365,7 +394,7 @@ describe('DnrService', () => {
       ];
       chrome.declarativeNetRequest.getDynamicRules.mockResolvedValue(existingRules);
 
-      await dnrService.updateRules(mockActions, true);
+      await dnrService.updateRules(mockActions, 'block');
 
       expect(chrome.declarativeNetRequest.updateDynamicRules).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -380,7 +409,7 @@ describe('DnrService', () => {
         new Error('DNR API error')
       );
 
-      const success = await dnrService.updateRules(mockActions, true);
+      const success = await dnrService.updateRules(mockActions, 'block');
       
       expect(success).toBe(false);
       expect(console.error).toHaveBeenCalled();
