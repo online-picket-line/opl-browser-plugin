@@ -150,12 +150,18 @@ chrome.runtime.onInstalled.addListener(function() {
         // Clean up legacy key
         chrome.storage.sync.remove('blockMode');
       });
+    } else if (result.mode === 'inject') {
+      // Migrate legacy inject mode to banner + strikeInjectorEnabled
+      chrome.storage.sync.set({ mode: 'banner', strikeInjectorEnabled: true });
     }
   });
-  // Initialize injectBlockAds default
-  chrome.storage.sync.get(['injectBlockAds'], function(result) {
+  // Initialize defaults
+  chrome.storage.sync.get(['injectBlockAds', 'strikeInjectorEnabled'], function(result) {
     if (result.injectBlockAds === undefined) {
       chrome.storage.sync.set({ injectBlockAds: true });
+    }
+    if (result.strikeInjectorEnabled === undefined) {
+      chrome.storage.sync.set({ strikeInjectorEnabled: false });
     }
   });
 });
@@ -178,10 +184,11 @@ function refreshLaborActions() {
         console.warn('Storage error in refreshLaborActions:', chrome.runtime.lastError.message);
         // Still update the blocking service with the actions even if storage failed
       }
-      chrome.storage.sync.get(['mode', 'injectBlockAds'], function(settings) {
+      chrome.storage.sync.get(['mode', 'injectBlockAds', 'strikeInjectorEnabled'], function(settings) {
         var mode = (settings && settings.mode) || 'banner';
         var injectBlockAds = settings && settings.injectBlockAds !== undefined ? settings.injectBlockAds : true;
-        blockingService.updateRules(actions, mode, injectBlockAds);
+        var strikeInjectorEnabled = settings && settings.strikeInjectorEnabled === true;
+        blockingService.updateRules(actions, mode, strikeInjectorEnabled && injectBlockAds);
       });
     });
   }).catch(function(error) {
@@ -230,8 +237,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     chrome.storage.local.get(['labor_actions'], function(result) {
       var actions = (result && result.labor_actions) || [];
       var match = matchUrlToAction(request.url, actions);
-      chrome.storage.sync.get(['mode'], function(settings) {
-        sendResponse({ match: match, mode: (settings && settings.mode) || 'banner' });
+      chrome.storage.sync.get(['mode', 'strikeInjectorEnabled'], function(settings) {
+        sendResponse({
+          match: match,
+          mode: (settings && settings.mode) || 'banner',
+          strikeInjectorEnabled: settings && settings.strikeInjectorEnabled === true
+        });
       });
     });
     return true;
@@ -249,12 +260,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
   
   if (request.action === 'updateMode') {
-    chrome.storage.sync.get(['mode', 'injectBlockAds'], function(settings) {
+    chrome.storage.sync.get(['mode', 'injectBlockAds', 'strikeInjectorEnabled'], function(settings) {
       var mode = (settings && settings.mode) || 'banner';
       var injectBlockAds = settings && settings.injectBlockAds !== undefined ? settings.injectBlockAds : true;
+      var strikeInjectorEnabled = settings && settings.strikeInjectorEnabled === true;
       chrome.storage.local.get(['labor_actions'], function(result) {
         var actions = (result && result.labor_actions) || [];
-        blockingService.updateRules(actions, mode, injectBlockAds).then(function() {
+        blockingService.updateRules(actions, mode, strikeInjectorEnabled && injectBlockAds).then(function() {
           sendResponse({ success: true });
         });
       });
@@ -265,9 +277,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'getActionsForInjection') {
     chrome.storage.local.get(['labor_actions'], function(result) {
       var actions = (result && result.labor_actions) || [];
-      // Return all active actions for ad replacement rotation
+      // Return all approved/active actions for ad replacement rotation
+      // 'approved' is the current workflow status; 'active' is deprecated but kept for compat
       var activeActions = actions.filter(function(a) {
-        return !a.status || a.status === 'active';
+        return !a.status || a.status === 'approved' || a.status === 'active';
       });
       sendResponse({ actions: activeActions });
     });
@@ -306,13 +319,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 refreshLaborActions();
 
 // Restore mode on startup
-chrome.storage.sync.get(['mode', 'injectBlockAds'], function(result) {
+chrome.storage.sync.get(['mode', 'injectBlockAds', 'strikeInjectorEnabled'], function(result) {
   var mode = (result && result.mode) || 'banner';
   var injectBlockAds = result && result.injectBlockAds !== undefined ? result.injectBlockAds : true;
-  if (mode === 'block' || mode === 'inject') {
+  var strikeInjectorEnabled = result && result.strikeInjectorEnabled === true;
+  if (mode === 'block' || strikeInjectorEnabled) {
     chrome.storage.local.get(['labor_actions'], function(localResult) {
       var actions = (localResult && localResult.labor_actions) || [];
-      blockingService.updateRules(actions, mode, injectBlockAds);
+      blockingService.updateRules(actions, mode, strikeInjectorEnabled && injectBlockAds);
     });
   }
 });

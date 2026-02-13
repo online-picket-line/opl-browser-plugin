@@ -279,29 +279,31 @@ class DnrService {
   }
 
   /**
-   * Update DNR rules based on labor actions and mode
+   * Update DNR rules based on labor actions, mode, and injector settings
    * 
    * @param {Array} laborActions - Array of labor action objects
-   * @param {string} mode - 'banner', 'block', or 'inject'
-   * @param {boolean} [injectBlockAds=true] - Whether to block ad networks in inject mode
+   * @param {string} mode - 'banner' or 'block'
+   * @param {boolean} [injectBlockAds=false] - Whether to add ad-network blocking rules (strike injector)
    * @returns {Promise<boolean>} - Success status
    */
   async updateRules(laborActions, mode, injectBlockAds) {
     try {
-      if (typeof injectBlockAds === 'undefined') injectBlockAds = true;
-      console.log(`Updating DNR rules for ${mode} mode`);
+      if (typeof injectBlockAds === 'undefined') injectBlockAds = false;
+      console.log(`Updating DNR rules for ${mode} mode, injector ad-blocking: ${injectBlockAds}`);
       
-      // Generate rules based on mode
-      var newRules;
+      // Generate mode-specific rules
+      var modeRules;
       if (mode === 'block') {
-        newRules = this.generateBlockModeRules(laborActions);
-      } else if (mode === 'inject') {
-        newRules = this.generateInjectModeRules(injectBlockAds);
+        modeRules = this.generateBlockModeRules(laborActions);
       } else {
-        newRules = this.generateBannerModeRules(laborActions);
+        modeRules = this.generateBannerModeRules(laborActions);
       }
 
-      console.log(`Generated ${newRules.length} DNR rules`);
+      // Add ad-network blocking rules if strike injector is active
+      var injectRules = this.generateInjectModeRules(injectBlockAds);
+
+      var newRules = modeRules.concat(injectRules);
+      console.log(`Generated ${newRules.length} DNR rules (${modeRules.length} mode + ${injectRules.length} inject)`);
 
       // Get existing dynamic rules
       const existingRules = await chrome.declarativeNetRequest.getDynamicRules();

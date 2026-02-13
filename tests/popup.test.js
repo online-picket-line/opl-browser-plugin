@@ -8,6 +8,12 @@ const createMockElement = (id, value = '') => ({
   checked: false,
   style: { display: '' },
   className: '',
+  classList: {
+    _classes: new Set(),
+    add(c) { this._classes.add(c); },
+    remove(c) { this._classes.delete(c); },
+    contains(c) { return this._classes.has(c); }
+  },
   addEventListener: jest.fn(),
   click: jest.fn()
 });
@@ -16,12 +22,12 @@ const createMockDocument = () => {
   const elements = {
     'mode-banner': createMockElement('mode-banner'),
     'mode-block': createMockElement('mode-block'),
-    'mode-inject': createMockElement('mode-inject'),
     'status': createMockElement('status'),
     'stats-content': createMockElement('stats-content'),
     'connection-indicator': createMockElement('connection-indicator'),
     'connection-text': createMockElement('connection-text'),
     'test-mode-btn': createMockElement('test-mode-btn'),
+    'strike-injector-enabled': createMockElement('strike-injector-enabled'),
     'inject-options': createMockElement('inject-options'),
     'inject-block-ads': createMockElement('inject-block-ads')
   };

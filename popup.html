@@ -247,25 +247,27 @@
       </div>
     </div>
 
+  </div>
+
+  <div class="card section">
+    <div class="section-title">Strike Injector</div>
     <div class="option">
-      <input type="radio" id="mode-inject" name="mode" value="inject">
+      <input type="checkbox" id="strike-injector-enabled">
       <div class="option-content">
-        <label for="mode-inject">Strike Injector</label>
+        <label for="strike-injector-enabled">Replace ads with strike info</label>
         <div class="option-description">
-          Replace ads on websites with strike and labor action information
+          Replaces ads on all websites with labor action information. Works alongside either mode above.
         </div>
       </div>
     </div>
-  </div>
-
-  <div id="inject-options" class="card section" style="display: none;">
-    <div class="section-title">Injector Options</div>
-    <div class="option">
-      <input type="checkbox" id="inject-block-ads" checked>
-      <div class="option-content">
-        <label for="inject-block-ads">Block ad network requests</label>
-        <div class="option-description">
-          More effective — prevents ads from loading so containers can be replaced with strike info. Disable if you experience page issues.
+    <div id="inject-options" class="collapsible">
+      <div class="option" style="margin-top: 0.5rem; margin-left: 1.5rem;">
+        <input type="checkbox" id="inject-block-ads" checked>
+        <div class="option-content">
+          <label for="inject-block-ads">Block ad network requests</label>
+          <div class="option-description">
+            More effective — prevents ads from loading so containers can be replaced with strike info. Disable if you experience page issues.
+          </div>
         </div>
       </div>
     </div>

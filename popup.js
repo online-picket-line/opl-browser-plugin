@@ -6,33 +6,46 @@
 document.addEventListener('DOMContentLoaded', () => {
   const modeBannerRadio = document.getElementById('mode-banner');
   const modeBlockRadio = document.getElementById('mode-block');
-  const modeInjectRadio = document.getElementById('mode-inject');
   const statusDiv = document.getElementById('status');
   const statsContent = document.getElementById('stats-content');
   const connectionIndicator = document.getElementById('connection-indicator');
   const connectionText = document.getElementById('connection-text');
+  const strikeInjectorCheckbox = document.getElementById('strike-injector-enabled');
   const injectOptionsDiv = document.getElementById('inject-options');
   const injectBlockAdsCheckbox = document.getElementById('inject-block-ads');
 
   // Load current settings
-  chrome.storage.sync.get(['mode', 'blockMode', 'injectBlockAds'], (result) => {
+  chrome.storage.sync.get(['mode', 'blockMode', 'strikeInjectorEnabled', 'injectBlockAds'], (result) => {
     // Support legacy blockMode boolean for backward compatibility
     let mode = result.mode;
     if (mode === undefined) {
       mode = result.blockMode ? 'block' : 'banner';
     }
+    // Migrate legacy inject mode to addon
+    if (mode === 'inject') {
+      mode = 'banner';
+      // Auto-enable injector for users who had inject mode selected
+      chrome.storage.sync.set({ mode: 'banner', strikeInjectorEnabled: true });
+    }
     
     if (mode === 'block') {
       modeBlockRadio.checked = true;
-    } else if (mode === 'inject') {
-      modeInjectRadio.checked = true;
     } else {
       modeBannerRadio.checked = true;
     }
     
-    // Show/hide inject options
+    // Strike injector checkbox
+    if (strikeInjectorCheckbox) {
+      strikeInjectorCheckbox.checked = result.strikeInjectorEnabled === true;
+    }
+    
+    // Show/hide inject sub-options
     if (injectOptionsDiv) {
-      injectOptionsDiv.style.display = (mode === 'inject') ? 'block' : 'none';
+      if (result.strikeInjectorEnabled) {
+        injectOptionsDiv.classList.add('expanded');
+      } else {
+        injectOptionsDiv.classList.remove('expanded');
+      }
     }
     
     // Load inject sub-option
@@ -65,13 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Save settings when radio buttons change
   function onModeChange(newMode) {
     chrome.storage.sync.set({ mode: newMode }, () => {
-      // Show/hide inject options
-      if (injectOptionsDiv) {
-        injectOptionsDiv.style.display = (newMode === 'inject') ? 'block' : 'none';
-      }
       // Update DNR rules when mode changes
       chrome.runtime.sendMessage({ action: 'updateMode' }, (response) => {
-        var modeLabel = newMode === 'block' ? 'Block' : newMode === 'inject' ? 'Strike Injector' : 'Banner';
+        var modeLabel = newMode === 'block' ? 'Block' : 'Banner';
         if (response && response.success) {
           showStatus(modeLabel + ' mode enabled', 'success');
         } else {
@@ -89,9 +98,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modeBlockRadio.checked) onModeChange('block');
   });
 
-  modeInjectRadio.addEventListener('change', () => {
-    if (modeInjectRadio.checked) onModeChange('inject');
-  });
+  // Strike injector toggle
+  if (strikeInjectorCheckbox) {
+    strikeInjectorCheckbox.addEventListener('change', () => {
+      var enabled = strikeInjectorCheckbox.checked;
+      chrome.storage.sync.set({ strikeInjectorEnabled: enabled }, () => {
+        // Show/hide inject sub-options
+        if (injectOptionsDiv) {
+          if (enabled) {
+            injectOptionsDiv.classList.add('expanded');
+          } else {
+            injectOptionsDiv.classList.remove('expanded');
+          }
+        }
+        chrome.runtime.sendMessage({ action: 'updateMode' }, (response) => {
+          if (response && response.success) {
+            showStatus(enabled ? 'Strike Injector enabled' : 'Strike Injector disabled', 'success');
+          }
+        });
+      });
+    });
+  }
 
   // Inject sub-option: block ad network requests
   if (injectBlockAdsCheckbox) {

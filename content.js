@@ -26,10 +26,12 @@
         
         var mode = response.mode || (response.blockMode ? 'block' : 'banner');
         
-        if (mode === 'inject') {
-          // Strike Injector mode: replace ads on ALL pages with action info
+        // Strike injector is an add-on that works alongside any mode
+        if (response.strikeInjectorEnabled) {
           startInjectorMode();
-        } else if (mode === 'banner' && response.match) {
+        }
+        
+        if (mode === 'banner' && response.match) {
           // Banner mode: show banner only on matched domains
           showBanner(response.match);
         }

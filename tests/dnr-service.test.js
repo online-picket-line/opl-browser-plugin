@@ -356,26 +356,36 @@ describe('DnrService', () => {
       });
     });
 
-    test('should generate ad-blocking rules in inject mode with blocking enabled', async () => {
-      const success = await dnrService.updateRules(mockActions, 'inject', true);
+    test('should generate ad-blocking rules when injector ad-blocking is enabled', async () => {
+      const success = await dnrService.updateRules(mockActions, 'banner', true);
 
       expect(success).toBe(true);
       const call = chrome.declarativeNetRequest.updateDynamicRules.mock.calls[0][0];
-      expect(call.addRules.length).toBeGreaterThan(0);
-      // All rules should be block type
-      call.addRules.forEach(rule => {
-        expect(rule.action.type).toBe('block');
-      });
+      // Should include ad-blocking rules
+      const blockRules = call.addRules.filter(r => r.action.type === 'block');
+      expect(blockRules.length).toBeGreaterThan(0);
     });
 
-    test('should generate no rules in inject mode with blocking disabled', async () => {
-      const success = await dnrService.updateRules(mockActions, 'inject', false);
+    test('should generate no inject rules when injector ad-blocking is disabled', async () => {
+      const success = await dnrService.updateRules(mockActions, 'banner', false);
 
       expect(success).toBe(true);
       expect(chrome.declarativeNetRequest.updateDynamicRules).toHaveBeenCalledWith({
         removeRuleIds: [],
         addRules: []
       });
+    });
+
+    test('should combine block mode rules with injector ad-blocking rules', async () => {
+      const success = await dnrService.updateRules(mockActions, 'block', true);
+
+      expect(success).toBe(true);
+      const call = chrome.declarativeNetRequest.updateDynamicRules.mock.calls[0][0];
+      // Should include both redirect (block mode) and block (injector) rules
+      const redirectRules = call.addRules.filter(r => r.action.type === 'redirect');
+      const blockRules = call.addRules.filter(r => r.action.type === 'block');
+      expect(redirectRules.length).toBeGreaterThan(0);
+      expect(blockRules.length).toBeGreaterThan(0);
     });
 
     test('should support legacy boolean for backward compatibility', async () => {

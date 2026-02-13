@@ -269,17 +269,27 @@ describe('Content Script Integration', () => {
 
     it('should handle response from background script', () => {
       const handleResponse = (response) => {
-        if (response && response.match) {
-          var mode = response.mode || (response.blockMode ? 'block' : 'banner');
-          if (mode === 'block') {
-            return { action: 'block', match: response.match };
-          } else if (mode === 'inject') {
-            return { action: 'inject', match: response.match };
-          } else {
-            return { action: 'banner', match: response.match };
-          }
+        if (!response) return { action: 'none' };
+        var result = { injector: false };
+        var mode = response.mode || (response.blockMode ? 'block' : 'banner');
+        
+        // Strike injector is independent of mode
+        if (response.strikeInjectorEnabled) {
+          result.injector = true;
         }
-        return { action: 'none' };
+        
+        if (response.match) {
+          if (mode === 'block') {
+            result.action = 'block';
+            result.match = response.match;
+          } else {
+            result.action = 'banner';
+            result.match = response.match;
+          }
+        } else {
+          result.action = 'none';
+        }
+        return result;
       };
 
       // Test with blocking response
@@ -298,13 +308,25 @@ describe('Content Script Integration', () => {
       const bannerResult = handleResponse(bannerResponse);
       expect(bannerResult.action).toBe('banner');
 
-      // Test with inject response
+      // Test with injector enabled as addon
       const injectResponse = {
         match: { title: 'Test Action' },
-        mode: 'inject'
+        mode: 'banner',
+        strikeInjectorEnabled: true
       };
       const injectResult = handleResponse(injectResponse);
-      expect(injectResult.action).toBe('inject');
+      expect(injectResult.action).toBe('banner');
+      expect(injectResult.injector).toBe(true);
+
+      // Test injector + block mode combined
+      const combinedResponse = {
+        match: { title: 'Test Action' },
+        mode: 'block',
+        strikeInjectorEnabled: true
+      };
+      const combinedResult = handleResponse(combinedResponse);
+      expect(combinedResult.action).toBe('block');
+      expect(combinedResult.injector).toBe(true);
 
       // Test with legacy blockMode response (backward compatibility)
       const legacyBlockResponse = {
