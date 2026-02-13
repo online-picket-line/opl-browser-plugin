@@ -59,20 +59,20 @@ function replaceAdWithCard(element, actions) {
   var width = rect.width || element.offsetWidth;
   var height = rect.height || element.offsetHeight;
 
-  // Skip truly invisible elements
-  if (width < 50 || height < 30) {
-    return false;
-  }
-
   // Determine size category
   // Use getAdSize from ad-detector.js if available, otherwise compute here
   var size;
-  if (typeof getAdSize === 'function') {
-    size = getAdSize(element);
+  if (width >= 50 && height >= 30) {
+    if (typeof getAdSize === 'function') {
+      size = getAdSize(element);
+    } else {
+      if (width >= 300 && height >= 200) size = 'large';
+      else if (width < 200 || height < 60) size = 'small';
+      else size = 'medium';
+    }
   } else {
-    if (width >= 300 && height >= 200) size = 'large';
-    else if (width < 200 || height < 60) size = 'small';
-    else size = 'medium';
+    // Container is tiny or unsized — default to medium and let the card set its own size
+    size = 'medium';
   }
 
   // Render the strike card

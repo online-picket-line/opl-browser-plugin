@@ -124,10 +124,10 @@ describe('Strike Injector Module', () => {
       expect(result).toBe(false);
     });
 
-    test('should skip very small elements', () => {
+    test('should replace very small elements with medium card', () => {
       const el = createMockAdElement(20, 10);
       const result = replaceAdWithCard(el, mockActions);
-      expect(result).toBe(false);
+      expect(result).toBe(true);
     });
 
     test('should return false when no actions available', () => {

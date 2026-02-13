@@ -1,7 +1,10 @@
-// Content script - runs on all pages (banner mode only)
+// Content script - runs on all pages and all frames
 // Block mode is now handled by declarativeNetRequest for better performance
 (function() {
   'use strict';
+
+  // Detect if we're running inside an iframe (ad frame)
+  var isIframe = (window !== window.top);
 
   // API base URL for resolving relative logo URLs
   const API_BASE_URL = 'https://onlinepicketline.com';
@@ -31,7 +34,8 @@
           startInjectorMode();
         }
         
-        if (mode === 'banner' && response.match) {
+        // Only show banner in top frame, not inside ad iframes
+        if (!isIframe && mode === 'banner' && response.match) {
           // Banner mode: show banner only on matched domains
           showBanner(response.match);
         }

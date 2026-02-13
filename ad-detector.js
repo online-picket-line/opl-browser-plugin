@@ -136,26 +136,72 @@ function findAdElements(rootElement) {
       continue;
     }
 
-    // Skip invisible elements
-    if (el.offsetWidth === 0 && el.offsetHeight === 0) {
-      continue;
-    }
-
-    // Skip elements hidden by CSS
+    // Skip elements hidden by CSS (but allow zero-size — ads often start empty)
     var style = window.getComputedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden') {
       continue;
     }
 
     var rect = el.getBoundingClientRect();
+    var width = rect.width || el.offsetWidth;
+    var height = rect.height || el.offsetHeight;
+
     results.push({
       element: el,
-      size: getAdSize(el),
+      size: (width > 0 && height > 0) ? getAdSize(el) : 'medium',
       rect: {
-        width: rect.width || el.offsetWidth,
-        height: rect.height || el.offsetHeight
+        width: width,
+        height: height
       }
     });
+  }
+
+  // Also detect iframes that look like ads (by src URL)
+  try {
+    var iframes = root.querySelectorAll('iframe');
+    for (var j = 0; j < iframes.length; j++) {
+      var iframe = iframes[j];
+      if (iframe.getAttribute('data-opl-injected') === 'true') continue;
+      var src = (iframe.src || '').toLowerCase();
+      if (!src) continue;
+
+      var isAd = false;
+      var adSrcPatterns = [
+        'doubleclick', 'googlesyndication', 'googleadservices',
+        'amazon-adsystem', 'taboola', 'outbrain', 'adnxs',
+        'criteo', 'pubmatic', 'rubiconproject', 'openx',
+        'casalemedia', 'sharethrough', 'triplelift', 'teads',
+        'adsrvr.org', 'serving-sys', 'nativo', 'connatix',
+        'yieldmo', 'gumgum', 'kargo', 'media.net', 'bidswitch',
+        'safeframe', 'ad-delivery'
+      ];
+      for (var k = 0; k < adSrcPatterns.length; k++) {
+        if (src.indexOf(adSrcPatterns[k]) !== -1) {
+          isAd = true;
+          break;
+        }
+      }
+      if (!isAd) continue;
+
+      // Target the parent of the iframe (the ad container) if possible
+      var target = iframe.parentElement || iframe;
+      if (target.getAttribute('data-opl-injected') === 'true') continue;
+
+      var style2 = window.getComputedStyle(target);
+      if (style2.display === 'none' || style2.visibility === 'hidden') continue;
+
+      var iRect = target.getBoundingClientRect();
+      results.push({
+        element: target,
+        size: (iRect.width > 0 && iRect.height > 0) ? getAdSize(target) : 'medium',
+        rect: {
+          width: iRect.width || target.offsetWidth,
+          height: iRect.height || target.offsetHeight
+        }
+      });
+    }
+  } catch (_e2) {
+    // iframe detection is best-effort
   }
 
   return results;
@@ -175,30 +221,53 @@ function observeNewAds(callback) {
   }
 
   var debounceTimer = null;
-  var DEBOUNCE_MS = 500;
+  var DEBOUNCE_MS = 200;
+  var rescanTimer = null;
+  var RESCAN_INTERVAL = 2000;
+  var rescanCount = 0;
+  var MAX_RESCANS = 15; // Rescan for 30 seconds after page load
+
+  function scanAndCallback() {
+    var newAds = findAdElements(document);
+    if (newAds.length > 0) {
+      callback(newAds);
+    }
+  }
 
   var observer = new MutationObserver(function(_mutations) {
     // Debounce: don't scan on every tiny DOM change
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
-    debounceTimer = setTimeout(function() {
-      var newAds = findAdElements(document);
-      if (newAds.length > 0) {
-        callback(newAds);
-      }
-    }, DEBOUNCE_MS);
+    debounceTimer = setTimeout(scanAndCallback, DEBOUNCE_MS);
   });
 
   observer.observe(document.body || document.documentElement, {
     childList: true,
-    subtree: true
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['src', 'class', 'style']
   });
+
+  // Periodic rescan to catch ads that load without DOM mutations
+  // (e.g., ads that fill existing containers via JS, or delayed ad loads)
+  rescanTimer = setInterval(function() {
+    rescanCount++;
+    scanAndCallback();
+    if (rescanCount >= MAX_RESCANS) {
+      clearInterval(rescanTimer);
+      rescanTimer = null;
+    }
+  }, RESCAN_INTERVAL);
 
   return {
     disconnect: function() {
       if (debounceTimer) {
         clearTimeout(debounceTimer);
+      }
+      if (rescanTimer) {
+        clearInterval(rescanTimer);
+        rescanTimer = null;
       }
       observer.disconnect();
     }

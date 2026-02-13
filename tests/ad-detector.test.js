@@ -118,18 +118,21 @@ describe('Ad Detector Module', () => {
       expect(result).toEqual([]);
     });
 
-    test('should skip invisible elements (zero dimensions)', () => {
-      const mockElement = {
-        getAttribute: jest.fn(() => null),
-        offsetWidth: 0,
-        offsetHeight: 0,
-        getBoundingClientRect: () => ({ width: 0, height: 0 })
-      };
+    test('should include zero-dimension elements with medium size default', () => {
+      const el = document.createElement('div');
+      Object.defineProperty(el, 'offsetWidth', { value: 0 });
+      Object.defineProperty(el, 'offsetHeight', { value: 0 });
+      el.getBoundingClientRect = () => ({ width: 0, height: 0 });
+
+      const spy = jest.spyOn(window, 'getComputedStyle').mockReturnValue({ display: 'block', visibility: 'visible' });
+
       const mockRoot = {
-        querySelectorAll: jest.fn(() => [mockElement])
+        querySelectorAll: jest.fn(() => [el])
       };
       const result = findAdElements(mockRoot);
-      expect(result).toEqual([]);
+      expect(result.length).toBe(1);
+      expect(result[0].size).toBe('medium');
+      spy.mockRestore();
     });
 
     test('should skip elements hidden by CSS', () => {

@@ -29,7 +29,8 @@
       "matches": ["<all_urls>"],
       "js": ["browser-polyfill.js", "ad-detector.js", "strike-card.js", "strike-injector.js", "content.js"],
       "css": ["content.css"],
-      "run_at": "document_end"
+      "run_at": "document_end",
+      "all_frames": true
     }
   ],
   "action": {
