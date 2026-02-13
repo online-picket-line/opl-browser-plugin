@@ -40,7 +40,7 @@ var AD_SELECTORS = [
   '.ob-widget',
   '.ob-smartfeed-wrapper',
 
-  // Generic ad patterns
+  // Generic ad patterns (class/id based)
   'iframe[src*="doubleclick"]',
   'iframe[src*="googlesyndication"]',
   '[class*="ad-slot"]',
@@ -48,7 +48,44 @@ var AD_SELECTORS = [
   '[id*="ad-wrapper"]',
   '[class*="ad-banner"]',
   '[data-ad-slot]',
-  '[data-ad-unit]'
+  '[data-ad-unit]',
+
+  // Broader generic ad selectors
+  '.advertisement',
+  '[class*="Advertisement"]',
+  '[class*="ad-unit"]',
+  '[id*="ad-unit"]',
+  '[class*="ad-wrapper"]',
+  '[data-ad]',
+  '[data-ad-region]',
+  '[aria-label*="advertisement" i]',
+  '[aria-label*="Advertisement"]',
+  '[class*="ad-recirc"]',
+  '[class*="dfp"]',
+  '[id*="dfp"]',
+
+  // HuffPost / BuzzFeed Media style
+  '[data-module*="ad" i]',
+  '[data-component*="Ad"]',
+  '[data-zone]',
+  '.ad__slot',
+  '.ad__container',
+
+  // Programmatic / native ad containers
+  '[class*="nativo"]',
+  '[id*="nativo"]',
+  '[class*="connatix"]',
+  '[class*="teads"]',
+  '[id*="teads"]',
+  '[class*="sharethrough"]',
+  '[class*="yieldmo"]',
+  '[id*="kargo"]',
+  '[class*="gumgum"]',
+
+  // Sponsored content markers
+  'div[class*="sponsored-content"]',
+  'div[class*="SponsoredContent"]',
+  'div[data-testid*="ad" i]'
 ].join(', ');
 
 /**

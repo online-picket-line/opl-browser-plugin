@@ -50,7 +50,45 @@ var AD_NETWORK_DOMAINS = [
   { domain: 'openx.net', urlFilter: '||openx.net^', provider: 'OpenX' },
   { domain: 'casalemedia.com', urlFilter: '||casalemedia.com^', provider: 'Index Exchange' },
   { domain: 'adform.net', urlFilter: '||adform.net^', provider: 'Adform' },
-  { domain: 'smartadserver.com', urlFilter: '||smartadserver.com^', provider: 'Smart AdServer' }
+  { domain: 'smartadserver.com', urlFilter: '||smartadserver.com^', provider: 'Smart AdServer' },
+
+  // Programmatic / header bidding platforms
+  { domain: 'adsrvr.org', urlFilter: '||adsrvr.org^', provider: 'The Trade Desk' },
+  { domain: 'thetradedesk.com', urlFilter: '||thetradedesk.com^', provider: 'The Trade Desk' },
+  { domain: 'bidswitch.net', urlFilter: '||bidswitch.net^', provider: 'BidSwitch' },
+  { domain: 'sharethrough.com', urlFilter: '||sharethrough.com^', provider: 'Sharethrough' },
+  { domain: 'triplelift.com', urlFilter: '||triplelift.com^', provider: 'TripleLift' },
+  { domain: '33across.com', urlFilter: '||33across.com^', provider: '33Across' },
+  { domain: 'indexexchange.com', urlFilter: '||indexexchange.com^', provider: 'Index Exchange' },
+  { domain: 'liveintent.com', urlFilter: '||liveintent.com^', provider: 'LiveIntent' },
+  { domain: 'yieldmo.com', urlFilter: '||yieldmo.com^', provider: 'Yieldmo' },
+  { domain: 'teads.tv', urlFilter: '||teads.tv^', provider: 'Teads' },
+  { domain: 'gumgum.com', urlFilter: '||gumgum.com^', provider: 'GumGum' },
+  { domain: 'kargo.com', urlFilter: '||kargo.com^', provider: 'Kargo' },
+
+  // Native ad platforms
+  { domain: 'nativo.com', urlFilter: '||nativo.com^', provider: 'Nativo' },
+  { domain: 'ntv.io', urlFilter: '||ntv.io^', provider: 'Nativo' },
+  { domain: 'revcontent.com', urlFilter: '||revcontent.com^', provider: 'RevContent' },
+  { domain: 'mgid.com', urlFilter: '||mgid.com^', provider: 'MGID' },
+  { domain: 'connatix.com', urlFilter: '||connatix.com^', provider: 'Connatix' },
+
+  // Tracking / ad measurement (often load ad creatives)
+  { domain: 'moatads.com', urlFilter: '||moatads.com^', provider: 'Moat' },
+  { domain: 'adsafeprotected.com', urlFilter: '||adsafeprotected.com^', provider: 'IAS' },
+  { domain: 'doubleverify.com', urlFilter: '||doubleverify.com^', provider: 'DoubleVerify' },
+
+  // Video ad networks
+  { domain: 'spotxchange.com', urlFilter: '||spotxchange.com^', provider: 'SpotX' },
+  { domain: 'springserve.com', urlFilter: '||springserve.com^', provider: 'SpringServe' },
+
+  // Additional exchanges / SSPs
+  { domain: 'sovrn.com', urlFilter: '||sovrn.com^', provider: 'Sovrn' },
+  { domain: 'lijit.com', urlFilter: '||lijit.com^', provider: 'Sovrn' },
+  { domain: 'districtm.io', urlFilter: '||districtm.io^', provider: 'District M' },
+  { domain: 'conversantmedia.com', urlFilter: '||conversantmedia.com^', provider: 'Conversant' },
+  { domain: 'mediavine.com', urlFilter: '||mediavine.com^', provider: 'Mediavine' },
+  { domain: 'ad-delivery.net', urlFilter: '||ad-delivery.net^', provider: 'Ad Delivery' }
 ];
 
 /**

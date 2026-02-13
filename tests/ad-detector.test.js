@@ -30,6 +30,23 @@ describe('Ad Detector Module', () => {
     test('should include generic ad selectors', () => {
       expect(AD_SELECTORS).toContain('[data-ad-slot]');
     });
+
+    test('should include broader generic ad selectors', () => {
+      expect(AD_SELECTORS).toContain('.advertisement');
+      expect(AD_SELECTORS).toContain('[data-ad]');
+      expect(AD_SELECTORS).toContain('[data-ad-region]');
+    });
+
+    test('should include programmatic/native ad container selectors', () => {
+      expect(AD_SELECTORS).toContain('[class*="nativo"]');
+      expect(AD_SELECTORS).toContain('[class*="connatix"]');
+      expect(AD_SELECTORS).toContain('[class*="teads"]');
+    });
+
+    test('should include DFP selectors', () => {
+      expect(AD_SELECTORS).toContain('[class*="dfp"]');
+      expect(AD_SELECTORS).toContain('[id*="dfp"]');
+    });
   });
 
   describe('getAdSize', () => {

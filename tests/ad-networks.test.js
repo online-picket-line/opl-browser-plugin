@@ -54,6 +54,17 @@ describe('Ad Networks Module', () => {
       const mediaNetDomains = AD_NETWORK_DOMAINS.filter(e => e.provider === 'Media.net');
       expect(mediaNetDomains.length).toBeGreaterThanOrEqual(1);
     });
+
+    test('should include programmatic platform domains', () => {
+      const ttdDomains = AD_NETWORK_DOMAINS.filter(e => e.provider === 'The Trade Desk');
+      expect(ttdDomains.length).toBeGreaterThanOrEqual(1);
+      expect(ttdDomains.some(e => e.domain === 'adsrvr.org')).toBe(true);
+    });
+
+    test('should include native ad platform domains', () => {
+      const nativoDomains = AD_NETWORK_DOMAINS.filter(e => e.provider === 'Nativo');
+      expect(nativoDomains.length).toBeGreaterThanOrEqual(1);
+    });
   });
 
   describe('AD_BLOCK_RESOURCE_TYPES', () => {
