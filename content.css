@@ -162,7 +162,7 @@
   box-sizing: border-box !important;
 }
 
-.opl-strike-card__inner {
+.opl-strike-card-inner {
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
@@ -173,20 +173,20 @@
 }
 
 /* --- Small Card --- */
-.opl-strike-card--small .opl-strike-card__inner {
+.opl-strike-card-small .opl-strike-card-inner {
   align-items: center !important;
   text-align: center !important;
   gap: 4px !important;
   padding: 6px !important;
 }
 
-.opl-strike-card__icon {
+.opl-strike-card-icon {
   font-size: 20px !important;
   line-height: 1 !important;
   flex-shrink: 0 !important;
 }
 
-.opl-strike-card__headline {
+.opl-strike-card-headline {
   font-size: 11px !important;
   font-weight: 600 !important;
   color: #1a1a1a !important;
@@ -197,7 +197,7 @@
   -webkit-box-orient: vertical !important;
 }
 
-.opl-strike-card__link {
+.opl-strike-card-link {
   font-size: 10px !important;
   color: #8B2C2C !important;
   text-decoration: underline !important;
@@ -205,44 +205,44 @@
   white-space: nowrap !important;
 }
 
-.opl-strike-card__link:hover {
+.opl-strike-card-link:hover {
   opacity: 0.7 !important;
 }
 
 /* --- Medium Card --- */
-.opl-strike-card--medium .opl-strike-card__inner {
+.opl-strike-card-medium .opl-strike-card-inner {
   gap: 6px !important;
   padding: 10px !important;
 }
 
-.opl-strike-card__top-row {
+.opl-strike-card-top-row {
   display: flex !important;
   align-items: flex-start !important;
   gap: 8px !important;
 }
 
-.opl-strike-card__logo {
+.opl-strike-card-logo {
   width: 32px !important;
   height: 32px !important;
   object-fit: contain !important;
   flex-shrink: 0 !important;
   border-radius: 2px !important;
-  background: rgba(0, 0, 0, 0.05) !important;
+  background: rgb(0 0 0 / 0.05) !important;
   padding: 2px !important;
 }
 
-.opl-strike-card__icon--medium {
+.opl-strike-card-icon-medium {
   font-size: 28px !important;
   width: 32px !important;
   text-align: center !important;
 }
 
-.opl-strike-card__text-col {
+.opl-strike-card-text-col {
   flex: 1 !important;
   min-width: 0 !important;
 }
 
-.opl-strike-card__badge {
+.opl-strike-card-badge {
   display: inline-block !important;
   font-size: 10px !important;
   font-weight: 700 !important;
@@ -252,7 +252,7 @@
   margin-bottom: 2px !important;
 }
 
-.opl-strike-card__employer {
+.opl-strike-card-employer {
   font-size: 13px !important;
   font-weight: 600 !important;
   color: #1a1a1a !important;
@@ -261,7 +261,7 @@
   white-space: nowrap !important;
 }
 
-.opl-strike-card__location {
+.opl-strike-card-location {
   font-size: 11px !important;
   color: #555 !important;
   overflow: hidden !important;
@@ -269,7 +269,7 @@
   white-space: nowrap !important;
 }
 
-.opl-strike-card__btn {
+.opl-strike-card-btn {
   display: inline-block !important;
   background: #8B2C2C !important;
   color: #fff !important;
@@ -284,11 +284,11 @@
   transition: opacity 0.15s !important;
 }
 
-.opl-strike-card__btn:hover {
+.opl-strike-card-btn:hover {
   opacity: 0.85 !important;
 }
 
-.opl-strike-card__footer {
+.opl-strike-card-footer {
   font-size: 9px !important;
   color: #888 !important;
   text-align: right !important;
@@ -296,28 +296,28 @@
 }
 
 /* --- Large Card --- */
-.opl-strike-card--large .opl-strike-card__inner {
+.opl-strike-card-large .opl-strike-card-inner {
   gap: 8px !important;
   padding: 14px !important;
 }
 
-.opl-strike-card__header {
+.opl-strike-card-header {
   display: flex !important;
   align-items: flex-start !important;
   gap: 10px !important;
 }
 
-.opl-strike-card__logo--large {
+.opl-strike-card-logo-large {
   width: 48px !important;
   height: 48px !important;
 }
 
-.opl-strike-card__header-text {
+.opl-strike-card-header-text {
   flex: 1 !important;
   min-width: 0 !important;
 }
 
-.opl-strike-card__title {
+.opl-strike-card-title {
   font-size: 15px !important;
   font-weight: 700 !important;
   color: #1a1a1a !important;
@@ -329,13 +329,13 @@
   -webkit-box-orient: vertical !important;
 }
 
-.opl-strike-card__subline {
+.opl-strike-card-subline {
   font-size: 12px !important;
   color: #555 !important;
   margin-top: 2px !important;
 }
 
-.opl-strike-card__demands {
+.opl-strike-card-demands {
   font-size: 12px !important;
   color: #333 !important;
   overflow: hidden !important;
@@ -345,11 +345,11 @@
   -webkit-box-orient: vertical !important;
 }
 
-.opl-strike-card__demands strong {
+.opl-strike-card-demands strong {
   color: #8B2C2C !important;
 }
 
-.opl-strike-card__description {
+.opl-strike-card-description {
   font-size: 11px !important;
   color: #555 !important;
   overflow: hidden !important;
@@ -359,7 +359,7 @@
   -webkit-box-orient: vertical !important;
 }
 
-.opl-strike-card__bottom-row {
+.opl-strike-card-bottom-row {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;

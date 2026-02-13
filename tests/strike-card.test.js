@@ -116,7 +116,7 @@ describe('Strike Card Module', () => {
   describe('renderSmallCard', () => {
     test('should create a small card with correct class', () => {
       const card = renderSmallCard(mockAction, 160, 60);
-      expect(card.className).toContain('opl-strike-card--small');
+      expect(card.className).toContain('opl-strike-card-small');
     });
 
     test('should set card dimensions', () => {
@@ -151,7 +151,7 @@ describe('Strike Card Module', () => {
   describe('renderMediumCard', () => {
     test('should create a medium card with correct class', () => {
       const card = renderMediumCard(mockAction, 300, 150);
-      expect(card.className).toContain('opl-strike-card--medium');
+      expect(card.className).toContain('opl-strike-card-medium');
     });
 
     test('should include logo image when available', () => {
@@ -192,7 +192,7 @@ describe('Strike Card Module', () => {
   describe('renderLargeCard', () => {
     test('should create a large card with correct class', () => {
       const card = renderLargeCard(mockAction, 400, 300);
-      expect(card.className).toContain('opl-strike-card--large');
+      expect(card.className).toContain('opl-strike-card-large');
     });
 
     test('should include demands section', () => {
@@ -227,18 +227,18 @@ describe('Strike Card Module', () => {
   describe('renderStrikeCard', () => {
     test('should delegate to renderSmallCard for small size', () => {
       const card = renderStrikeCard(mockAction, 'small', { width: 150, height: 50 });
-      expect(card.className).toContain('opl-strike-card--small');
+      expect(card.className).toContain('opl-strike-card-small');
       expect(card.getAttribute('data-opl-injected')).toBe('true');
     });
 
     test('should delegate to renderMediumCard for medium size', () => {
       const card = renderStrikeCard(mockAction, 'medium', { width: 300, height: 150 });
-      expect(card.className).toContain('opl-strike-card--medium');
+      expect(card.className).toContain('opl-strike-card-medium');
     });
 
     test('should delegate to renderLargeCard for large size', () => {
       const card = renderStrikeCard(mockAction, 'large', { width: 400, height: 300 });
-      expect(card.className).toContain('opl-strike-card--large');
+      expect(card.className).toContain('opl-strike-card-large');
     });
 
     test('should set data-opl-injected attribute', () => {

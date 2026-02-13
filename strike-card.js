@@ -86,7 +86,7 @@ function truncateText(text, maxLen) {
  */
 function renderSmallCard(action, width, height) {
   var card = document.createElement('div');
-  card.className = 'opl-strike-card opl-strike-card--small';
+  card.className = 'opl-strike-card opl-strike-card-small';
   card.style.width = width + 'px';
   card.style.height = height + 'px';
 
@@ -95,24 +95,24 @@ function renderSmallCard(action, width, height) {
   var moreInfoUrl = getActionMoreInfoUrl(action);
 
   var inner = document.createElement('div');
-  inner.className = 'opl-strike-card__inner';
+  inner.className = 'opl-strike-card-inner';
 
   // Fist icon
   var icon = document.createElement('span');
-  icon.className = 'opl-strike-card__icon';
+  icon.className = 'opl-strike-card-icon';
   icon.textContent = '✊';
   inner.appendChild(icon);
 
   // Headline text
   var headline = document.createElement('span');
-  headline.className = 'opl-strike-card__headline';
+  headline.className = 'opl-strike-card-headline';
   headline.textContent = typeLabel + ' at ' + truncateText(employer, 30);
   inner.appendChild(headline);
 
   // Learn more link
   if (moreInfoUrl) {
     var link = document.createElement('a');
-    link.className = 'opl-strike-card__link';
+    link.className = 'opl-strike-card-link';
     link.href = moreInfoUrl;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
@@ -135,7 +135,7 @@ function renderSmallCard(action, width, height) {
  */
 function renderMediumCard(action, width, height) {
   var card = document.createElement('div');
-  card.className = 'opl-strike-card opl-strike-card--medium';
+  card.className = 'opl-strike-card opl-strike-card-medium';
   card.style.width = width + 'px';
   card.style.height = height + 'px';
 
@@ -146,46 +146,46 @@ function renderMediumCard(action, width, height) {
   var location = (action.locations && action.locations.length > 0) ? action.locations[0] : '';
 
   var inner = document.createElement('div');
-  inner.className = 'opl-strike-card__inner';
+  inner.className = 'opl-strike-card-inner';
 
   // Top row: logo + text
   var topRow = document.createElement('div');
-  topRow.className = 'opl-strike-card__top-row';
+  topRow.className = 'opl-strike-card-top-row';
 
   // Logo or icon
   if (logoUrl) {
     var logo = document.createElement('img');
-    logo.className = 'opl-strike-card__logo';
+    logo.className = 'opl-strike-card-logo';
     logo.src = logoUrl;
     logo.alt = 'Union logo';
     logo.onerror = function() { this.style.display = 'none'; };
     topRow.appendChild(logo);
   } else {
     var icon = document.createElement('span');
-    icon.className = 'opl-strike-card__icon opl-strike-card__icon--medium';
+    icon.className = 'opl-strike-card-icon opl-strike-card-icon-medium';
     icon.textContent = '✊';
     topRow.appendChild(icon);
   }
 
   var textCol = document.createElement('div');
-  textCol.className = 'opl-strike-card__text-col';
+  textCol.className = 'opl-strike-card-text-col';
 
   // Action type badge
   var badge = document.createElement('span');
-  badge.className = 'opl-strike-card__badge';
+  badge.className = 'opl-strike-card-badge';
   badge.textContent = '🪧 ' + typeLabel;
   textCol.appendChild(badge);
 
   // Employer name
   var empEl = document.createElement('div');
-  empEl.className = 'opl-strike-card__employer';
+  empEl.className = 'opl-strike-card-employer';
   empEl.textContent = truncateText(employer, 40);
   textCol.appendChild(empEl);
 
   // Location
   if (location) {
     var locEl = document.createElement('div');
-    locEl.className = 'opl-strike-card__location';
+    locEl.className = 'opl-strike-card-location';
     locEl.textContent = location;
     textCol.appendChild(locEl);
   }
@@ -196,7 +196,7 @@ function renderMediumCard(action, width, height) {
   // Learn More button
   if (moreInfoUrl) {
     var btn = document.createElement('a');
-    btn.className = 'opl-strike-card__btn';
+    btn.className = 'opl-strike-card-btn';
     btn.href = moreInfoUrl;
     btn.target = '_blank';
     btn.rel = 'noopener noreferrer';
@@ -206,7 +206,7 @@ function renderMediumCard(action, width, height) {
 
   // OPL footer
   var footer = document.createElement('div');
-  footer.className = 'opl-strike-card__footer';
+  footer.className = 'opl-strike-card-footer';
   footer.textContent = 'via Online Picket Line';
   inner.appendChild(footer);
 
@@ -225,7 +225,7 @@ function renderMediumCard(action, width, height) {
  */
 function renderLargeCard(action, width, height) {
   var card = document.createElement('div');
-  card.className = 'opl-strike-card opl-strike-card--large';
+  card.className = 'opl-strike-card opl-strike-card-large';
   card.style.width = width + 'px';
   card.style.height = height + 'px';
 
@@ -239,15 +239,15 @@ function renderLargeCard(action, width, height) {
   var description = action.description || '';
 
   var inner = document.createElement('div');
-  inner.className = 'opl-strike-card__inner';
+  inner.className = 'opl-strike-card-inner';
 
   // Header row: logo + title area
   var header = document.createElement('div');
-  header.className = 'opl-strike-card__header';
+  header.className = 'opl-strike-card-header';
 
   if (logoUrl) {
     var logo = document.createElement('img');
-    logo.className = 'opl-strike-card__logo opl-strike-card__logo--large';
+    logo.className = 'opl-strike-card-logo opl-strike-card-logo-large';
     logo.src = logoUrl;
     logo.alt = 'Union logo';
     logo.onerror = function() { this.style.display = 'none'; };
@@ -255,17 +255,17 @@ function renderLargeCard(action, width, height) {
   }
 
   var headerText = document.createElement('div');
-  headerText.className = 'opl-strike-card__header-text';
+  headerText.className = 'opl-strike-card-header-text';
 
   // Action type badge
   var badge = document.createElement('span');
-  badge.className = 'opl-strike-card__badge';
+  badge.className = 'opl-strike-card-badge';
   badge.textContent = '🪧 ' + typeLabel;
   headerText.appendChild(badge);
 
   // Title (e.g., "UAW Strike at Amazon")
   var titleEl = document.createElement('div');
-  titleEl.className = 'opl-strike-card__title';
+  titleEl.className = 'opl-strike-card-title';
   if (title) {
     titleEl.textContent = truncateText(title, 60);
   } else {
@@ -275,7 +275,7 @@ function renderLargeCard(action, width, height) {
 
   // Employer + location
   var subline = document.createElement('div');
-  subline.className = 'opl-strike-card__subline';
+  subline.className = 'opl-strike-card-subline';
   subline.textContent = employer + (location ? ' — ' + location : '');
   headerText.appendChild(subline);
 
@@ -285,7 +285,7 @@ function renderLargeCard(action, width, height) {
   // Demands
   if (demands) {
     var demandsEl = document.createElement('div');
-    demandsEl.className = 'opl-strike-card__demands';
+    demandsEl.className = 'opl-strike-card-demands';
     var demandsLabel = document.createElement('strong');
     demandsLabel.textContent = 'Demands: ';
     demandsEl.appendChild(demandsLabel);
@@ -296,18 +296,18 @@ function renderLargeCard(action, width, height) {
   // Description
   if (description) {
     var descEl = document.createElement('div');
-    descEl.className = 'opl-strike-card__description';
+    descEl.className = 'opl-strike-card-description';
     descEl.textContent = truncateText(description, 180);
     inner.appendChild(descEl);
   }
 
   // Bottom row: Learn More button + footer
   var bottomRow = document.createElement('div');
-  bottomRow.className = 'opl-strike-card__bottom-row';
+  bottomRow.className = 'opl-strike-card-bottom-row';
 
   if (moreInfoUrl) {
     var btn = document.createElement('a');
-    btn.className = 'opl-strike-card__btn';
+    btn.className = 'opl-strike-card-btn';
     btn.href = moreInfoUrl;
     btn.target = '_blank';
     btn.rel = 'noopener noreferrer';
@@ -316,7 +316,7 @@ function renderLargeCard(action, width, height) {
   }
 
   var footer = document.createElement('div');
-  footer.className = 'opl-strike-card__footer';
+  footer.className = 'opl-strike-card-footer';
   footer.textContent = '✊ Online Picket Line';
   bottomRow.appendChild(footer);
 
