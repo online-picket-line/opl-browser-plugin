@@ -135,24 +135,33 @@ function initStrikeInjector(actions) {
   }
 
   if (!actions || actions.length === 0) {
+    console.log('OPL Ad Blocker: No actions available for injection');
     return { stop: function() {} };
   }
 
   _oplInjectorActive = true;
   _oplActionIndex = 0;
+  console.log('OPL Ad Blocker: Starting with ' + actions.length + ' actions');
 
   // Initial scan
   if (typeof findAdElements === 'function') {
     var initialAds = findAdElements(document);
+    console.log('OPL Ad Blocker: Initial scan found ' + initialAds.length + ' ad elements');
     if (initialAds.length > 0) {
-      processAdElements(initialAds, actions);
+      var replaced = processAdElements(initialAds, actions);
+      console.log('OPL Ad Blocker: Replaced ' + replaced + ' ads on initial scan');
     }
   }
 
   // Observe for dynamically inserted ads
   if (typeof observeNewAds === 'function') {
     _oplAdObserver = observeNewAds(function(newAds) {
-      processAdElements(newAds, actions);
+      if (newAds.length > 0) {
+        var count = processAdElements(newAds, actions);
+        if (count > 0) {
+          console.log('OPL Ad Blocker: Replaced ' + count + ' dynamically loaded ads');
+        }
+      }
     });
   }
 

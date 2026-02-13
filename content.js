@@ -4,7 +4,18 @@
   'use strict';
 
   // Detect if we're running inside an iframe (ad frame)
-  var isIframe = (window !== window.top);
+  var isIframe = false;
+  try {
+    isIframe = (window.self !== window.top);
+  } catch (_e) {
+    // Cross-origin iframe — treat as iframe
+    isIframe = true;
+  }
+
+  // Skip everything in iframes — ad blocker and banner only run in top frame
+  if (isIframe) {
+    return;
+  }
 
   // API base URL for resolving relative logo URLs
   const API_BASE_URL = 'https://onlinepicketline.com';
@@ -22,33 +33,90 @@
       return;
     }
 
+    // Start ad blocker independently — read settings + actions directly from storage
+    // This avoids depending on the background service worker being awake
+    startAdBlockerFromStorage();
+
+    // Check banner via background (needs URL matching logic)
     chrome.runtime.sendMessage(
       { action: 'checkUrlForBanner', url: window.location.href },
       (response) => {
+        if (chrome.runtime.lastError) {
+          console.log('OPL: Error checking URL:', chrome.runtime.lastError.message);
+          return;
+        }
         if (!response) return;
         
         var mode = response.mode || (response.blockMode ? 'block' : 'banner');
         
-        // Ad blocker is an add-on that works alongside any mode
-        if (response.adBlockerEnabled) {
-          startInjectorMode();
-        }
-        
-        // Only show banner in top frame, not inside ad iframes
-        if (!isIframe && mode === 'banner' && response.match) {
-          // Banner mode: show banner only on matched domains
+        if (mode === 'banner' && response.match) {
           showBanner(response.match);
         }
-        // Block mode: DNR handles it, content script does nothing
       }
     );
   }
 
   /**
-   * Start the strike injector on this page.
-   * Requests all available actions from the background and starts ad replacement.
+   * Start the ad blocker by reading settings and actions directly from chrome.storage.
+   * This is independent of the background service worker — no message round-trip needed.
    */
-  function startInjectorMode() {
+  function startAdBlockerFromStorage() {
+    chrome.storage.sync.get(['adBlockerEnabled'], function(syncResult) {
+      if (chrome.runtime.lastError) {
+        console.log('OPL Ad Blocker: Error reading settings:', chrome.runtime.lastError.message);
+        return;
+      }
+
+      var enabled = syncResult && syncResult.adBlockerEnabled === true;
+      console.log('OPL Ad Blocker: enabled=' + enabled);
+
+      if (!enabled) return;
+
+      // Read labor actions directly from local storage — no background needed
+      chrome.storage.local.get(['labor_actions'], function(localResult) {
+        if (chrome.runtime.lastError) {
+          console.log('OPL Ad Blocker: Error reading actions:', chrome.runtime.lastError.message);
+          return;
+        }
+
+        var allActions = (localResult && localResult.labor_actions) || [];
+        var actions = allActions.filter(function(a) {
+          return !a.status || a.status === 'approved' || a.status === 'active';
+        });
+
+        console.log('OPL Ad Blocker: ' + actions.length + ' actions available');
+
+        if (actions.length === 0) {
+          console.log('OPL Ad Blocker: No actions in storage. Trying to refresh via background...');
+          // Trigger a refresh in the background and retry once
+          chrome.runtime.sendMessage({ action: 'refreshActions' }, function() {
+            if (chrome.runtime.lastError) return;
+            // Retry reading after a short delay
+            setTimeout(function() {
+              chrome.storage.local.get(['labor_actions'], function(retryResult) {
+                if (chrome.runtime.lastError) return;
+                var retryActions = ((retryResult && retryResult.labor_actions) || []).filter(function(a) {
+                  return !a.status || a.status === 'approved' || a.status === 'active';
+                });
+                if (retryActions.length > 0) {
+                  console.log('OPL Ad Blocker: Got ' + retryActions.length + ' actions after refresh');
+                  startInjector(retryActions);
+                }
+              });
+            }, 2000);
+          });
+          return;
+        }
+
+        startInjector(actions);
+      });
+    });
+  }
+
+  /**
+   * Start the strike injector with the given actions.
+   */
+  function startInjector(actions) {
     // Stop any previous injector instance
     if (currentInjector) {
       if (typeof stopStrikeInjector === 'function') {
@@ -57,13 +125,11 @@
       currentInjector = null;
     }
 
-    chrome.runtime.sendMessage({ action: 'getActionsForInjection' }, (response) => {
-      if (response && response.actions && response.actions.length > 0) {
-        if (typeof initStrikeInjector === 'function') {
-          currentInjector = initStrikeInjector(response.actions);
-        }
-      }
-    });
+    if (typeof initStrikeInjector === 'function') {
+      currentInjector = initStrikeInjector(actions);
+    } else {
+      console.log('OPL Ad Blocker: initStrikeInjector function not available');
+    }
   }
 
   /**
