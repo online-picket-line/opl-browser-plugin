@@ -10,12 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const statsContent = document.getElementById('stats-content');
   const connectionIndicator = document.getElementById('connection-indicator');
   const connectionText = document.getElementById('connection-text');
-  const strikeInjectorCheckbox = document.getElementById('strike-injector-enabled');
-  const injectOptionsDiv = document.getElementById('inject-options');
-  const injectBlockAdsCheckbox = document.getElementById('inject-block-ads');
+  const adBlockerCheckbox = document.getElementById('ad-blocker-enabled');
 
   // Load current settings
-  chrome.storage.sync.get(['mode', 'blockMode', 'strikeInjectorEnabled', 'injectBlockAds'], (result) => {
+  chrome.storage.sync.get(['mode', 'blockMode', 'adBlockerEnabled', 'strikeInjectorEnabled'], (result) => {
     // Support legacy blockMode boolean for backward compatibility
     let mode = result.mode;
     if (mode === undefined) {
@@ -24,8 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Migrate legacy inject mode to addon
     if (mode === 'inject') {
       mode = 'banner';
-      // Auto-enable injector for users who had inject mode selected
-      chrome.storage.sync.set({ mode: 'banner', strikeInjectorEnabled: true });
+      chrome.storage.sync.set({ mode: 'banner', adBlockerEnabled: true });
     }
     
     if (mode === 'block') {
@@ -34,23 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
       modeBannerRadio.checked = true;
     }
     
-    // Strike injector checkbox
-    if (strikeInjectorCheckbox) {
-      strikeInjectorCheckbox.checked = result.strikeInjectorEnabled === true;
-    }
-    
-    // Show/hide inject sub-options
-    if (injectOptionsDiv) {
-      if (result.strikeInjectorEnabled) {
-        injectOptionsDiv.classList.add('expanded');
-      } else {
-        injectOptionsDiv.classList.remove('expanded');
-      }
-    }
-    
-    // Load inject sub-option
-    if (injectBlockAdsCheckbox) {
-      injectBlockAdsCheckbox.checked = result.injectBlockAds !== false; // default true
+    // Ad blocker checkbox (migrate from old strikeInjectorEnabled)
+    var adBlockerOn = result.adBlockerEnabled === true || result.strikeInjectorEnabled === true;
+    if (adBlockerCheckbox) {
+      adBlockerCheckbox.checked = adBlockerOn;
     }
   });
 
@@ -98,36 +82,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modeBlockRadio.checked) onModeChange('block');
   });
 
-  // Strike injector toggle
-  if (strikeInjectorCheckbox) {
-    strikeInjectorCheckbox.addEventListener('change', () => {
-      var enabled = strikeInjectorCheckbox.checked;
-      chrome.storage.sync.set({ strikeInjectorEnabled: enabled }, () => {
-        // Show/hide inject sub-options
-        if (injectOptionsDiv) {
-          if (enabled) {
-            injectOptionsDiv.classList.add('expanded');
-          } else {
-            injectOptionsDiv.classList.remove('expanded');
-          }
-        }
+  // Ad blocker toggle
+  if (adBlockerCheckbox) {
+    adBlockerCheckbox.addEventListener('change', () => {
+      var enabled = adBlockerCheckbox.checked;
+      chrome.storage.sync.set({ adBlockerEnabled: enabled }, () => {
         chrome.runtime.sendMessage({ action: 'updateMode' }, (response) => {
           if (response && response.success) {
-            showStatus(enabled ? 'Strike Injector enabled' : 'Strike Injector disabled', 'success');
+            showStatus(enabled ? 'Ad Blocker enabled' : 'Ad Blocker disabled', 'success');
           }
         });
       });
     });
   }
 
-  // Inject sub-option: block ad network requests
-  if (injectBlockAdsCheckbox) {
-    injectBlockAdsCheckbox.addEventListener('change', () => {
-      chrome.storage.sync.set({ injectBlockAds: injectBlockAdsCheckbox.checked }, () => {
-        chrome.runtime.sendMessage({ action: 'updateMode' }, (response) => {
-          if (response && response.success) {
-            showStatus(injectBlockAdsCheckbox.checked ? 'Ad blocking enabled' : 'Ad blocking disabled', 'success');
-          }
         });
       });
     });

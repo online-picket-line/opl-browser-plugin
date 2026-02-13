@@ -26,8 +26,8 @@
         
         var mode = response.mode || (response.blockMode ? 'block' : 'banner');
         
-        // Strike injector is an add-on that works alongside any mode
-        if (response.strikeInjectorEnabled) {
+        // Ad blocker is an add-on that works alongside any mode
+        if (response.adBlockerEnabled) {
           startInjectorMode();
         }
         

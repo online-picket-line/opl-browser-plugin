@@ -223,14 +223,14 @@ class DnrService {
   }
 
   /**
-   * Generate DNR rules for strike injector mode
+   * Generate DNR rules for ad blocker
    * Blocks ad network requests so the content script can replace empty ad containers
    * 
-   * @param {boolean} injectBlockAds - Whether to block ad network requests
+   * @param {boolean} adBlockerEnabled - Whether the ad blocker is enabled
    * @returns {Array} - Array of DNR rule objects for blocking ad networks
    */
-  generateInjectModeRules(injectBlockAds) {
-    if (!injectBlockAds) {
+  generateInjectModeRules(adBlockerEnabled) {
+    if (!adBlockerEnabled) {
       return [];
     }
 
@@ -279,17 +279,17 @@ class DnrService {
   }
 
   /**
-   * Update DNR rules based on labor actions, mode, and injector settings
+   * Update DNR rules based on labor actions, mode, and ad blocker settings
    * 
    * @param {Array} laborActions - Array of labor action objects
    * @param {string} mode - 'banner' or 'block'
-   * @param {boolean} [injectBlockAds=false] - Whether to add ad-network blocking rules (strike injector)
+   * @param {boolean} [adBlockerEnabled=false] - Whether to add ad-network blocking rules
    * @returns {Promise<boolean>} - Success status
    */
-  async updateRules(laborActions, mode, injectBlockAds) {
+  async updateRules(laborActions, mode, adBlockerEnabled) {
     try {
-      if (typeof injectBlockAds === 'undefined') injectBlockAds = false;
-      console.log(`Updating DNR rules for ${mode} mode, injector ad-blocking: ${injectBlockAds}`);
+      if (typeof adBlockerEnabled === 'undefined') adBlockerEnabled = false;
+      console.log(`Updating DNR rules for ${mode} mode, ad blocker: ${adBlockerEnabled}`);
       
       // Generate mode-specific rules
       var modeRules;
@@ -299,8 +299,8 @@ class DnrService {
         modeRules = this.generateBannerModeRules(laborActions);
       }
 
-      // Add ad-network blocking rules if strike injector is active
-      var injectRules = this.generateInjectModeRules(injectBlockAds);
+      // Add ad-network blocking rules if ad blocker is active
+      var injectRules = this.generateInjectModeRules(adBlockerEnabled);
 
       var newRules = modeRules.concat(injectRules);
       console.log(`Generated ${newRules.length} DNR rules (${modeRules.length} mode + ${injectRules.length} inject)`);

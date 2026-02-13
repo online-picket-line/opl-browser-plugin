@@ -27,9 +27,7 @@ const createMockDocument = () => {
     'connection-indicator': createMockElement('connection-indicator'),
     'connection-text': createMockElement('connection-text'),
     'test-mode-btn': createMockElement('test-mode-btn'),
-    'strike-injector-enabled': createMockElement('strike-injector-enabled'),
-    'inject-options': createMockElement('inject-options'),
-    'inject-block-ads': createMockElement('inject-block-ads')
+    'ad-blocker-enabled': createMockElement('ad-blocker-enabled')
   };
 
   return {

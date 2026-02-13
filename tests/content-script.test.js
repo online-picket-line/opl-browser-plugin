@@ -273,8 +273,8 @@ describe('Content Script Integration', () => {
         var result = { injector: false };
         var mode = response.mode || (response.blockMode ? 'block' : 'banner');
         
-        // Strike injector is independent of mode
-        if (response.strikeInjectorEnabled) {
+        // Ad blocker is independent of mode
+        if (response.adBlockerEnabled) {
           result.injector = true;
         }
         
@@ -308,21 +308,21 @@ describe('Content Script Integration', () => {
       const bannerResult = handleResponse(bannerResponse);
       expect(bannerResult.action).toBe('banner');
 
-      // Test with injector enabled as addon
+      // Test with ad blocker enabled as addon
       const injectResponse = {
         match: { title: 'Test Action' },
         mode: 'banner',
-        strikeInjectorEnabled: true
+        adBlockerEnabled: true
       };
       const injectResult = handleResponse(injectResponse);
       expect(injectResult.action).toBe('banner');
       expect(injectResult.injector).toBe(true);
 
-      // Test injector + block mode combined
+      // Test ad blocker + block mode combined
       const combinedResponse = {
         match: { title: 'Test Action' },
         mode: 'block',
-        strikeInjectorEnabled: true
+        adBlockerEnabled: true
       };
       const combinedResult = handleResponse(combinedResponse);
       expect(combinedResult.action).toBe('block');

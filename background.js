@@ -151,17 +151,16 @@ chrome.runtime.onInstalled.addListener(function() {
         chrome.storage.sync.remove('blockMode');
       });
     } else if (result.mode === 'inject') {
-      // Migrate legacy inject mode to banner + strikeInjectorEnabled
-      chrome.storage.sync.set({ mode: 'banner', strikeInjectorEnabled: true });
+      // Migrate legacy inject mode to banner + adBlockerEnabled
+      chrome.storage.sync.set({ mode: 'banner', adBlockerEnabled: true });
     }
   });
   // Initialize defaults
-  chrome.storage.sync.get(['injectBlockAds', 'strikeInjectorEnabled'], function(result) {
-    if (result.injectBlockAds === undefined) {
-      chrome.storage.sync.set({ injectBlockAds: true });
-    }
-    if (result.strikeInjectorEnabled === undefined) {
-      chrome.storage.sync.set({ strikeInjectorEnabled: false });
+  chrome.storage.sync.get(['adBlockerEnabled', 'strikeInjectorEnabled'], function(result) {
+    if (result.adBlockerEnabled === undefined) {
+      // Migrate from old strikeInjectorEnabled if present
+      var enabled = result.strikeInjectorEnabled === true;
+      chrome.storage.sync.set({ adBlockerEnabled: enabled });
     }
   });
 });
@@ -184,11 +183,10 @@ function refreshLaborActions() {
         console.warn('Storage error in refreshLaborActions:', chrome.runtime.lastError.message);
         // Still update the blocking service with the actions even if storage failed
       }
-      chrome.storage.sync.get(['mode', 'injectBlockAds', 'strikeInjectorEnabled'], function(settings) {
+      chrome.storage.sync.get(['mode', 'adBlockerEnabled'], function(settings) {
         var mode = (settings && settings.mode) || 'banner';
-        var injectBlockAds = settings && settings.injectBlockAds !== undefined ? settings.injectBlockAds : true;
-        var strikeInjectorEnabled = settings && settings.strikeInjectorEnabled === true;
-        blockingService.updateRules(actions, mode, strikeInjectorEnabled && injectBlockAds);
+        var adBlockerEnabled = settings && settings.adBlockerEnabled === true;
+        blockingService.updateRules(actions, mode, adBlockerEnabled);
       });
     });
   }).catch(function(error) {
@@ -237,11 +235,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     chrome.storage.local.get(['labor_actions'], function(result) {
       var actions = (result && result.labor_actions) || [];
       var match = matchUrlToAction(request.url, actions);
-      chrome.storage.sync.get(['mode', 'strikeInjectorEnabled'], function(settings) {
+      chrome.storage.sync.get(['mode', 'adBlockerEnabled'], function(settings) {
         sendResponse({
           match: match,
           mode: (settings && settings.mode) || 'banner',
-          strikeInjectorEnabled: settings && settings.strikeInjectorEnabled === true
+          adBlockerEnabled: settings && settings.adBlockerEnabled === true
         });
       });
     });
@@ -260,13 +258,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
   
   if (request.action === 'updateMode') {
-    chrome.storage.sync.get(['mode', 'injectBlockAds', 'strikeInjectorEnabled'], function(settings) {
+    chrome.storage.sync.get(['mode', 'adBlockerEnabled'], function(settings) {
       var mode = (settings && settings.mode) || 'banner';
-      var injectBlockAds = settings && settings.injectBlockAds !== undefined ? settings.injectBlockAds : true;
-      var strikeInjectorEnabled = settings && settings.strikeInjectorEnabled === true;
+      var adBlockerEnabled = settings && settings.adBlockerEnabled === true;
       chrome.storage.local.get(['labor_actions'], function(result) {
         var actions = (result && result.labor_actions) || [];
-        blockingService.updateRules(actions, mode, strikeInjectorEnabled && injectBlockAds).then(function() {
+        blockingService.updateRules(actions, mode, adBlockerEnabled).then(function() {
           sendResponse({ success: true });
         });
       });
@@ -319,14 +316,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 refreshLaborActions();
 
 // Restore mode on startup
-chrome.storage.sync.get(['mode', 'injectBlockAds', 'strikeInjectorEnabled'], function(result) {
+chrome.storage.sync.get(['mode', 'adBlockerEnabled'], function(result) {
   var mode = (result && result.mode) || 'banner';
-  var injectBlockAds = result && result.injectBlockAds !== undefined ? result.injectBlockAds : true;
-  var strikeInjectorEnabled = result && result.strikeInjectorEnabled === true;
-  if (mode === 'block' || strikeInjectorEnabled) {
+  var adBlockerEnabled = result && result.adBlockerEnabled === true;
+  if (mode === 'block' || adBlockerEnabled) {
     chrome.storage.local.get(['labor_actions'], function(localResult) {
       var actions = (localResult && localResult.labor_actions) || [];
-      blockingService.updateRules(actions, mode, strikeInjectorEnabled && injectBlockAds);
+      blockingService.updateRules(actions, mode, adBlockerEnabled);
     });
   }
 });
