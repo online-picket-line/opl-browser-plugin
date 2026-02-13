@@ -21,7 +21,7 @@ WebRequestService.prototype.isDomainBypassed = function(url) {
         }
       }
     }
-  } catch (e) {}
+  } catch (_e) {}
   return false;
 };
 
@@ -44,7 +44,7 @@ WebRequestService.prototype.matchUrlToAction = function(url) {
         for (var j = 0; j < patterns.length; j++) {
           try {
             if (new RegExp(patterns[j], 'i').test(urlToTest)) return action;
-          } catch (e) {}
+          } catch (_e) {}
         }
       } else {
         var hostname = new URL(url).hostname.toLowerCase();
@@ -67,7 +67,7 @@ WebRequestService.prototype.handleRequest = function(details) {
   var match = this.matchUrlToAction(details.url);
   if (match) {
     var domain = '';
-    try { domain = new URL(details.url).hostname; } catch (e) { domain = details.url.split('/')[2] || ''; }
+    try { domain = new URL(details.url).hostname; } catch (_e) { domain = details.url.split('/')[2] || ''; }
     var api = (typeof browser !== 'undefined') ? browser : chrome;
     var blockPageUrl = api.runtime.getURL('block.html');
     return { redirectUrl: blockPageUrl + '?domain=' + encodeURIComponent(domain) + '&url=' + encodeURIComponent(details.url) };
@@ -106,7 +106,7 @@ WebRequestService.prototype.stopListener = function() {
 };
 
 WebRequestService.prototype.clearRules = function() { this.stopListener(); this.laborActions = []; return Promise.resolve(true); };
-WebRequestService.prototype.addBypassRule = function(url) { try { this.addBypass(new URL(url).hostname); } catch(e){} return Promise.resolve(true); };
+WebRequestService.prototype.addBypassRule = function(url) { try { this.addBypass(new URL(url).hostname); } catch(_e){} return Promise.resolve(true); };
 WebRequestService.prototype.getRuleStats = function() { return Promise.resolve({ totalRules: this.laborActions.length, listenerActive: this.isListenerActive, mode: this.mode }); };
 
 // ============================================================================
@@ -210,7 +210,7 @@ function matchUrlToAction(url, actions) {
       if (action._extensionData && action._extensionData.matchingUrlRegexes) {
         var patterns = action._extensionData.matchingUrlRegexes;
         for (var j = 0; j < patterns.length; j++) {
-          try { if (new RegExp(patterns[j], 'i').test(urlToTest)) return action; } catch(e){}
+          try { if (new RegExp(patterns[j], 'i').test(urlToTest)) return action; } catch(_e){}
         }
       } else {
         var hostname = new URL(url).hostname.toLowerCase();

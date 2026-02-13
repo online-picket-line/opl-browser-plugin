@@ -38,7 +38,7 @@ async function testCurrentAPI() {
 }
 
 // Test alternative endpoints
-async function testAlternativeEndpoints() {
+async function _testAlternativeEndpoints() {
   const baseUrl = 'YOUR_INSTANCE_URL'; // Replace with actual URL
   const endpoints = [
     '/api/v1/blocklist',

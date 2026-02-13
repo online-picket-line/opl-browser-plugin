@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return null;
   }
 
-  function updateUI(action, originalUrl) {
+  function updateUI(action, _originalUrl) {
     if (action) {
       // Display union logo if available - check multiple locations and field names
       // API now returns unionLogoUrl (URLs only, not base64)

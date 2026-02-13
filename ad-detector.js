@@ -86,7 +86,7 @@ function findAdElements(rootElement) {
   var elements;
   try {
     elements = root.querySelectorAll(AD_SELECTORS);
-  } catch (e) {
+  } catch (_e) {
     return [];
   }
 

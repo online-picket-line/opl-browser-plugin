@@ -96,11 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-        });
-      });
-    });
-  }
-
   /**
    * Show status message
    * @param {string} message - Status message
