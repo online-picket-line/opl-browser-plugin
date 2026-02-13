@@ -227,7 +227,7 @@
   object-fit: contain !important;
   flex-shrink: 0 !important;
   border-radius: 2px !important;
-  background: rgb(0 0 0 / 0.05) !important;
+  background: rgb(0 0 0 / 5%) !important;
   padding: 2px !important;
 }
 
