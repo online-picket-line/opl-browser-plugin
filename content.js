@@ -17,6 +17,12 @@
     return;
   }
 
+  console.log('OPL: Content script loaded on', window.location.hostname);
+
+  // Use browser-compatible storage API (Firefox native vs Chrome)
+  var storageApi = (typeof browser !== 'undefined' && browser.storage) ? browser.storage : chrome.storage;
+  var runtimeApi = (typeof browser !== 'undefined' && browser.runtime) ? browser.runtime : chrome.runtime;
+
   // API base URL for resolving relative logo URLs
   const API_BASE_URL = 'https://onlinepicketline.com';
 
@@ -38,11 +44,11 @@
     startAdBlockerFromStorage();
 
     // Check banner via background (needs URL matching logic)
-    chrome.runtime.sendMessage(
+    runtimeApi.sendMessage(
       { action: 'checkUrlForBanner', url: window.location.href },
       (response) => {
-        if (chrome.runtime.lastError) {
-          console.log('OPL: Error checking URL:', chrome.runtime.lastError.message);
+        if (runtimeApi.lastError) {
+          console.log('OPL: Error checking URL:', runtimeApi.lastError.message);
           return;
         }
         if (!response) return;
@@ -57,60 +63,71 @@
   }
 
   /**
-   * Start the ad blocker by reading settings and actions directly from chrome.storage.
+   * Start the ad blocker by reading settings and actions directly from storage API.
    * This is independent of the background service worker — no message round-trip needed.
    */
   function startAdBlockerFromStorage() {
-    chrome.storage.sync.get(['adBlockerEnabled'], function(syncResult) {
-      if (chrome.runtime.lastError) {
-        console.log('OPL Ad Blocker: Error reading settings:', chrome.runtime.lastError.message);
-        return;
-      }
+    if (!storageApi || !storageApi.sync) {
+      console.log('OPL Ad Blocker: Storage API not available');
+      return;
+    }
 
-      var enabled = syncResult && syncResult.adBlockerEnabled === true;
-      console.log('OPL Ad Blocker: enabled=' + enabled);
-
-      if (!enabled) return;
-
-      // Read labor actions directly from local storage — no background needed
-      chrome.storage.local.get(['labor_actions'], function(localResult) {
-        if (chrome.runtime.lastError) {
-          console.log('OPL Ad Blocker: Error reading actions:', chrome.runtime.lastError.message);
+    try {
+      storageApi.sync.get(['adBlockerEnabled'], function(syncResult) {
+        var lastErr = runtimeApi && runtimeApi.lastError;
+        if (lastErr) {
+          console.log('OPL Ad Blocker: Error reading settings:', lastErr.message);
           return;
         }
 
-        var allActions = (localResult && localResult.labor_actions) || [];
-        var actions = allActions.filter(function(a) {
-          return !a.status || a.status === 'approved' || a.status === 'active';
-        });
+        var enabled = syncResult && syncResult.adBlockerEnabled === true;
+        console.log('OPL Ad Blocker: enabled=' + enabled);
 
-        console.log('OPL Ad Blocker: ' + actions.length + ' actions available');
+        if (!enabled) return;
 
-        if (actions.length === 0) {
-          console.log('OPL Ad Blocker: No actions in storage. Trying to refresh via background...');
-          // Trigger a refresh in the background and retry once
-          chrome.runtime.sendMessage({ action: 'refreshActions' }, function() {
-            if (chrome.runtime.lastError) return;
-            // Retry reading after a short delay
-            setTimeout(function() {
-              chrome.storage.local.get(['labor_actions'], function(retryResult) {
-                if (chrome.runtime.lastError) return;
-                var retryActions = ((retryResult && retryResult.labor_actions) || []).filter(function(a) {
-                  return !a.status || a.status === 'approved' || a.status === 'active';
-                });
-                if (retryActions.length > 0) {
-                  console.log('OPL Ad Blocker: Got ' + retryActions.length + ' actions after refresh');
-                  startInjector(retryActions);
-                }
-              });
-            }, 2000);
+        // Read labor actions directly from local storage — no background needed
+        storageApi.local.get(['labor_actions'], function(localResult) {
+          var localErr = runtimeApi && runtimeApi.lastError;
+          if (localErr) {
+            console.log('OPL Ad Blocker: Error reading actions:', localErr.message);
+            return;
+          }
+
+          var allActions = (localResult && localResult.labor_actions) || [];
+          var actions = allActions.filter(function(a) {
+            return !a.status || a.status === 'approved' || a.status === 'active';
           });
-          return;
-        }
 
-        startInjector(actions);
+          console.log('OPL Ad Blocker: ' + actions.length + ' actions available');
+
+          if (actions.length === 0) {
+            console.log('OPL Ad Blocker: No actions in storage. Trying to refresh via background...');
+            // Trigger a refresh in the background and retry once
+            runtimeApi.sendMessage({ action: 'refreshActions' }, function() {
+              if (runtimeApi.lastError) return;
+              // Retry reading after a short delay
+              setTimeout(function() {
+                storageApi.local.get(['labor_actions'], function(retryResult) {
+                  if (runtimeApi.lastError) return;
+                  var retryActions = ((retryResult && retryResult.labor_actions) || []).filter(function(a) {
+                    return !a.status || a.status === 'approved' || a.status === 'active';
+                  });
+                  if (retryActions.length > 0) {
+                    console.log('OPL Ad Blocker: Got ' + retryActions.length + ' actions after refresh');
+                    startInjector(retryActions);
+                  }
+                });
+              }, 2000);
+            });
+            return;
+          }
+
+          startInjector(actions);
+        });
       });
-    });
+    } catch (err) {
+      console.log('OPL Ad Blocker: Exception during storage read:', err.message);
+    }
   }
 
   /**
@@ -197,7 +214,7 @@
       // Try company first, then title as fallback (title may contain org name)
       const company = action.company || action.title;
       if (company) {
-        chrome.runtime.sendMessage({ action: 'getLogo', company: company }, (response) => {
+        runtimeApi.sendMessage({ action: 'getLogo', company: company }, (response) => {
           if (response && response.logo) {
             // Replace icon with logo - handle relative URLs
             let logoUrl = response.logo;

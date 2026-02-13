@@ -58,6 +58,7 @@ var AD_NETWORK_DOMAINS = [
   { domain: 'bidswitch.net', urlFilter: '||bidswitch.net^', provider: 'BidSwitch' },
   { domain: 'sharethrough.com', urlFilter: '||sharethrough.com^', provider: 'Sharethrough' },
   { domain: 'triplelift.com', urlFilter: '||triplelift.com^', provider: 'TripleLift' },
+  { domain: '3lift.com', urlFilter: '||3lift.com^', provider: 'TripleLift' },
   { domain: '33across.com', urlFilter: '||33across.com^', provider: '33Across' },
   { domain: 'indexexchange.com', urlFilter: '||indexexchange.com^', provider: 'Index Exchange' },
   { domain: 'liveintent.com', urlFilter: '||liveintent.com^', provider: 'LiveIntent' },

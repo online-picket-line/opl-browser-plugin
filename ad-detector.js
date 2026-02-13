@@ -170,7 +170,7 @@ function findAdElements(rootElement) {
         'doubleclick', 'googlesyndication', 'googleadservices',
         'amazon-adsystem', 'taboola', 'outbrain', 'adnxs',
         'criteo', 'pubmatic', 'rubiconproject', 'openx',
-        'casalemedia', 'sharethrough', 'triplelift', 'teads',
+        'casalemedia', 'sharethrough', 'triplelift', '3lift', 'teads',
         'adsrvr.org', 'serving-sys', 'nativo', 'connatix',
         'yieldmo', 'gumgum', 'kargo', 'media.net', 'bidswitch',
         'safeframe', 'ad-delivery'
