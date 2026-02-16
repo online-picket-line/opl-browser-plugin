@@ -30,6 +30,27 @@
   let currentInjector = null;
 
   /**
+   * Cross-browser sendMessage helper.
+   * Firefox's browser.runtime.sendMessage() is Promise-based and ignores
+   * a callback passed as the second argument (treats it as options).
+   * This helper normalises the two patterns so the callback always fires.
+   */
+  function sendMessageCompat(message, callback) {
+    try {
+      var result = runtimeApi.sendMessage(message);
+      if (result && typeof result.then === 'function') {
+        result.then(function(response) {
+          if (callback) callback(response);
+        }).catch(function() {
+          // Message port closed or no listener — silently ignore
+        });
+      }
+    } catch (e) {
+      console.log('OPL: sendMessage error:', e.message);
+    }
+  }
+
+  /**
    * Check if current page matches any labor actions (banner mode only)
    * In block mode, DNR handles the redirect before this script runs
    */
@@ -44,13 +65,9 @@
     startAdBlockerFromStorage();
 
     // Check banner via background (needs URL matching logic)
-    runtimeApi.sendMessage(
+    sendMessageCompat(
       { action: 'checkUrlForBanner', url: window.location.href },
-      (response) => {
-        if (runtimeApi.lastError) {
-          console.log('OPL: Error checking URL:', runtimeApi.lastError.message);
-          return;
-        }
+      function(response) {
         if (!response) return;
         
         var mode = response.mode || (response.blockMode ? 'block' : 'banner');
@@ -103,7 +120,7 @@
           if (actions.length === 0) {
             console.log('OPL Ad Blocker: No actions in storage. Trying to refresh via background...');
             // Trigger a refresh in the background and retry once
-            runtimeApi.sendMessage({ action: 'refreshActions' }, function() {
+            sendMessageCompat({ action: 'refreshActions' }, function() {
               if (runtimeApi.lastError) return;
               // Retry reading after a short delay
               setTimeout(function() {
@@ -214,7 +231,7 @@
       // Try company first, then title as fallback (title may contain org name)
       const company = action.company || action.title;
       if (company) {
-        runtimeApi.sendMessage({ action: 'getLogo', company: company }, (response) => {
+        sendMessageCompat({ action: 'getLogo', company: company }, function(response) {
           if (response && response.logo) {
             // Replace icon with logo - handle relative URLs
             let logoUrl = response.logo;

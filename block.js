@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     for (const action of actions) {
       // Skip inactive actions
-      if (action.status && action.status !== 'active') {
+      if (action.status && action.status !== 'active' && action.status !== 'approved') {
         continue;
       }
       

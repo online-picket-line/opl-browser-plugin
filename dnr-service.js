@@ -150,7 +150,7 @@ class DnrService {
 
     for (const action of laborActions) {
       // Skip inactive actions
-      if (action.status && action.status !== 'active') {
+      if (action.status && action.status !== 'active' && action.status !== 'approved') {
         continue;
       }
 

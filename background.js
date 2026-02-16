@@ -37,7 +37,7 @@ WebRequestService.prototype.matchUrlToAction = function(url) {
     var urlToTest = url.toLowerCase();
     for (var i = 0; i < this.laborActions.length; i++) {
       var action = this.laborActions[i];
-      if (action.status && action.status !== 'active') continue;
+      if (action.status && action.status !== 'active' && action.status !== 'approved') continue;
       
       if (action._extensionData && action._extensionData.matchingUrlRegexes) {
         var patterns = action._extensionData.matchingUrlRegexes;
@@ -206,7 +206,7 @@ function matchUrlToAction(url, actions) {
     var urlToTest = url.toLowerCase();
     for (var i = 0; i < actions.length; i++) {
       var action = actions[i];
-      if (action.status && action.status !== 'active') continue;
+      if (action.status && action.status !== 'active' && action.status !== 'approved') continue;
       if (action._extensionData && action._extensionData.matchingUrlRegexes) {
         var patterns = action._extensionData.matchingUrlRegexes;
         for (var j = 0; j < patterns.length; j++) {
