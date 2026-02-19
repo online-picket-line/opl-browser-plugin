@@ -119,10 +119,10 @@ describe('Strike Card Module', () => {
       expect(card.className).toContain('opl-strike-card-small');
     });
 
-    test('should set card dimensions', () => {
+    test('should not set inline dimensions (CSS handles sizing)', () => {
       const card = renderSmallCard(mockAction, 160, 60);
-      expect(card.style.width).toBe('160px');
-      expect(card.style.height).toBe('60px');
+      expect(card.style.width).toBe('');
+      expect(card.style.height).toBe('');
     });
 
     test('should contain fist emoji icon', () => {
@@ -226,24 +226,46 @@ describe('Strike Card Module', () => {
 
   describe('renderStrikeCard', () => {
     test('should delegate to renderSmallCard for small size', () => {
-      const card = renderStrikeCard(mockAction, 'small', { width: 150, height: 50 });
-      expect(card.className).toContain('opl-strike-card-small');
-      expect(card.getAttribute('data-opl-injected')).toBe('true');
+      const host = renderStrikeCard(mockAction, 'small', { width: 150, height: 50 });
+      // renderStrikeCard now returns a Shadow DOM host wrapper
+      expect(host.getAttribute('data-opl-injected')).toBe('true');
+      // Host uses 100% width with max-width as cap
+      expect(host.style.getPropertyValue('width')).toBe('100%');
+      expect(host.style.getPropertyValue('max-width')).toBe('150px');
+      expect(host.style.getPropertyValue('height')).toBe('50px');
     });
 
     test('should delegate to renderMediumCard for medium size', () => {
-      const card = renderStrikeCard(mockAction, 'medium', { width: 300, height: 150 });
-      expect(card.className).toContain('opl-strike-card-medium');
+      const host = renderStrikeCard(mockAction, 'medium', { width: 300, height: 150 });
+      expect(host.getAttribute('data-opl-injected')).toBe('true');
+      expect(host.style.getPropertyValue('width')).toBe('100%');
+      expect(host.style.getPropertyValue('max-width')).toBe('300px');
+      expect(host.style.getPropertyValue('height')).toBe('150px');
     });
 
     test('should delegate to renderLargeCard for large size', () => {
-      const card = renderStrikeCard(mockAction, 'large', { width: 400, height: 300 });
-      expect(card.className).toContain('opl-strike-card-large');
+      const host = renderStrikeCard(mockAction, 'large', { width: 400, height: 300 });
+      expect(host.getAttribute('data-opl-injected')).toBe('true');
+      expect(host.style.getPropertyValue('width')).toBe('100%');
+      expect(host.style.getPropertyValue('max-width')).toBe('400px');
+      expect(host.style.getPropertyValue('height')).toBe('300px');
     });
 
     test('should set data-opl-injected attribute', () => {
-      const card = renderStrikeCard(mockAction, 'medium', { width: 300, height: 150 });
-      expect(card.getAttribute('data-opl-injected')).toBe('true');
+      const host = renderStrikeCard(mockAction, 'medium', { width: 300, height: 150 });
+      expect(host.getAttribute('data-opl-injected')).toBe('true');
+    });
+
+    test('should not set overflow or contain on host (outer container handles clipping)', () => {
+      const host = renderStrikeCard(mockAction, 'medium', { width: 300, height: 150 });
+      // overflow and contain are NOT set — outer container in strike-injector handles these
+      expect(host.style.getPropertyValue('overflow')).toBe('');
+      expect(host.style.getPropertyValue('contain')).toBe('');
+    });
+
+    test('should set position:static on host to prevent repositioning', () => {
+      const host = renderStrikeCard(mockAction, 'medium', { width: 300, height: 150 });
+      expect(host.style.getPropertyValue('position')).toBe('static');
     });
   });
 });

@@ -7,6 +7,8 @@
 global.findAdElements = jest.fn(() => []);
 global.observeNewAds = jest.fn(() => ({ disconnect: jest.fn() }));
 global.getAdSize = jest.fn(() => 'medium');
+global._hasOverlayAncestor = jest.fn(() => false);
+global._isFullPageTakeover = jest.fn(() => false);
 global.renderStrikeCard = jest.fn(() => {
   const card = {
     tagName: 'DIV',
@@ -52,9 +54,28 @@ const mockActions = [
 ];
 
 describe('Strike Injector Module', () => {
+  // Helper: create a mock style object that supports setProperty/getPropertyValue
+  function createMockStyle() {
+    var store = {};
+    return {
+      setProperty: jest.fn(function(prop, val) { store[prop] = val; this[prop] = val; }),
+      getPropertyValue: jest.fn(function(prop) { return store[prop] || ''; })
+    };
+  }
+
   beforeEach(() => {
     _resetState();
     jest.clearAllMocks();
+
+    // Mock window.getComputedStyle for container-locking logic
+    global.window = global.window || {};
+    global.window.getComputedStyle = jest.fn(() => ({ position: 'static' }));
+
+    // Mock MutationObserver for container-guard observers
+    global.MutationObserver = jest.fn(() => ({
+      observe: jest.fn(),
+      disconnect: jest.fn()
+    }));
 
     // Mock document for DOM operations
     global.document = {
@@ -63,7 +84,7 @@ describe('Strike Injector Module', () => {
       createElement: jest.fn(() => ({
         className: '',
         innerHTML: '',
-        style: {},
+        style: createMockStyle(),
         appendChild: jest.fn(),
         setAttribute: jest.fn(),
         getAttribute: jest.fn(() => null)
@@ -98,7 +119,9 @@ describe('Strike Injector Module', () => {
     function createMockAdElement(width, height) {
       return {
         innerHTML: '<ad>original ad content</ad>',
-        style: {},
+        style: createMockStyle(),
+        tagName: 'DIV',
+        parentElement: document.body,
         offsetWidth: width,
         offsetHeight: height,
         getBoundingClientRect: () => ({ width, height }),
@@ -124,10 +147,37 @@ describe('Strike Injector Module', () => {
       expect(result).toBe(false);
     });
 
-    test('should replace very small elements with medium card', () => {
-      const el = createMockAdElement(20, 10);
+    test('should replace small ad elements', () => {
+      const el = createMockAdElement(80, 50);
       const result = replaceAdWithCard(el, mockActions);
       expect(result).toBe(true);
+    });
+
+    test('should block injection into structural elements like HTML', () => {
+      const el = createMockAdElement(970, 600);
+      el.tagName = 'HTML';
+      const result = replaceAdWithCard(el, mockActions);
+      expect(result).toBe(false);
+    });
+
+    test('should block injection into BODY element', () => {
+      const el = createMockAdElement(970, 600);
+      el.tagName = 'BODY';
+      const result = replaceAdWithCard(el, mockActions);
+      expect(result).toBe(false);
+    });
+
+    test('should block injection into detached elements', () => {
+      const el = createMockAdElement(300, 250);
+      el.parentElement = null;
+      const result = replaceAdWithCard(el, mockActions);
+      expect(result).toBe(false);
+    });
+
+    test('should block injection into tiny elements (smaller than 50x40)', () => {
+      const el = createMockAdElement(30, 20);
+      const result = replaceAdWithCard(el, mockActions);
+      expect(result).toBe(false);
     });
 
     test('should return false when no actions available', () => {
@@ -139,7 +189,17 @@ describe('Strike Injector Module', () => {
     test('should set overflow hidden on replaced element', () => {
       const el = createMockAdElement(300, 250);
       replaceAdWithCard(el, mockActions);
-      expect(el.style.overflow).toBe('hidden');
+      expect(el.style.setProperty).toHaveBeenCalledWith('overflow', 'hidden', 'important');
+    });
+
+    test('should cap container with max-width and set min-height to prevent collapse', () => {
+      const el = createMockAdElement(300, 250);
+      replaceAdWithCard(el, mockActions);
+      expect(el.style.setProperty).toHaveBeenCalledWith('max-width', '300px', 'important');
+      expect(el.style.setProperty).toHaveBeenCalledWith('min-height', '250px', 'important');
+      expect(el.style.setProperty).toHaveBeenCalledWith('box-sizing', 'border-box', 'important');
+      expect(el.style.setProperty).toHaveBeenCalledWith('display', 'block', 'important');
+      expect(el.style.setProperty).toHaveBeenCalledWith('visibility', 'visible', 'important');
     });
   });
 
@@ -148,12 +208,14 @@ describe('Strike Injector Module', () => {
       _resetState();
       const elements = [
         { element: {
-          innerHTML: '', style: {}, offsetWidth: 300, offsetHeight: 250,
+          innerHTML: '', style: createMockStyle(), tagName: 'DIV', parentElement: document.body,
+          offsetWidth: 300, offsetHeight: 250,
           getBoundingClientRect: () => ({ width: 300, height: 250 }),
           getAttribute: jest.fn(() => null), setAttribute: jest.fn(), appendChild: jest.fn()
         }},
         { element: {
-          innerHTML: '', style: {}, offsetWidth: 728, offsetHeight: 90,
+          innerHTML: '', style: createMockStyle(), tagName: 'DIV', parentElement: document.body,
+          offsetWidth: 728, offsetHeight: 90,
           getBoundingClientRect: () => ({ width: 728, height: 90 }),
           getAttribute: jest.fn(() => null), setAttribute: jest.fn(), appendChild: jest.fn()
         }}

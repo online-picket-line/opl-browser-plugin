@@ -114,11 +114,14 @@ WebRequestService.prototype.getRuleStats = function() { return Promise.resolve({
 // ============================================================================
 
 // Detect environment
-var isMV3 = typeof importScripts === 'function';
-var hasDNR = isMV3 && typeof chrome !== 'undefined' && chrome.declarativeNetRequest && typeof chrome.declarativeNetRequest.updateDynamicRules === 'function';
+// Service worker context (Chrome MV3) has importScripts; Firefox MV3 uses
+// background scripts loaded via manifest "scripts" array — no importScripts.
+var isServiceWorker = typeof importScripts === 'function';
+var hasDNR = typeof chrome !== 'undefined' && chrome.declarativeNetRequest && typeof chrome.declarativeNetRequest.updateDynamicRules === 'function';
 
-// Load dependencies for MV3
-if (isMV3) {
+// In a service worker we must load dependencies manually; in Firefox MV3
+// background page they are already loaded via the manifest "scripts" array.
+if (isServiceWorker) {
   importScripts('browser-polyfill.js');
   importScripts('api-service.js');
   importScripts('ad-networks.js');

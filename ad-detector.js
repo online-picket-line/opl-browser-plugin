@@ -127,12 +127,41 @@ function findAdElements(rootElement) {
     return [];
   }
 
+  // Structural/document elements that should NEVER be replaced with ad cards.
+  // Broad selectors like [data-zone] can match <html> or <body> on some sites.
+  var BLOCKED_TAG_NAMES = {
+    'HTML': true, 'BODY': true, 'HEAD': true, 'HEADER': true, 'FOOTER': true,
+    'MAIN': true, 'NAV': true, 'FORM': true, 'TABLE': true, 'SCRIPT': true,
+    'STYLE': true, 'LINK': true, 'META': true, 'NOSCRIPT': true, 'TITLE': true
+  };
+
+  // Minimum pixel dimensions to consider an element a real ad slot.
+  // Elements smaller than this are tracking pixels or hidden containers.
+  var MIN_AD_WIDTH = 50;
+  var MIN_AD_HEIGHT = 40;
+
   var results = [];
   for (var i = 0; i < elements.length; i++) {
     var el = elements[i];
 
+    // Skip structural/document elements — never inject into page structure
+    if (BLOCKED_TAG_NAMES[el.tagName]) {
+      continue;
+    }
+
+    // Skip detached elements (not in the visible DOM)
+    if (!el.parentElement && el !== document.documentElement) {
+      continue;
+    }
+
     // Skip already-processed elements
     if (el.getAttribute('data-opl-injected') === 'true') {
+      continue;
+    }
+
+    // Skip elements that contain an already-injected child
+    // (prevents injecting into a parent container of a card we already placed)
+    if (el.querySelector && el.querySelector('[data-opl-injected="true"]')) {
       continue;
     }
 
@@ -142,13 +171,34 @@ function findAdElements(rootElement) {
       continue;
     }
 
+    // Skip elements that look like full-page takeover overlays
+    // (position:fixed with near-viewport dimensions)
+    if (_isFullPageTakeover(el, style)) {
+      continue;
+    }
+
+    // Skip elements inside a fixed/absolute overlay ancestor
+    // (the element itself may be small, but if it's inside a viewport-covering
+    // overlay, injecting into it creates a visible full-page disruption)
+    if (_hasOverlayAncestor(el)) {
+      continue;
+    }
+
     var rect = el.getBoundingClientRect();
     var width = rect.width || el.offsetWidth;
     var height = rect.height || el.offsetHeight;
 
+    // Skip zero-size, tracking-pixel, and tiny elements.
+    // These are either 1x1 tracking pixels, hidden interstitial containers
+    // waiting to expand, or elements not yet rendered. Injecting into them
+    // causes cards to appear in unexpected places or trigger interstitials.
+    if (width < MIN_AD_WIDTH || height < MIN_AD_HEIGHT) {
+      continue;
+    }
+
     results.push({
       element: el,
-      size: (width > 0 && height > 0) ? getAdSize(el) : 'medium',
+      size: getAdSize(el),
       rect: {
         width: width,
         height: height
@@ -274,7 +324,86 @@ function observeNewAds(callback) {
   };
 }
 
+// Maximum ad dimensions — anything larger is likely a takeover/interstitial, not a standard ad slot
+var MAX_AD_WIDTH = 970;   // Largest standard IAB format (Billboard 970x250)
+var MAX_AD_HEIGHT = 600;  // Generous: largest standard is 300x600 (Half Page)
+
+/**
+ * Check if an element looks like a full-page ad takeover / interstitial overlay.
+ * These are position:fixed or position:absolute elements sized to fill the viewport.
+ * We do NOT want to inject into these — they'd make the card full-page.
+ *
+ * @param {HTMLElement} el - The element to check
+ * @param {CSSStyleDeclaration} [computedStyle] - Pre-computed style (optional)
+ * @returns {boolean} - True if this looks like a takeover overlay
+ */
+function _isFullPageTakeover(el, computedStyle) {
+  var style = computedStyle || window.getComputedStyle(el);
+  var pos = style.position;
+
+  // Only fixed/absolute elements can be takeovers
+  if (pos !== 'fixed' && pos !== 'absolute') {
+    return false;
+  }
+
+  var rect = el.getBoundingClientRect();
+  var vw = window.innerWidth || document.documentElement.clientWidth;
+  var vh = window.innerHeight || document.documentElement.clientHeight;
+
+  // Consider it a takeover if it covers most of the viewport (>80% of both dimensions)
+  if (rect.width > vw * 0.8 && rect.height > vh * 0.8) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if an element has an ancestor that indicates it's part of an
+ * overlay / interstitial / takeover ad — NOT a normal in-page ad slot.
+ *
+ * Key insight: normal in-page ad slots are in the document flow.
+ * They do NOT sit inside `position: fixed` containers. Only overlays,
+ * interstitials, and modals use `position: fixed`. So any ad element
+ * inside a fixed-position ancestor is an interstitial — skip it.
+ *
+ * Also checks for very high z-index, which is another interstitial signal.
+ *
+ * @param {HTMLElement} el - Element to check
+ * @returns {boolean} - True if this element is inside an overlay/interstitial
+ */
+function _hasOverlayAncestor(el) {
+  // Check the element itself first
+  try {
+    var elStyle = window.getComputedStyle(el);
+    if (elStyle.position === 'fixed') return true;
+    var zIndex = parseInt(elStyle.zIndex, 10);
+    if (zIndex >= 1000) return true;
+  } catch (_e) { /* ignore */ }
+
+  // Walk ancestors — ANY position:fixed ancestor means this is an overlay
+  var ancestor = el.parentElement;
+  while (ancestor && ancestor !== document.body && ancestor !== document.documentElement) {
+    try {
+      var style = window.getComputedStyle(ancestor);
+      // position:fixed = overlay/interstitial — always skip
+      if (style.position === 'fixed') {
+        return true;
+      }
+      // Very high z-index on a positioned ancestor = likely overlay
+      var z = parseInt(style.zIndex, 10);
+      if (z >= 1000 && style.position !== 'static') {
+        return true;
+      }
+    } catch (_e) {
+      // getComputedStyle can fail on detached elements
+    }
+    ancestor = ancestor.parentElement;
+  }
+  return false;
+}
+
 // Export for Node.js/Jest testing environment
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined' && typeof process !== 'undefined') {
-  module.exports = { AD_SELECTORS, getAdSize, findAdElements, observeNewAds };
+  module.exports = { AD_SELECTORS, getAdSize, findAdElements, observeNewAds, MAX_AD_WIDTH, MAX_AD_HEIGHT, _isFullPageTakeover, _hasOverlayAncestor };
 }

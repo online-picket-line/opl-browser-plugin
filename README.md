@@ -50,16 +50,12 @@ No setup required! The extension connects automatically to the Online Picketline
 4. Click "Load unpacked"
 5. Select the `opl-browser-plugin` directory
 
-#### Firefox (Manifest V2)
+#### Firefox (Manifest V3)
 
 1. Download or clone this repository
-2. Copy `manifest-v2.json` to `manifest.json`:
-   ```bash
-   cp manifest-v2.json manifest.json
-   ```
-3. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
-4. Click "Load Temporary Add-on"
-5. Select any file in the `opl-browser-plugin` directory
+2. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`
+3. Click "Load Temporary Add-on"
+4. Select `manifest.json` in the `opl-browser-plugin` directory
 
 #### Safari (Development)
 

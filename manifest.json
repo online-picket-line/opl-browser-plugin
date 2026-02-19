@@ -22,6 +22,7 @@
     "<all_urls>"
   ],
   "background": {
+    "scripts": ["browser-polyfill.js", "api-service.js", "ad-networks.js", "dnr-service.js", "background.js"],
     "service_worker": "background.js"
   },
   "content_scripts": [
